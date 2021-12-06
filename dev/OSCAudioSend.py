@@ -69,6 +69,14 @@ SLIPser.send_msg(pkt)
 print(pkt)
 sleep(0.5)
 
+pkt = OSCpackAuto('/teensy1/audio/sgtl5000/vol',0.2)                  
+SLIPser.send_msg(pkt)
+sleep(0.5)
+
+pkt = OSCpackAuto('/teensy1/audio/sgtl5000/vol',0.1)                  
+SLIPser.send_msg(pkt)
+sleep(0.5)
+
 pkt = OSCpackAuto('/teensy1/audio/waveform1/be',0)                  
 SLIPser.send_msg(pkt)
 sleep(0.5)

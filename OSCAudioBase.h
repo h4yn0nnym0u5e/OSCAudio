@@ -98,48 +98,5 @@ class OSCAudioBase
     }
 };
 
-
-class OSCAudioSynthWaveform : public AudioSynthWaveform, OSCAudioBase
-{
-  public:
-    OSCAudioSynthWaveform(const char* _name) : OSCAudioBase(_name) {}
-
-    void route(OSCMessage& msg, int addressOffset)
-    {
-      if (isMine(msg,addressOffset))
-      {
-        //debugPrint(msg,addressOffset+nameLen+1);
-        // Can't use msg.route() here because the callback has to be static, and we'd then
-        // lose knowledge of the instance.
-        //
-        // To permit shorter message addresses, we allow shortening of the member function
-        // to any point that is still unique
-        if (isTarget(msg,addressOffset,"/am*","f")) {amplitude(msg.getFloat(0));} 
-        if (isTarget(msg,addressOffset,"/ar*","bf")) {OSCarbitraryWaveform(msg,addressOffset+nameLen+1);} 
-        if (isTarget(msg,addressOffset,"/b*","ffi")) {begin(msg.getFloat(0),msg.getFloat(1),msg.getInt(2));}         
-        if (isTarget(msg,addressOffset,"/b*","i")) {begin(msg.getInt(0));}         
-        if (isTarget(msg,addressOffset,"/f*","f")) {frequency(msg.getFloat(0));} 
-        if (isTarget(msg,addressOffset,"/o*","f")) {offset(msg.getFloat(0));} 
-        if (isTarget(msg,addressOffset,"/ph*","f")) {phase(msg.getFloat(0));} 
-        if (isTarget(msg,addressOffset,"/pu*","f")) {pulseWidth(msg.getFloat(0));} 
-      }
-    }
-  private:
-    void OSCarbitraryWaveform(OSCMessage& msg, int addressOffset) {debugPrint(msg,addressOffset);}
-};
-
-
-class OSCAudioMixer4 : public AudioMixer4, OSCAudioBase
-{
-  public:
-    OSCAudioMixer4(const char* _name) : OSCAudioBase(_name) {}
-
-    void route(OSCMessage& msg, int addressOffset)
-    {
-      if (isMine(msg,addressOffset))
-      {
-        if (isTarget(msg,addressOffset,"/g*","if")) {gain(msg.getInt(0),msg.getFloat(1));} 
-      }
-    }
-};
+#include <OSCAudioAutogen.h>
 #endif // !defined(_OSCAUDIOBASE_H_)

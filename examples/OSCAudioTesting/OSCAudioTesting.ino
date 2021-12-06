@@ -24,7 +24,7 @@ AudioOutputI2S           i2s1;           //xy=977,476
 AudioConnection          patchCord1(waveform1, 0, i2s1, 0);
 AudioConnection          patchCord2(waveform1, 0, mixer1, 1);
 AudioConnection          patchCord3(mixer1, 0, i2s1, 1);
-AudioControlSGTL5000     sgtl5000_1;     //xy=977,519
+OSCAudioControlSGTL5000     sgtl5000_1("sgtl5000");     //xy=977,519
 // GUItool: end automatically generated code
 
 
