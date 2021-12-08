@@ -57,6 +57,23 @@ def OSCpackAuto(addr,*argv):
 ser = serial.Serial('COM5',115200)
 SLIPser = sliplib.SlipStream(ser)
 
-pkt = OSCpackAuto('/teensy1/dynamic/create','AudioSynthWaveform','waveform2')                  
+pkt = OSCpackAuto('/teensy1/dynamic/de','pc1')                  
 SLIPser.send_msg(pkt)
+sleep(0.5)
+
+pkt = OSCpackAuto('/teensy1/dynamic/de','waveform2')                  
+SLIPser.send_msg(pkt)
+
+pkt = OSCpackAuto('/teensy1/dynamic/crOb','AudioSynthWaveform','waveform2')                  
+SLIPser.send_msg(pkt)
+
+pkt = OSCpackAuto('/teensy1/audio/waveform2/begin',0.2,330.0,0)                  
+SLIPser.send_msg(pkt)
+
+pkt = OSCpackAuto('/teensy1/dynamic/crCo','pc1')                  
+SLIPser.send_msg(pkt)
+
+pkt = OSCpackAuto('/teensy1/audio/pc1/connect','waveform2',0,'mixer1',3)                  
+SLIPser.send_msg(pkt)
+
 ser.close()

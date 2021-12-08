@@ -2,7 +2,7 @@
 class AsyncOSCAudioInputSPDIF3 : public AsyncAudioInputSPDIF3, OSCAudioBase
 {
     public:
-        AsyncOSCAudioInputSPDIF3(const char* _name) :  OSCAudioBase(_name) {}
+        AsyncOSCAudioInputSPDIF3(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -23,7 +23,7 @@ class AsyncOSCAudioInputSPDIF3 : public AsyncAudioInputSPDIF3, OSCAudioBase
 class OSCAudioAmplifier : public AudioAmplifier, OSCAudioBase
 {
     public:
-        OSCAudioAmplifier(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioAmplifier(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -56,7 +56,7 @@ class OSCAudioAnalyzeEvent : public AudioAnalyzeEvent, OSCAudioBase
 class OSCAudioAnalyzeFFT1024 : public AudioAnalyzeFFT1024, OSCAudioBase
 {
     public:
-        OSCAudioAnalyzeFFT1024(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioAnalyzeFFT1024(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -75,7 +75,7 @@ class OSCAudioAnalyzeFFT1024 : public AudioAnalyzeFFT1024, OSCAudioBase
 class OSCAudioAnalyzeFFT256 : public AudioAnalyzeFFT256, OSCAudioBase
 {
     public:
-        OSCAudioAnalyzeFFT256(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioAnalyzeFFT256(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -94,7 +94,7 @@ class OSCAudioAnalyzeFFT256 : public AudioAnalyzeFFT256, OSCAudioBase
 class OSCAudioAnalyzeNoteFrequency : public AudioAnalyzeNoteFrequency, OSCAudioBase
 {
     public:
-        OSCAudioAnalyzeNoteFrequency(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioAnalyzeNoteFrequency(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -113,7 +113,7 @@ class OSCAudioAnalyzeNoteFrequency : public AudioAnalyzeNoteFrequency, OSCAudioB
 class OSCAudioAnalyzePeak : public AudioAnalyzePeak, OSCAudioBase
 {
     public:
-        OSCAudioAnalyzePeak(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioAnalyzePeak(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -130,7 +130,7 @@ class OSCAudioAnalyzePeak : public AudioAnalyzePeak, OSCAudioBase
 class OSCAudioAnalyzePrint : public AudioAnalyzePrint, OSCAudioBase
 {
     public:
-        OSCAudioAnalyzePrint(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioAnalyzePrint(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -149,7 +149,7 @@ class OSCAudioAnalyzePrint : public AudioAnalyzePrint, OSCAudioBase
 class OSCAudioAnalyzeRMS : public AudioAnalyzeRMS, OSCAudioBase
 {
     public:
-        OSCAudioAnalyzeRMS(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioAnalyzeRMS(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -165,7 +165,7 @@ class OSCAudioAnalyzeRMS : public AudioAnalyzeRMS, OSCAudioBase
 class OSCAudioAnalyzeToneDetect : public AudioAnalyzeToneDetect, OSCAudioBase
 {
     public:
-        OSCAudioAnalyzeToneDetect(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioAnalyzeToneDetect(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -184,7 +184,7 @@ class OSCAudioAnalyzeToneDetect : public AudioAnalyzeToneDetect, OSCAudioBase
 class OSCAudioControlAK4558 : public AudioControlAK4558, OSCAudioBase
 {
     public:
-        OSCAudioControlAK4558(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioControlAK4558(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -209,7 +209,7 @@ class OSCAudioControlAK4558 : public AudioControlAK4558, OSCAudioBase
 class OSCAudioControlCS42448 : public AudioControlCS42448, OSCAudioBase
 {
     public:
-        OSCAudioControlCS42448(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioControlCS42448(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -231,7 +231,7 @@ class OSCAudioControlCS42448 : public AudioControlCS42448, OSCAudioBase
 class OSCAudioControlCS4272 : public AudioControlCS4272, OSCAudioBase
 {
     public:
-        OSCAudioControlCS4272(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioControlCS4272(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -259,7 +259,7 @@ class OSCAudioControlCS4272 : public AudioControlCS4272, OSCAudioBase
 class OSCAudioControlSGTL5000 : public AudioControlSGTL5000, OSCAudioBase
 {
     public:
-        OSCAudioControlSGTL5000(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioControlSGTL5000(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -320,7 +320,7 @@ class OSCAudioControlSGTL5000 : public AudioControlSGTL5000, OSCAudioBase
 class OSCAudioControlTLV320AIC3206 : public AudioControlTLV320AIC3206, OSCAudioBase
 {
     public:
-        OSCAudioControlTLV320AIC3206(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioControlTLV320AIC3206(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -353,7 +353,7 @@ class OSCAudioControlTLV320AIC3206 : public AudioControlTLV320AIC3206, OSCAudioB
 class OSCAudioControlWM8731 : public AudioControlWM8731, OSCAudioBase
 {
     public:
-        OSCAudioControlWM8731(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioControlWM8731(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -372,7 +372,7 @@ class OSCAudioControlWM8731 : public AudioControlWM8731, OSCAudioBase
 class OSCAudioControlWM8731master : public AudioControlWM8731master, OSCAudioBase
 {
     public:
-        OSCAudioControlWM8731master(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioControlWM8731master(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -387,7 +387,7 @@ class OSCAudioControlWM8731master : public AudioControlWM8731master, OSCAudioBas
 class OSCAudioEffectBitcrusher : public AudioEffectBitcrusher, OSCAudioBase
 {
     public:
-        OSCAudioEffectBitcrusher(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioEffectBitcrusher(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -403,7 +403,7 @@ class OSCAudioEffectBitcrusher : public AudioEffectBitcrusher, OSCAudioBase
 class OSCAudioEffectDelay : public AudioEffectDelay, OSCAudioBase
 {
     public:
-        OSCAudioEffectDelay(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioEffectDelay(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -419,7 +419,7 @@ class OSCAudioEffectDelay : public AudioEffectDelay, OSCAudioBase
 class OSCAudioEffectDelayExternal : public AudioEffectDelayExternal, OSCAudioBase
 {
     public:
-        OSCAudioEffectDelayExternal(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioEffectDelayExternal(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -435,7 +435,7 @@ class OSCAudioEffectDelayExternal : public AudioEffectDelayExternal, OSCAudioBas
 class OSCAudioEffectDigitalCombine : public AudioEffectDigitalCombine, OSCAudioBase
 {
     public:
-        OSCAudioEffectDigitalCombine(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioEffectDigitalCombine(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -450,7 +450,7 @@ class OSCAudioEffectDigitalCombine : public AudioEffectDigitalCombine, OSCAudioB
 class OSCAudioEffectEnvelope : public AudioEffectEnvelope, OSCAudioBase
 {
     public:
-        OSCAudioEffectEnvelope(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioEffectEnvelope(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -502,7 +502,7 @@ class OSCAudioEffectExpEnvelope : public AudioEffectExpEnvelope, OSCAudioBase
 class OSCAudioEffectFade : public AudioEffectFade, OSCAudioBase
 {
     public:
-        OSCAudioEffectFade(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioEffectFade(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -518,7 +518,7 @@ class OSCAudioEffectFade : public AudioEffectFade, OSCAudioBase
 class OSCAudioEffectFreeverb : public AudioEffectFreeverb, OSCAudioBase
 {
     public:
-        OSCAudioEffectFreeverb(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioEffectFreeverb(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -534,7 +534,7 @@ class OSCAudioEffectFreeverb : public AudioEffectFreeverb, OSCAudioBase
 class OSCAudioEffectFreeverbStereo : public AudioEffectFreeverbStereo, OSCAudioBase
 {
     public:
-        OSCAudioEffectFreeverbStereo(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioEffectFreeverbStereo(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -550,7 +550,7 @@ class OSCAudioEffectFreeverbStereo : public AudioEffectFreeverbStereo, OSCAudioB
 class OSCAudioEffectGranular : public AudioEffectGranular, OSCAudioBase
 {
     public:
-        OSCAudioEffectGranular(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioEffectGranular(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -569,7 +569,7 @@ class OSCAudioEffectGranular : public AudioEffectGranular, OSCAudioBase
 class OSCAudioEffectMidSide : public AudioEffectMidSide, OSCAudioBase
 {
     public:
-        OSCAudioEffectMidSide(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioEffectMidSide(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -585,7 +585,7 @@ class OSCAudioEffectMidSide : public AudioEffectMidSide, OSCAudioBase
 class OSCAudioEffectMultiply : public AudioEffectMultiply, OSCAudioBase
 {
     public:
-        OSCAudioEffectMultiply(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioEffectMultiply(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -599,7 +599,7 @@ class OSCAudioEffectMultiply : public AudioEffectMultiply, OSCAudioBase
 class OSCAudioEffectRectifier : public AudioEffectRectifier, OSCAudioBase
 {
     public:
-        OSCAudioEffectRectifier(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioEffectRectifier(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -613,7 +613,7 @@ class OSCAudioEffectRectifier : public AudioEffectRectifier, OSCAudioBase
 class OSCAudioEffectReverb : public AudioEffectReverb, OSCAudioBase
 {
     public:
-        OSCAudioEffectReverb(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioEffectReverb(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -628,7 +628,7 @@ class OSCAudioEffectReverb : public AudioEffectReverb, OSCAudioBase
 class OSCAudioEffectWaveFolder : public AudioEffectWaveFolder, OSCAudioBase
 {
     public:
-        OSCAudioEffectWaveFolder(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioEffectWaveFolder(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -642,7 +642,7 @@ class OSCAudioEffectWaveFolder : public AudioEffectWaveFolder, OSCAudioBase
 class OSCAudioEffectWaveshaper : public AudioEffectWaveshaper, OSCAudioBase
 {
     public:
-        OSCAudioEffectWaveshaper(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioEffectWaveshaper(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -657,7 +657,7 @@ class OSCAudioEffectWaveshaper : public AudioEffectWaveshaper, OSCAudioBase
 class OSCAudioFilterBiquad : public AudioFilterBiquad, OSCAudioBase
 {
     public:
-        OSCAudioFilterBiquad(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioFilterBiquad(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -679,7 +679,7 @@ class OSCAudioFilterBiquad : public AudioFilterBiquad, OSCAudioBase
 class OSCAudioFilterFIR : public AudioFilterFIR, OSCAudioBase
 {
     public:
-        OSCAudioFilterFIR(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioFilterFIR(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -695,7 +695,7 @@ class OSCAudioFilterFIR : public AudioFilterFIR, OSCAudioBase
 class OSCAudioFilterLadder : public AudioFilterLadder, OSCAudioBase
 {
     public:
-        OSCAudioFilterLadder(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioFilterLadder(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -715,7 +715,7 @@ class OSCAudioFilterLadder : public AudioFilterLadder, OSCAudioBase
 class OSCAudioFilterStateVariable : public AudioFilterStateVariable, OSCAudioBase
 {
     public:
-        OSCAudioFilterStateVariable(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioFilterStateVariable(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -732,7 +732,7 @@ class OSCAudioFilterStateVariable : public AudioFilterStateVariable, OSCAudioBas
 class OSCAudioInputAnalog : public AudioInputAnalog, OSCAudioBase
 {
     public:
-        OSCAudioInputAnalog(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioInputAnalog(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -746,7 +746,7 @@ class OSCAudioInputAnalog : public AudioInputAnalog, OSCAudioBase
 class OSCAudioInputAnalogStereo : public AudioInputAnalogStereo, OSCAudioBase
 {
     public:
-        OSCAudioInputAnalogStereo(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioInputAnalogStereo(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -760,7 +760,7 @@ class OSCAudioInputAnalogStereo : public AudioInputAnalogStereo, OSCAudioBase
 class OSCAudioInputI2S : public AudioInputI2S, OSCAudioBase
 {
     public:
-        OSCAudioInputI2S(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioInputI2S(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -774,7 +774,7 @@ class OSCAudioInputI2S : public AudioInputI2S, OSCAudioBase
 class OSCAudioInputI2S2 : public AudioInputI2S2, OSCAudioBase
 {
     public:
-        OSCAudioInputI2S2(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioInputI2S2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -789,7 +789,7 @@ class OSCAudioInputI2S2 : public AudioInputI2S2, OSCAudioBase
 class OSCAudioInputI2SHex : public AudioInputI2SHex, OSCAudioBase
 {
     public:
-        OSCAudioInputI2SHex(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioInputI2SHex(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -803,7 +803,7 @@ class OSCAudioInputI2SHex : public AudioInputI2SHex, OSCAudioBase
 class OSCAudioInputI2SOct : public AudioInputI2SOct, OSCAudioBase
 {
     public:
-        OSCAudioInputI2SOct(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioInputI2SOct(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -817,7 +817,7 @@ class OSCAudioInputI2SOct : public AudioInputI2SOct, OSCAudioBase
 class OSCAudioInputI2SQuad : public AudioInputI2SQuad, OSCAudioBase
 {
     public:
-        OSCAudioInputI2SQuad(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioInputI2SQuad(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -831,7 +831,7 @@ class OSCAudioInputI2SQuad : public AudioInputI2SQuad, OSCAudioBase
 class OSCAudioInputPDM : public AudioInputPDM, OSCAudioBase
 {
     public:
-        OSCAudioInputPDM(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioInputPDM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -845,7 +845,7 @@ class OSCAudioInputPDM : public AudioInputPDM, OSCAudioBase
 class OSCAudioInputPDM2 : public AudioInputPDM2, OSCAudioBase
 {
     public:
-        OSCAudioInputPDM2(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioInputPDM2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -859,7 +859,7 @@ class OSCAudioInputPDM2 : public AudioInputPDM2, OSCAudioBase
 class OSCAudioInputSPDIF3 : public AudioInputSPDIF3, OSCAudioBase
 {
     public:
-        OSCAudioInputSPDIF3(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioInputSPDIF3(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -875,7 +875,7 @@ class OSCAudioInputSPDIF3 : public AudioInputSPDIF3, OSCAudioBase
 class OSCAudioInputTDM : public AudioInputTDM, OSCAudioBase
 {
     public:
-        OSCAudioInputTDM(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioInputTDM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -889,7 +889,7 @@ class OSCAudioInputTDM : public AudioInputTDM, OSCAudioBase
 class OSCAudioInputTDM2 : public AudioInputTDM2, OSCAudioBase
 {
     public:
-        OSCAudioInputTDM2(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioInputTDM2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -903,7 +903,7 @@ class OSCAudioInputTDM2 : public AudioInputTDM2, OSCAudioBase
 class OSCAudioMixer4 : public AudioMixer4, OSCAudioBase
 {
     public:
-        OSCAudioMixer4(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioMixer4(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -918,7 +918,7 @@ class OSCAudioMixer4 : public AudioMixer4, OSCAudioBase
 class OSCAudioOutputADAT : public AudioOutputADAT, OSCAudioBase
 {
     public:
-        OSCAudioOutputADAT(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputADAT(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -933,7 +933,7 @@ class OSCAudioOutputADAT : public AudioOutputADAT, OSCAudioBase
 class OSCAudioOutputAnalog : public AudioOutputAnalog, OSCAudioBase
 {
     public:
-        OSCAudioOutputAnalog(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputAnalog(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -948,7 +948,7 @@ class OSCAudioOutputAnalog : public AudioOutputAnalog, OSCAudioBase
 class OSCAudioOutputAnalogStereo : public AudioOutputAnalogStereo, OSCAudioBase
 {
     public:
-        OSCAudioOutputAnalogStereo(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputAnalogStereo(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -963,7 +963,7 @@ class OSCAudioOutputAnalogStereo : public AudioOutputAnalogStereo, OSCAudioBase
 class OSCAudioOutputI2S : public AudioOutputI2S, OSCAudioBase
 {
     public:
-        OSCAudioOutputI2S(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputI2S(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -979,7 +979,7 @@ class OSCAudioOutputI2S : public AudioOutputI2S, OSCAudioBase
 class OSCAudioOutputI2S2 : public AudioOutputI2S2, OSCAudioBase
 {
     public:
-        OSCAudioOutputI2S2(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputI2S2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -994,7 +994,7 @@ class OSCAudioOutputI2S2 : public AudioOutputI2S2, OSCAudioBase
 class OSCAudioOutputI2SHex : public AudioOutputI2SHex, OSCAudioBase
 {
     public:
-        OSCAudioOutputI2SHex(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputI2SHex(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1008,7 +1008,7 @@ class OSCAudioOutputI2SHex : public AudioOutputI2SHex, OSCAudioBase
 class OSCAudioOutputI2SOct : public AudioOutputI2SOct, OSCAudioBase
 {
     public:
-        OSCAudioOutputI2SOct(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputI2SOct(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1022,7 +1022,7 @@ class OSCAudioOutputI2SOct : public AudioOutputI2SOct, OSCAudioBase
 class OSCAudioOutputI2SQuad : public AudioOutputI2SQuad, OSCAudioBase
 {
     public:
-        OSCAudioOutputI2SQuad(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputI2SQuad(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1036,7 +1036,7 @@ class OSCAudioOutputI2SQuad : public AudioOutputI2SQuad, OSCAudioBase
 class OSCAudioOutputMQS : public AudioOutputMQS, OSCAudioBase
 {
     public:
-        OSCAudioOutputMQS(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputMQS(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1050,7 +1050,7 @@ class OSCAudioOutputMQS : public AudioOutputMQS, OSCAudioBase
 class OSCAudioOutputPT8211 : public AudioOutputPT8211, OSCAudioBase
 {
     public:
-        OSCAudioOutputPT8211(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputPT8211(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1064,7 +1064,7 @@ class OSCAudioOutputPT8211 : public AudioOutputPT8211, OSCAudioBase
 class OSCAudioOutputPT8211_2 : public AudioOutputPT8211_2, OSCAudioBase
 {
     public:
-        OSCAudioOutputPT8211_2(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputPT8211_2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1078,7 +1078,7 @@ class OSCAudioOutputPT8211_2 : public AudioOutputPT8211_2, OSCAudioBase
 class OSCAudioOutputPWM : public AudioOutputPWM, OSCAudioBase
 {
     public:
-        OSCAudioOutputPWM(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputPWM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1092,7 +1092,7 @@ class OSCAudioOutputPWM : public AudioOutputPWM, OSCAudioBase
 class OSCAudioOutputSPDIF : public AudioOutputSPDIF, OSCAudioBase
 {
     public:
-        OSCAudioOutputSPDIF(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputSPDIF(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1107,7 +1107,7 @@ class OSCAudioOutputSPDIF : public AudioOutputSPDIF, OSCAudioBase
 class OSCAudioOutputSPDIF2 : public AudioOutputSPDIF2, OSCAudioBase
 {
     public:
-        OSCAudioOutputSPDIF2(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputSPDIF2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1122,7 +1122,7 @@ class OSCAudioOutputSPDIF2 : public AudioOutputSPDIF2, OSCAudioBase
 class OSCAudioOutputSPDIF3 : public AudioOutputSPDIF3, OSCAudioBase
 {
     public:
-        OSCAudioOutputSPDIF3(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputSPDIF3(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1138,7 +1138,7 @@ class OSCAudioOutputSPDIF3 : public AudioOutputSPDIF3, OSCAudioBase
 class OSCAudioOutputTDM : public AudioOutputTDM, OSCAudioBase
 {
     public:
-        OSCAudioOutputTDM(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputTDM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1152,7 +1152,7 @@ class OSCAudioOutputTDM : public AudioOutputTDM, OSCAudioBase
 class OSCAudioOutputTDM2 : public AudioOutputTDM2, OSCAudioBase
 {
     public:
-        OSCAudioOutputTDM2(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioOutputTDM2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1166,7 +1166,7 @@ class OSCAudioOutputTDM2 : public AudioOutputTDM2, OSCAudioBase
 class OSCAudioPlayMemory : public AudioPlayMemory, OSCAudioBase
 {
     public:
-        OSCAudioPlayMemory(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioPlayMemory(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1185,7 +1185,7 @@ class OSCAudioPlayMemory : public AudioPlayMemory, OSCAudioBase
 class OSCAudioPlayQueue : public AudioPlayQueue, OSCAudioBase
 {
     public:
-        OSCAudioPlayQueue(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioPlayQueue(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1206,7 +1206,7 @@ class OSCAudioPlayQueue : public AudioPlayQueue, OSCAudioBase
 class OSCAudioPlaySdRaw : public AudioPlaySdRaw, OSCAudioBase
 {
     public:
-        OSCAudioPlaySdRaw(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioPlaySdRaw(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1226,7 +1226,7 @@ class OSCAudioPlaySdRaw : public AudioPlaySdRaw, OSCAudioBase
 class OSCAudioPlaySdWav : public AudioPlaySdWav, OSCAudioBase
 {
     public:
-        OSCAudioPlaySdWav(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioPlaySdWav(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1249,7 +1249,7 @@ class OSCAudioPlaySdWav : public AudioPlaySdWav, OSCAudioBase
 class OSCAudioPlaySerialflashRaw : public AudioPlaySerialflashRaw, OSCAudioBase
 {
     public:
-        OSCAudioPlaySerialflashRaw(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioPlaySerialflashRaw(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1269,7 +1269,7 @@ class OSCAudioPlaySerialflashRaw : public AudioPlaySerialflashRaw, OSCAudioBase
 class OSCAudioRecordQueue : public AudioRecordQueue, OSCAudioBase
 {
     public:
-        OSCAudioRecordQueue(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioRecordQueue(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1289,7 +1289,7 @@ class OSCAudioRecordQueue : public AudioRecordQueue, OSCAudioBase
 class OSCAudioSynthKarplusStrong : public AudioSynthKarplusStrong, OSCAudioBase
 {
     public:
-        OSCAudioSynthKarplusStrong(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioSynthKarplusStrong(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1305,7 +1305,7 @@ class OSCAudioSynthKarplusStrong : public AudioSynthKarplusStrong, OSCAudioBase
 class OSCAudioSynthNoisePink : public AudioSynthNoisePink, OSCAudioBase
 {
     public:
-        OSCAudioSynthNoisePink(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioSynthNoisePink(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1320,7 +1320,7 @@ class OSCAudioSynthNoisePink : public AudioSynthNoisePink, OSCAudioBase
 class OSCAudioSynthNoiseWhite : public AudioSynthNoiseWhite, OSCAudioBase
 {
     public:
-        OSCAudioSynthNoiseWhite(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioSynthNoiseWhite(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1335,7 +1335,7 @@ class OSCAudioSynthNoiseWhite : public AudioSynthNoiseWhite, OSCAudioBase
 class OSCAudioSynthSimpleDrum : public AudioSynthSimpleDrum, OSCAudioBase
 {
     public:
-        OSCAudioSynthSimpleDrum(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioSynthSimpleDrum(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1354,7 +1354,7 @@ class OSCAudioSynthSimpleDrum : public AudioSynthSimpleDrum, OSCAudioBase
 class OSCAudioSynthToneSweep : public AudioSynthToneSweep, OSCAudioBase
 {
     public:
-        OSCAudioSynthToneSweep(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioSynthToneSweep(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1371,7 +1371,7 @@ class OSCAudioSynthToneSweep : public AudioSynthToneSweep, OSCAudioBase
 class OSCAudioSynthWaveform : public AudioSynthWaveform, OSCAudioBase
 {
     public:
-        OSCAudioSynthWaveform(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioSynthWaveform(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1393,7 +1393,7 @@ class OSCAudioSynthWaveform : public AudioSynthWaveform, OSCAudioBase
 class OSCAudioSynthWaveformDc : public AudioSynthWaveformDc, OSCAudioBase
 {
     public:
-        OSCAudioSynthWaveformDc(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioSynthWaveformDc(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1410,7 +1410,7 @@ class OSCAudioSynthWaveformDc : public AudioSynthWaveformDc, OSCAudioBase
 class OSCAudioSynthWaveformModulated : public AudioSynthWaveformModulated, OSCAudioBase
 {
     public:
-        OSCAudioSynthWaveformModulated(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioSynthWaveformModulated(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1432,7 +1432,7 @@ class OSCAudioSynthWaveformModulated : public AudioSynthWaveformModulated, OSCAu
 class OSCAudioSynthWaveformPWM : public AudioSynthWaveformPWM, OSCAudioBase
 {
     public:
-        OSCAudioSynthWaveformPWM(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioSynthWaveformPWM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1448,7 +1448,7 @@ class OSCAudioSynthWaveformPWM : public AudioSynthWaveformPWM, OSCAudioBase
 class OSCAudioSynthWaveformSine : public AudioSynthWaveformSine, OSCAudioBase
 {
     public:
-        OSCAudioSynthWaveformSine(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioSynthWaveformSine(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1465,7 +1465,7 @@ class OSCAudioSynthWaveformSine : public AudioSynthWaveformSine, OSCAudioBase
 class OSCAudioSynthWaveformSineHires : public AudioSynthWaveformSineHires, OSCAudioBase
 {
     public:
-        OSCAudioSynthWaveformSineHires(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioSynthWaveformSineHires(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1482,7 +1482,7 @@ class OSCAudioSynthWaveformSineHires : public AudioSynthWaveformSineHires, OSCAu
 class OSCAudioSynthWaveformSineModulated : public AudioSynthWaveformSineModulated, OSCAudioBase
 {
     public:
-        OSCAudioSynthWaveformSineModulated(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioSynthWaveformSineModulated(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1499,7 +1499,7 @@ class OSCAudioSynthWaveformSineModulated : public AudioSynthWaveformSineModulate
 class OSCAudioSynthWavetable : public AudioSynthWavetable, OSCAudioBase
 {
     public:
-        OSCAudioSynthWavetable(const char* _name) :  OSCAudioBase(_name) {}
+        OSCAudioSynthWavetable(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset)
         {
@@ -1519,4 +1519,90 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, OSCAudioBase
           }
         }
 };
+
+#define OSC_AUDIO_CLASSES \
+	OSC_CLASS(AsyncAudioInputSPDIF3,AsyncOSCAudioInputSPDIF3) \
+	OSC_CLASS(AudioAmplifier,OSCAudioAmplifier) \
+	OSC_CLASS(AudioAnalyzeFFT1024,OSCAudioAnalyzeFFT1024) \
+	OSC_CLASS(AudioAnalyzeFFT256,OSCAudioAnalyzeFFT256) \
+	OSC_CLASS(AudioAnalyzeNoteFrequency,OSCAudioAnalyzeNoteFrequency) \
+	OSC_CLASS(AudioAnalyzePeak,OSCAudioAnalyzePeak) \
+	OSC_CLASS(AudioAnalyzePrint,OSCAudioAnalyzePrint) \
+	OSC_CLASS(AudioAnalyzeRMS,OSCAudioAnalyzeRMS) \
+	OSC_CLASS(AudioAnalyzeToneDetect,OSCAudioAnalyzeToneDetect) \
+	OSC_CLASS(AudioControlAK4558,OSCAudioControlAK4558) \
+	OSC_CLASS(AudioControlCS42448,OSCAudioControlCS42448) \
+	OSC_CLASS(AudioControlCS4272,OSCAudioControlCS4272) \
+	OSC_CLASS(AudioControlSGTL5000,OSCAudioControlSGTL5000) \
+	OSC_CLASS(AudioControlTLV320AIC3206,OSCAudioControlTLV320AIC3206) \
+	OSC_CLASS(AudioControlWM8731,OSCAudioControlWM8731) \
+	OSC_CLASS(AudioControlWM8731master,OSCAudioControlWM8731master) \
+	OSC_CLASS(AudioEffectBitcrusher,OSCAudioEffectBitcrusher) \
+	OSC_CLASS(AudioEffectDelay,OSCAudioEffectDelay) \
+	OSC_CLASS(AudioEffectDelayExternal,OSCAudioEffectDelayExternal) \
+	OSC_CLASS(AudioEffectDigitalCombine,OSCAudioEffectDigitalCombine) \
+	OSC_CLASS(AudioEffectEnvelope,OSCAudioEffectEnvelope) \
+	OSC_CLASS(AudioEffectFade,OSCAudioEffectFade) \
+	OSC_CLASS(AudioEffectFreeverb,OSCAudioEffectFreeverb) \
+	OSC_CLASS(AudioEffectFreeverbStereo,OSCAudioEffectFreeverbStereo) \
+	OSC_CLASS(AudioEffectGranular,OSCAudioEffectGranular) \
+	OSC_CLASS(AudioEffectMidSide,OSCAudioEffectMidSide) \
+	OSC_CLASS(AudioEffectMultiply,OSCAudioEffectMultiply) \
+	OSC_CLASS(AudioEffectRectifier,OSCAudioEffectRectifier) \
+	OSC_CLASS(AudioEffectReverb,OSCAudioEffectReverb) \
+	OSC_CLASS(AudioEffectWaveFolder,OSCAudioEffectWaveFolder) \
+	OSC_CLASS(AudioEffectWaveshaper,OSCAudioEffectWaveshaper) \
+	OSC_CLASS(AudioFilterBiquad,OSCAudioFilterBiquad) \
+	OSC_CLASS(AudioFilterFIR,OSCAudioFilterFIR) \
+	OSC_CLASS(AudioFilterLadder,OSCAudioFilterLadder) \
+	OSC_CLASS(AudioFilterStateVariable,OSCAudioFilterStateVariable) \
+	OSC_CLASS(AudioInputAnalog,OSCAudioInputAnalog) \
+	OSC_CLASS(AudioInputAnalogStereo,OSCAudioInputAnalogStereo) \
+	OSC_CLASS(AudioInputI2S,OSCAudioInputI2S) \
+	OSC_CLASS(AudioInputI2S2,OSCAudioInputI2S2) \
+	OSC_CLASS(AudioInputI2SHex,OSCAudioInputI2SHex) \
+	OSC_CLASS(AudioInputI2SOct,OSCAudioInputI2SOct) \
+	OSC_CLASS(AudioInputI2SQuad,OSCAudioInputI2SQuad) \
+	OSC_CLASS(AudioInputPDM,OSCAudioInputPDM) \
+	OSC_CLASS(AudioInputPDM2,OSCAudioInputPDM2) \
+	OSC_CLASS(AudioInputSPDIF3,OSCAudioInputSPDIF3) \
+	OSC_CLASS(AudioInputTDM,OSCAudioInputTDM) \
+	OSC_CLASS(AudioInputTDM2,OSCAudioInputTDM2) \
+	OSC_CLASS(AudioMixer4,OSCAudioMixer4) \
+	OSC_CLASS(AudioOutputADAT,OSCAudioOutputADAT) \
+	OSC_CLASS(AudioOutputAnalog,OSCAudioOutputAnalog) \
+	OSC_CLASS(AudioOutputAnalogStereo,OSCAudioOutputAnalogStereo) \
+	OSC_CLASS(AudioOutputI2S,OSCAudioOutputI2S) \
+	OSC_CLASS(AudioOutputI2S2,OSCAudioOutputI2S2) \
+	OSC_CLASS(AudioOutputI2SHex,OSCAudioOutputI2SHex) \
+	OSC_CLASS(AudioOutputI2SOct,OSCAudioOutputI2SOct) \
+	OSC_CLASS(AudioOutputI2SQuad,OSCAudioOutputI2SQuad) \
+	OSC_CLASS(AudioOutputMQS,OSCAudioOutputMQS) \
+	OSC_CLASS(AudioOutputPT8211,OSCAudioOutputPT8211) \
+	OSC_CLASS(AudioOutputPT8211_2,OSCAudioOutputPT8211_2) \
+	OSC_CLASS(AudioOutputPWM,OSCAudioOutputPWM) \
+	OSC_CLASS(AudioOutputSPDIF,OSCAudioOutputSPDIF) \
+	OSC_CLASS(AudioOutputSPDIF2,OSCAudioOutputSPDIF2) \
+	OSC_CLASS(AudioOutputSPDIF3,OSCAudioOutputSPDIF3) \
+	OSC_CLASS(AudioOutputTDM,OSCAudioOutputTDM) \
+	OSC_CLASS(AudioOutputTDM2,OSCAudioOutputTDM2) \
+	OSC_CLASS(AudioPlayMemory,OSCAudioPlayMemory) \
+	OSC_CLASS(AudioPlayQueue,OSCAudioPlayQueue) \
+	OSC_CLASS(AudioPlaySdRaw,OSCAudioPlaySdRaw) \
+	OSC_CLASS(AudioPlaySdWav,OSCAudioPlaySdWav) \
+	OSC_CLASS(AudioPlaySerialflashRaw,OSCAudioPlaySerialflashRaw) \
+	OSC_CLASS(AudioRecordQueue,OSCAudioRecordQueue) \
+	OSC_CLASS(AudioSynthKarplusStrong,OSCAudioSynthKarplusStrong) \
+	OSC_CLASS(AudioSynthNoisePink,OSCAudioSynthNoisePink) \
+	OSC_CLASS(AudioSynthNoiseWhite,OSCAudioSynthNoiseWhite) \
+	OSC_CLASS(AudioSynthSimpleDrum,OSCAudioSynthSimpleDrum) \
+	OSC_CLASS(AudioSynthToneSweep,OSCAudioSynthToneSweep) \
+	OSC_CLASS(AudioSynthWaveform,OSCAudioSynthWaveform) \
+	OSC_CLASS(AudioSynthWaveformDc,OSCAudioSynthWaveformDc) \
+	OSC_CLASS(AudioSynthWaveformModulated,OSCAudioSynthWaveformModulated) \
+	OSC_CLASS(AudioSynthWaveformPWM,OSCAudioSynthWaveformPWM) \
+	OSC_CLASS(AudioSynthWaveformSine,OSCAudioSynthWaveformSine) \
+	OSC_CLASS(AudioSynthWaveformSineHires,OSCAudioSynthWaveformSineHires) \
+	OSC_CLASS(AudioSynthWaveformSineModulated,OSCAudioSynthWaveformSineModulated) \
+	OSC_CLASS(AudioSynthWavetable,OSCAudioSynthWavetable) \
 

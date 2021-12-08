@@ -68,6 +68,29 @@ void routeAudio(OSCMessage& msg, int addressOffset)
 }
 
 
+void routeDynamic(OSCMessage& msg, int addressOffset)
+{
+#if defined(SAFE_RELEASE)  
+  Serial.println("dynamic objects message!");
+  OSCAudioBase::routeDynamic(msg,addressOffset);
+#else
+  Serial.println("dynamic objects not available!");
+#endif // defined(SAFE_RELEASE)  
+}
+
+
+void listObjects(void)
+{
+  OSCAudioBase* obj=OSCAudioBase::getFirst();
+
+  while (NULL != obj)
+  {
+    Serial.println(obj->name);
+    obj = obj->getNext();
+  }
+}
+
+
 // work with SLIP-protocol serial port:
 void loop()
 {
@@ -94,6 +117,9 @@ void loop()
     Serial.println(prt);
     Serial.flush();
     msg.route("/teensy*/audio",routeAudio); // see if this object can use the message
+    msg.route("/teensy*/dynamic",routeDynamic); // see if this object can use the message
+    Serial.println("---------------------");
+    listObjects();
     Serial.println("=====================");
   }
 }
