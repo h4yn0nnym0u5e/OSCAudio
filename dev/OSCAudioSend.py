@@ -100,6 +100,6 @@ sleep(0.5)
 pkt = OSCpackAuto('/teensy1/audio/waveform1/amp',0.0)                  
 SLIPser.send_msg(pkt)
 
-pkt = OSCpackAuto('/teensy1/audio/waveform11/amplitude',0.0)                  
+pkt = OSCpackAuto('/teensy1/audio/waveform2/fr',550.0)                  
 SLIPser.send_msg(pkt)
 ser.close()
