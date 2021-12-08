@@ -80,6 +80,7 @@ class OSCAudioBase
         ppLink = &((*ppLink)->next_route);
       }
     }
+    static void routeDynamic(OSCMessage& msg, int addressOffset);
     
   private:
     static OSCAudioBase* first_route; //!< linked list to route OSC messages to all derived instances
@@ -98,5 +99,10 @@ class OSCAudioBase
     }
 };
 
-#include <OSCAudioAutogen.h>
+#if defined(SAFE_RELEASE)
+#include <OSCAudioAutogen-dynamic.h>
+#else
+#include <OSCAudioAutogen-static.h>
+#endif // defined(SAFE_RELEASE)
+
 #endif // !defined(_OSCAUDIOBASE_H_)
