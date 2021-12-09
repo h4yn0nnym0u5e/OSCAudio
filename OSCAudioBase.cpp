@@ -12,7 +12,33 @@ static void dbgPrt(OSCMessage& msg, int addressOffset)
 	Serial.println(); 
 }
 
-#if defined(SAFE_RELEASE) // only defined in Dynamic Audio Objects library
+
+/**
+ *	Rename an [OSC]AudioStream or Connection object.
+ *  This could be an /audio function, but that would pollute the 
+ *	audio functions' name spaces, so we make it a /dynamic
+ *  function instead.
+ */
+void OSCAudioBase::renameObject(OSCMessage& msg, int addressOffset)
+{
+	char oldName[50],newName[50];
+	OSCAudioBase* pVictim;
+	
+	msg.getString(1,newName,50);
+	pVictim = OSCAudioBase::find(newName);
+	if (NULL == pVictim) // we're not duplicating the name of another object: good
+	{
+		msg.getString(0,oldName,50);
+		
+		pVictim = OSCAudioBase::find(oldName);
+		if (NULL != pVictim)
+		{
+			pVictim->setName(newName);
+		}
+	}
+}
+
+
 //=======================================================================================================
 //============================== Dynamic Audio Objects ==================================================
 /**
@@ -20,12 +46,16 @@ static void dbgPrt(OSCMessage& msg, int addressOffset)
  */
 void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset)
 {
-    if (isStaticTarget(msg,addressOffset,"/cr*O*","ss")) {createObject(msg,addressOffset);} 
+    if (isStaticTarget(msg,addressOffset,"/ren*","ss")) {renameObject(msg,addressOffset);} 
+#if defined(SAFE_RELEASE) // only defined in Dynamic Audio Objects library
+    else if (isStaticTarget(msg,addressOffset,"/cr*O*","ss")) {createObject(msg,addressOffset);} 
     else if (isStaticTarget(msg,addressOffset,"/cr*C","s")) {createConnection(msg,addressOffset);} 
     else if (isStaticTarget(msg,addressOffset,"/d*","s")) {destroyObject(msg,addressOffset);} 
+#endif // defined(SAFE_RELEASE)
 }
 
 
+#if defined(SAFE_RELEASE) // only defined in Dynamic Audio Objects library
 /**
  *	Destroy an [OSC]AudioStream or Connection object.
  */

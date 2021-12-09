@@ -8,21 +8,9 @@
 class OSCAudioBase
 {
   public:
-    OSCAudioBase(const char* _name,AudioStream* _sibling = NULL) : sibling(_sibling)
+    OSCAudioBase(const char* _name,AudioStream* _sibling = NULL) : name(NULL), sibling(_sibling)
     {
-      if (NULL != _name)
-      {
-        nameLen = strlen(_name);
-        
-        Serial.printf("Created %s\n\n",_name);
-        
-        name = (char*) malloc(nameLen+3); // include space for // and null terminator
-        if (NULL != name)
-        {
-          name[0] = '/'; // for routing
-          strcpy(name+1,_name);
-        }
-      }
+      setName(_name); 
       linkIn(); 
     }
 	
@@ -32,6 +20,38 @@ class OSCAudioBase
     char* name;
     size_t nameLen;
 	AudioStream* sibling;
+	
+	
+	/**
+	 * (Re)set the name of the OSCAudio object so the system can find it.
+	 * We don't allow a NULL name, as everything should have a name.
+	 * If there's already enough space for a new name then we don't 
+	 * re-allocate less, which may help heap fragmentation in some small way.
+	 */
+	void setName(const char* _name)
+	{		
+	  void* toFree = name;
+	  if (NULL != _name)
+      {
+        nameLen = strlen(_name);
+                
+        name = (char*) malloc(nameLen+3); // include space for // and null terminator
+        if (NULL != name)
+        {
+          name[0] = '/'; // for routing
+          strcpy(name+1,_name);
+		  Serial.printf("Created %s at 0x%08X\n",name,(uint32_t) name);
+        }
+		if (NULL != toFree)
+		{
+			Serial.printf("now free 0x%08X...\n",(uint32_t) toFree);
+			Serial.flush();
+			free(toFree);
+		}
+		
+      }
+	}
+	
 	
 	/**
 	 * Check to see if message is directed at audio instances whose name matches ours
@@ -146,7 +166,11 @@ class OSCAudioBase
 		return next_route;
 	}
 	
+    static void routeDynamic(OSCMessage& msg, int addressOffset);
+	
   private:
+	static void renameObject(OSCMessage& msg, int addressOffset);
+	size_t nameAlloc;	//!< space allocated for name: may be shorter than current name
 	// existing objects: message passing and linking in/out
     static OSCAudioBase* first_route; //!< linked list to route OSC messages to all derived instances
     OSCAudioBase* next_route;
@@ -165,11 +189,6 @@ class OSCAudioBase
 	
 #if defined(SAFE_RELEASE) // only defined in Dynamic Audio Objects library
 //============================== Dynamic Audio Objects ==================================================
-	public:
-	/**
-	 * Route a message for the audio creation / destruction / connection sub-system.
-	 */
-    static void routeDynamic(OSCMessage& msg, int addressOffset);
     
   private:
 	// dynamic audio objects:
