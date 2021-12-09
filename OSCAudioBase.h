@@ -30,25 +30,33 @@ class OSCAudioBase
 	 */
 	void setName(const char* _name)
 	{		
+#define NAME_PAD 3	
 	  void* toFree = name;
 	  if (NULL != _name)
       {
         nameLen = strlen(_name);
                 
-        name = (char*) malloc(nameLen+3); // include space for // and null terminator
+		if (nameAlloc < nameLen+NAME_PAD || NULL == name)
+		{
+			nameAlloc = nameLen+NAME_PAD;
+			name = (char*) malloc(nameAlloc); // include space for // and null terminator
+		}
+		else
+			toFree = NULL;
+		
         if (NULL != name)
         {
           name[0] = '/'; // for routing
           strcpy(name+1,_name);
-		  Serial.printf("Created %s at 0x%08X\n",name,(uint32_t) name);
+		  //Serial.printf("Created %s at 0x%08X\n",name,(uint32_t) name);
         }
+		
 		if (NULL != toFree)
 		{
-			Serial.printf("now free 0x%08X...\n",(uint32_t) toFree);
-			Serial.flush();
+			//Serial.printf("now free 0x%08X...\n",(uint32_t) toFree);
+			//Serial.flush();
 			free(toFree);
-		}
-		
+		}		
       }
 	}
 	
