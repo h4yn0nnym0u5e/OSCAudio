@@ -139,7 +139,7 @@ class OSCAudioAnalyzePrint : public AudioAnalyzePrint, OSCAudioBase
             if (isTarget(msg,addressOffset,"/d*","i")) {delay(msg.getInt(0));} // void delay(uint32_t num) { delay_length = num; }
             else if (isTarget(msg,addressOffset,"/l*","i")) {length(msg.getInt(0));} // void length(uint32_t num) { print_length = num; }
             // else if (isTarget(msg,addressOffset,"/n*","s")) {name(msg.getString(0));} // void name(const char *str) { myname = str; }
-            else if (isTarget(msg,addressOffset,"/t*","fi")) {trigger(msg.getFloat(0),msg.getInt(1));} // void trigger(float level, int edge);
+            // NOT DEFINED: else if (isTarget(msg,addressOffset,"/t*","fi")) {trigger(msg.getFloat(0),msg.getInt(1));} // void trigger(float level, int edge);
             else if (isTarget(msg,addressOffset,"/t*",NULL)) {trigger();} // void trigger(void);
           }
         }
@@ -1083,7 +1083,7 @@ class OSCAudioOutputPWM : public AudioOutputPWM, OSCAudioBase
         void route(OSCMessage& msg, int addressOffset)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
           }
         }
 };
@@ -1129,7 +1129,7 @@ class OSCAudioOutputSPDIF3 : public AudioOutputSPDIF3, OSCAudioBase
           if (isMine(msg,addressOffset))
           { 
             if (isTarget(msg,addressOffset,"/m*",";")) {mute_PCM(msg.getBoolean(0));} // static void mute_PCM(const bool mute);
-            else if (isTarget(msg,addressOffset,"/p*",NULL)) {pll_locked();} // static bool pll_locked(void);
+            // NOT DEFINED: else if (isTarget(msg,addressOffset,"/p*",NULL)) {pll_locked();} // static bool pll_locked(void);
           }
         }
 };
@@ -1197,7 +1197,7 @@ class OSCAudioPlayQueue : public AudioPlayQueue, OSCAudioBase
             // else if (isTarget(msg,addressOffset,"/play","bi")) {play(msg.getBlob(0),msg.getInt(1));} // void play(const int16_t *data, uint32_t len);
             else if (isTarget(msg,addressOffset,"/play","i")) {play(msg.getInt(0));} // void play(int16_t data);
             else if (isTarget(msg,addressOffset,"/se*","i")) {setMaxBuffers(msg.getInt(0));} // void setMaxBuffers(uint8_t);
-            else if (isTarget(msg,addressOffset,"/st*",NULL)) {stop();} // void stop(void);
+            // NOT DEFINED: else if (isTarget(msg,addressOffset,"/st*",NULL)) {stop();} // void stop(void);
           }
         }
 };
@@ -1528,6 +1528,7 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, OSCAudioBase
 	OSC_CLASS(AudioAnalyzeFFT256,OSCAudioAnalyzeFFT256) \
 	OSC_CLASS(AudioAnalyzeNoteFrequency,OSCAudioAnalyzeNoteFrequency) \
 	OSC_CLASS(AudioAnalyzePeak,OSCAudioAnalyzePeak) \
+	OSC_CLASS(AudioAnalyzePrint,OSCAudioAnalyzePrint) \
 	OSC_CLASS(AudioAnalyzeRMS,OSCAudioAnalyzeRMS) \
 	OSC_CLASS(AudioAnalyzeToneDetect,OSCAudioAnalyzeToneDetect) \
 	OSC_CLASS(AudioControlAK4558,OSCAudioControlAK4558) \
@@ -1557,8 +1558,38 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, OSCAudioBase
 	OSC_CLASS(AudioFilterFIR,OSCAudioFilterFIR) \
 	OSC_CLASS(AudioFilterLadder,OSCAudioFilterLadder) \
 	OSC_CLASS(AudioFilterStateVariable,OSCAudioFilterStateVariable) \
+	OSC_CLASS(AudioInputAnalog,OSCAudioInputAnalog) \
+	OSC_CLASS(AudioInputAnalogStereo,OSCAudioInputAnalogStereo) \
+	OSC_CLASS(AudioInputI2S,OSCAudioInputI2S) \
+	OSC_CLASS(AudioInputI2S2,OSCAudioInputI2S2) \
+	OSC_CLASS(AudioInputI2SHex,OSCAudioInputI2SHex) \
+	OSC_CLASS(AudioInputI2SOct,OSCAudioInputI2SOct) \
+	OSC_CLASS(AudioInputI2SQuad,OSCAudioInputI2SQuad) \
+	OSC_CLASS(AudioInputPDM,OSCAudioInputPDM) \
+	OSC_CLASS(AudioInputPDM2,OSCAudioInputPDM2) \
+	OSC_CLASS(AudioInputSPDIF3,OSCAudioInputSPDIF3) \
+	OSC_CLASS(AudioInputTDM,OSCAudioInputTDM) \
+	OSC_CLASS(AudioInputTDM2,OSCAudioInputTDM2) \
 	OSC_CLASS(AudioMixer4,OSCAudioMixer4) \
+	OSC_CLASS(AudioOutputADAT,OSCAudioOutputADAT) \
+	OSC_CLASS(AudioOutputAnalog,OSCAudioOutputAnalog) \
+	OSC_CLASS(AudioOutputAnalogStereo,OSCAudioOutputAnalogStereo) \
+	OSC_CLASS(AudioOutputI2S,OSCAudioOutputI2S) \
+	OSC_CLASS(AudioOutputI2S2,OSCAudioOutputI2S2) \
+	OSC_CLASS(AudioOutputI2SHex,OSCAudioOutputI2SHex) \
+	OSC_CLASS(AudioOutputI2SOct,OSCAudioOutputI2SOct) \
+	OSC_CLASS(AudioOutputI2SQuad,OSCAudioOutputI2SQuad) \
+	OSC_CLASS(AudioOutputMQS,OSCAudioOutputMQS) \
+	OSC_CLASS(AudioOutputPT8211,OSCAudioOutputPT8211) \
+	OSC_CLASS(AudioOutputPT8211_2,OSCAudioOutputPT8211_2) \
+	OSC_CLASS(AudioOutputPWM,OSCAudioOutputPWM) \
+	OSC_CLASS(AudioOutputSPDIF,OSCAudioOutputSPDIF) \
+	OSC_CLASS(AudioOutputSPDIF2,OSCAudioOutputSPDIF2) \
+	OSC_CLASS(AudioOutputSPDIF3,OSCAudioOutputSPDIF3) \
+	OSC_CLASS(AudioOutputTDM,OSCAudioOutputTDM) \
+	OSC_CLASS(AudioOutputTDM2,OSCAudioOutputTDM2) \
 	OSC_CLASS(AudioPlayMemory,OSCAudioPlayMemory) \
+	OSC_CLASS(AudioPlayQueue,OSCAudioPlayQueue) \
 	OSC_CLASS(AudioPlaySdRaw,OSCAudioPlaySdRaw) \
 	OSC_CLASS(AudioPlaySdWav,OSCAudioPlaySdWav) \
 	OSC_CLASS(AudioPlaySerialflashRaw,OSCAudioPlaySerialflashRaw) \
@@ -1576,8 +1607,6 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, OSCAudioBase
 	OSC_CLASS(AudioSynthWaveformSineHires,OSCAudioSynthWaveformSineHires) \
 	OSC_CLASS(AudioSynthWaveformSineModulated,OSCAudioSynthWaveformSineModulated) \
 	OSC_CLASS(AudioSynthWavetable,OSCAudioSynthWavetable) \
-//		OSC_CLASS(AudioPlayQueue,OSCAudioPlayQueue) 
 
-// Enabling the last line above causes a compile error, but in a weird place
-// Don't understand this for now; have also had to omit input and output classes, as some
-// cause similar problems.
+
+

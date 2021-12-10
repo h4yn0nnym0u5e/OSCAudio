@@ -139,7 +139,7 @@ class OSCAudioAnalyzePrint : public AudioAnalyzePrint, OSCAudioBase
             if (isTarget(msg,addressOffset,"/d*","i")) {delay(msg.getInt(0));} // void delay(uint32_t num) { delay_length = num; }
             else if (isTarget(msg,addressOffset,"/l*","i")) {length(msg.getInt(0));} // void length(uint32_t num) { print_length = num; }
             // else if (isTarget(msg,addressOffset,"/n*","s")) {name(msg.getString(0));} // void name(const char *str) { myname = str; }
-            else if (isTarget(msg,addressOffset,"/t*","fi")) {trigger(msg.getFloat(0),msg.getInt(1));} // void trigger(float level, int edge);
+            // NOT DEFINED: else if (isTarget(msg,addressOffset,"/t*","fi")) {trigger(msg.getFloat(0),msg.getInt(1));} // void trigger(float level, int edge);
             else if (isTarget(msg,addressOffset,"/t*",NULL)) {trigger();} // void trigger(void);
           }
         }
@@ -1129,7 +1129,7 @@ class OSCAudioOutputSPDIF3 : public AudioOutputSPDIF3, OSCAudioBase
           if (isMine(msg,addressOffset))
           { 
             if (isTarget(msg,addressOffset,"/m*",";")) {mute_PCM(msg.getBoolean(0));} // static void mute_PCM(const bool mute);
-            else if (isTarget(msg,addressOffset,"/p*",NULL)) {pll_locked();} // static bool pll_locked(void);
+            // NOT DEFINED: else if (isTarget(msg,addressOffset,"/p*",NULL)) {pll_locked();} // static bool pll_locked(void);
           }
         }
 };
@@ -1197,7 +1197,7 @@ class OSCAudioPlayQueue : public AudioPlayQueue, OSCAudioBase
             // else if (isTarget(msg,addressOffset,"/play","bi")) {play(msg.getBlob(0),msg.getInt(1));} // void play(const int16_t *data, uint32_t len);
             else if (isTarget(msg,addressOffset,"/play","i")) {play(msg.getInt(0));} // void play(int16_t data);
             else if (isTarget(msg,addressOffset,"/se*","i")) {setMaxBuffers(msg.getInt(0));} // void setMaxBuffers(uint8_t);
-            else if (isTarget(msg,addressOffset,"/st*",NULL)) {stop();} // void stop(void);
+            // NOT DEFINED: else if (isTarget(msg,addressOffset,"/st*",NULL)) {stop();} // void stop(void);
           }
         }
 };
