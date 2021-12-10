@@ -61,7 +61,7 @@ pkt = OSCpackAuto('/teensy1/dynamic/de','pc1')
 SLIPser.send_msg(pkt)
 sleep(0.5)
 
-pkt = OSCpackAuto('/teensy1/dynamic/de','wave_form2')                  
+pkt = OSCpackAuto('/teensy1/dynamic/de','wave?form2')                  
 SLIPser.send_msg(pkt)
 
 pkt = OSCpackAuto('/teensy1/dynamic/crOb','AudioSynthWaveform','[wave_form2]')                  

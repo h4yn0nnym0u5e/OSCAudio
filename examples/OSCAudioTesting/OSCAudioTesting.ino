@@ -4,7 +4,7 @@
  *   "C:\Program Files (x86)\Arduino\hardware\tools\arm\bin\arm-none-eabi-addr2line" -e 
  */
 
-#include <OSCMessage.h>
+#include <OSCBundle.h>
 #include <SLIPEncodedSerial.h>
 
 
@@ -58,6 +58,8 @@ void setup() {
   sgtl5000_1.enable();
   sgtl5000_1.volume(0.1);
   //-------------------------------
+  //testSanitise();
+  listObjects();
 }
 
 
@@ -85,18 +87,51 @@ void listObjects(void)
 
   while (NULL != obj)
   {
-    Serial.println(obj->name);
+    Serial.printf("%s is at %08X\n",obj->name,(uint32_t) obj);
+    Serial.flush();
     obj = obj->getNext();
   }
+}
+
+
+void testSanitise()
+{
+  char buf[20];
+  OSCAudioBase::sanitise("Hello world!",buf); Serial.println(buf);  
+  OSCAudioBase::sanitise("[Hello world!]",buf); Serial.println(buf);  
+  OSCAudioBase::trimUnderscores(buf,buf); Serial.println(buf);  
+  OSCAudioBase::sanitise("*[H]e{}llo#, world!?/",buf); Serial.println(buf);  
+  OSCAudioBase::trimUnderscores(buf,buf); Serial.println(buf);  
+  OSCAudioBase::sanitise("#*,/? []{}",buf); Serial.println(buf);  
+  OSCAudioBase::trimUnderscores(buf,buf); Serial.printf("<%s>\n",buf);  
+}
+
+
+void processMessage(OSCMessage* msg)
+{
+  char prt[200];
+  
+  if (!msg->hasError())
+  {
+    msg->getAddress(prt);  
+    Serial.println(prt);
+    Serial.flush();
+  
+    msg->route("/teensy*/audio",routeAudio); // see if this object can use the message
+    msg->route("/teensy*/dynamic",routeDynamic); // see if this object can use the message
+  }
+  else
+    Serial.println("error in msg");
 }
 
 
 // work with SLIP-protocol serial port:
 void loop()
 {
+  OSCBundle bndl;
   OSCMessage msg;
+  char firstCh = 0;
   int msgLen;
-  char prt[200];
   
   while (!HWSERIAL.endofPacket())
   {
@@ -105,21 +140,49 @@ void loop()
     while (msgLen--)
     {
       char c = HWSERIAL.read();
-      msg.fill((uint8_t) c);
+      // figure out if it's a message or a bundle
+      if (0 == firstCh)
+        firstCh = c;
+      if ('#' == firstCh)
+        bndl.fill((uint8_t) c); // simple messages should result in a 1-message "bundle", but don't
+      else
+        msg.fill((uint8_t) c); // so process them specifically
+    }
+  }
+
+  if ('#' == firstCh)
+  {
+    if (!bndl.hasError())  
+    {
+      int bndlSize = bndl.size();
+      
+      for (int i=0;i<bndlSize;i++)
+      {
+        OSCMessage* msg = bndl.getOSCMessage(i); 
+        Serial.printf("Message %d\n",i);
+        processMessage(msg);   
+      }  
+    }
+    else
+    {
+      Serial.printf("error %d in bundle\n",(int) bndl.getError());
+      int bndlSize = bndl.size();
+      
+      for (int i=0;i<bndlSize;i++)
+      {
+        OSCMessage* msg = bndl.getOSCMessage(i); 
+        Serial.printf("error %d in message %d\n",(int) msg->getError(),i);
+      }
+    }
+    listObjects();
+  }
+  else 
+  {
+    if ('/' == firstCh) 
+    {
+      processMessage(&msg);   
+      listObjects();
     }
   }
   Serial.println();
-
-  if (!msg.hasError())
-  {
-    msg.getAddress(prt);
-    
-    Serial.println(prt);
-    Serial.flush();
-    msg.route("/teensy*/audio",routeAudio); // see if this object can use the message
-    msg.route("/teensy*/dynamic",routeDynamic); // see if this object can use the message
-    Serial.println("---------------------");
-    listObjects();
-    Serial.println("=====================");
-  }
 }
