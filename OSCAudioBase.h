@@ -174,6 +174,8 @@ class OSCAudioBase
 		return next_route;
 	}
 	
+	static char* sanitise(const char* src, char* dst);
+	static char* trimUnderscores(const char* src, char* dst);
     static void routeDynamic(OSCMessage& msg, int addressOffset);
 	
   private:

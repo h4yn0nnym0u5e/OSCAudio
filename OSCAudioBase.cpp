@@ -25,17 +25,81 @@ void OSCAudioBase::renameObject(OSCMessage& msg, int addressOffset)
 	OSCAudioBase* pVictim;
 	
 	msg.getString(1,newName,50);
+	trimUnderscores(sanitise(newName,newName),newName); // make the new name valid
 	pVictim = OSCAudioBase::find(newName);
 	if (NULL == pVictim) // we're not duplicating the name of another object: good
 	{
 		msg.getString(0,oldName,50);
-		
-		pVictim = OSCAudioBase::find(oldName);
-		if (NULL != pVictim)
+		trimUnderscores(sanitise(oldName,oldName),oldName); // make the old name valid
+		if (0 != strlen(newName)) // zero-length names are not allowed
 		{
-			pVictim->setName(newName);
+			pVictim = OSCAudioBase::find(oldName);
+			if (NULL != pVictim)
+			{
+				pVictim->setName(newName);
+			}
 		}
 	}
+}
+
+
+/**
+ * Sanitise a string to contain only characters valid in an OSC container or method.
+ * Replaces all invalid characters <space>#*,/?[]{} with _.
+ * \return pointer to result string (same as dst)
+ */
+char* OSCAudioBase::sanitise(const char* src, //!< source string
+							       char* dst) //!< destination string: may be same as src
+{
+	char* dstCopy = dst;
+	
+	while (0 != *src)
+	{
+		if (NULL == strchr(" #*,/?[]{}",*src))
+			*dst++ = *src;
+		else
+			*dst++ = '_';
+		src++;
+	}
+	*dst = 0;
+	
+	return dstCopy;
+}
+
+
+/**
+ * Trim leading and trailing underscores from a string, and compress internal runs.
+ * Replaces all invalid characters <space>#*,/?[]{} with _.
+ * \return pointer to result string (same as dst)
+ */
+char* OSCAudioBase::trimUnderscores(const char* src, //!< source string
+							         char* dst) //!< destination string: may be same as src
+{
+	char* dstCopy = dst;
+	bool inBody = false,lastWas_ = false;
+
+	while (0 != *src)
+	{
+		if ('_' == *src)
+		{
+			if (inBody && !lastWas_)
+				*dst++ = *src;
+			lastWas_ = true;
+		}
+		else
+		{
+			*dst++ = *src;
+			inBody = true;
+			lastWas_ = false;
+		}
+		src++;
+	}
+	
+	if (lastWas_ && dst != dstCopy) // trailing underscore in non-empty result...
+		dst--;	  					// ...overwrite it
+	*dst = 0; // terminate result
+	
+	return dstCopy;
 }
 
 
@@ -64,6 +128,7 @@ void OSCAudioBase::destroyObject(OSCMessage& msg, int addressOffset)
 	char buf[50];
 	OSCAudioBase* pVictim;
 	msg.getString(0,buf,50);
+	trimUnderscores(sanitise(buf,buf),buf); // make the name valid
 	
 	Serial.print("destroyObject: ");
 	Serial.println(buf);
@@ -88,11 +153,13 @@ void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset)
 	void* pNewObj = NULL;
 	msg.getString(0,typ,50);
 	msg.getString(1,name,50);
+	trimUnderscores(sanitise(name,name),name); // make the name valid
 	
 	Serial.printf("createObject(%s,%s)\n",typ,name);
 	dbgPrt(msg,addressOffset);
 	
-	if (NULL != find(name)) Serial.println("duplicate"); // don't allow duplicate name
+	if (0 == strlen(name)) 		 Serial.println("blank name"); // don't allow blank name
+	else if (NULL != find(name)) Serial.println("duplicate");  // don't allow duplicate name
 #define OSC_CLASS(a,o) else if (0 == strcmp(#a,typ)) pNewObj = new o(name);
 	OSC_AUDIO_CLASSES // massive inefficient macro expansion to create object of required type
 #undef OSC_CLASS
@@ -114,11 +181,15 @@ void OSCAudioBase::createConnection(OSCMessage& msg, int addressOffset)
 	Serial.println("createConnection");
 	dbgPrt(msg,addressOffset);
 	msg.getString(0,buf,50);
+	trimUnderscores(sanitise(buf,buf),buf); // make the name valid
 	Serial.println(buf);
 	
-	OSCAudioConnection* pNewConn = new OSCAudioConnection(buf);
-	(void) pNewConn;
-	Serial.printf("Created at: 0x%08X\n",(uint32_t) pNewConn);
+	if (0 != strlen(buf))
+	{
+		OSCAudioConnection* pNewConn = new OSCAudioConnection(buf);
+		(void) pNewConn;
+		Serial.printf("Created at: 0x%08X\n",(uint32_t) pNewConn);
+	}
 }
 
 
@@ -138,6 +209,7 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 	dbgPrt(msg,addressOffset);
 	
 	msg.getString(0,srcn,50);
+	trimUnderscores(sanitise(srcn,srcn),srcn); // make the source name valid
 	if (!zeroToZero)
 	{
 		srcp = msg.getInt(1);
@@ -146,6 +218,7 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 	}
 	else
 		msg.getString(1,dstn,50);
+	trimUnderscores(sanitise(dstn,dstn),dstn); // make the destination name valid
 	
 	// Find the named OSCAudioBase objects and convert to
 	// the corresponding AudioStream: is there a better way?

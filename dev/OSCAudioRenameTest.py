@@ -59,11 +59,15 @@ SLIPser = sliplib.SlipStream(ser)
 
 pkt = OSCpackAuto('/teensy1/dynamic/reeeeeeeeeeenamerrrrr test!') # mark the start - does nothing!
 SLIPser.send_msg(pkt)
-pkt = OSCpackAuto('/teensy1/dynamic/rename','mixer1','MAXer2')                  
+pkt = OSCpackAuto('/teensy1/dynamic/rename','mixer1','MAXer2')  # simple - works                
 SLIPser.send_msg(pkt)
 pkt = OSCpackAuto('/teensy1/dynamic/rename','MAXer2','waveform1')  # fails, attempt to duplicate name                
 SLIPser.send_msg(pkt)
-pkt = OSCpackAuto('/teensy1/dynamic/rename','MAXer2','mixer1')                  
+pkt = OSCpackAuto('/teensy1/dynamic/rename','MAXer2','MAX?er2')  # sanitisation lets this work                
+SLIPser.send_msg(pkt)
+pkt = OSCpackAuto('/teensy1/dynamic/rename','MAX_er2',' #*,/?[]{}') # fails, result string is empty
+SLIPser.send_msg(pkt)
+pkt = OSCpackAuto('/teensy1/dynamic/rename','[MAX*er2]','*?mixer1{}') # sanitisation lets this work
 SLIPser.send_msg(pkt)
 
 
