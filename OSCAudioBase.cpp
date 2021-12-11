@@ -112,9 +112,10 @@ void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset)
 {
     if (isStaticTarget(msg,addressOffset,"/ren*","ss")) {renameObject(msg,addressOffset);} 
 #if defined(SAFE_RELEASE) // only defined in Dynamic Audio Objects library
+    else if (isStaticTarget(msg,addressOffset,"/cr*C*","s"))  {createConnection(msg,addressOffset);} 
     else if (isStaticTarget(msg,addressOffset,"/cr*O*","ss")) {createObject(msg,addressOffset);} 
-    else if (isStaticTarget(msg,addressOffset,"/cr*C","s")) {createConnection(msg,addressOffset);} 
-    else if (isStaticTarget(msg,addressOffset,"/d*","s")) {destroyObject(msg,addressOffset);} 
+    else if (isStaticTarget(msg,addressOffset,"/d*","s"))     {destroyObject(msg,addressOffset);} 
+    else if (isStaticTarget(msg,addressOffset,"/e*",NULL))    {emptyAllObjects(msg,addressOffset);} 
 #endif // defined(SAFE_RELEASE)
 }
 
@@ -141,6 +142,23 @@ void OSCAudioBase::destroyObject(OSCMessage& msg, int addressOffset)
 		delete pVictim;
 	else
 		Serial.println("not found!");
+}
+
+/**
+ *	Destroy all dynamic OSCAudioStream and OSCAudioConnection objects.
+ *  Note that this will not destroy objects unknown to the OSCAudio system.
+ */
+void OSCAudioBase::emptyAllObjects(OSCMessage& msg, int addressOffset)
+{
+	Serial.print("emptyAllObjects: ");
+	dbgPrt(msg,addressOffset);
+	
+	while (NULL != first_route)
+	{
+		Serial.println(first_route->name);
+		Serial.flush();
+		delete first_route;
+	}
 }
 
 //============================== OSCAudioStream =========================================================

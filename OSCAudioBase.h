@@ -71,11 +71,16 @@ class OSCAudioBase
 	 * Check to see if message's parameter types match those expected for the 
 	 * candidate function to be called.
 	 */
-    static bool validParams(OSCMessage& msg,const char* types)
+    static bool validParams(OSCMessage& msg,	//!< OSC message to check
+							const char* types)	//!< expected parameter types: NULL imples none expected
     {
-      size_t sl = strlen(types);
-      bool result = (size_t) msg.size() == sl;
-
+      size_t sl = 0;
+      bool result;
+	  
+	  if (NULL != types)
+		sl = strlen(types);
+	  result= (size_t) msg.size() == sl;
+	  
       for (size_t i=0;i<sl && result;i++)
       {
         char type = msg.getType(i);
@@ -202,10 +207,11 @@ class OSCAudioBase
     
   private:
 	// dynamic audio objects:
+	static void createConnection(OSCMessage& msg, int addressOffset);
 	static void createObject(OSCMessage& msg, int addressOffset);
 	static void destroyObject(OSCMessage& msg, int addressOffset);
-	static void createConnection(OSCMessage& msg, int addressOffset);
-			
+	static void emptyAllObjects(OSCMessage& msg, int addressOffset);
+	
 #endif // defined(SAFE_RELEASE)	
 };
 
