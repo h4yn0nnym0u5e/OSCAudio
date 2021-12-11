@@ -210,7 +210,7 @@ class OSCAudioBase
 	static void createConnection(OSCMessage& msg, int addressOffset);
 	static void createObject(OSCMessage& msg, int addressOffset);
 	static void destroyObject(OSCMessage& msg, int addressOffset);
-	static void emptyAllObjects(OSCMessage& msg, int addressOffset);
+	static void clearAllObjects(OSCMessage& msg, int addressOffset);
 	
 #endif // defined(SAFE_RELEASE)	
 };
