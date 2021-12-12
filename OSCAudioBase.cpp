@@ -102,25 +102,72 @@ char* OSCAudioBase::trimUnderscores(const char* src, //!< source string
 	return dstCopy;
 }
 
+/**
+ * Add to the reply bundle as a result of having executed an OSC message routed to us.
+ */
+void OSCAudioBase::addReplyExecuted(OSCMessage& msg, int addressOffset, OSCBundle& reply) 
+{
+	prepareReplyResult(msg,reply).add(true); // add a "true" bool to the response, because we did the method
+}
+
+
+/**
+ * Prepare the initial part of a reply to a message routed to us.
+ * Fills in the standard information generated for any successful routing.
+ * \return reference to the OSCMessage, ready to add any extra information, dependent on the method called
+ */
+OSCMessage& OSCAudioBase::prepareReplyResult(OSCMessage& msg, 	//!< the received message
+											 OSCBundle& reply) 	//!< the bundle that will become the reply
+{
+	int msgCount = reply.size(); // number of messages in bundle
+	OSCMessage* pLastMsg = reply.getOSCMessage(msgCount-1); // point to last message in reply bundle
+	int dataCount = pLastMsg->size(); // how many pieces of data are in that?
+	char replyAddress[50];
+	pLastMsg->getAddress(replyAddress);
+	
+	char buf[50];
+	msg.getAddress(buf);
+	Serial.printf("%s executed %s; result was ",name,buf);
+	
+	if (0 != dataCount) // message already in use...
+		pLastMsg = &reply.add(replyAddress); // ... make ourselves a new one
+		
+	// start composing our reply:
+	pLastMsg->add(replyAddress);	// where it's going
+	pLastMsg->add(buf);				// which address the routed message was destined for
+	pLastMsg->add(name);			// which element caught the routed message
+	
+	return *pLastMsg;
+}
+
+// Despatch function overloaded with the various reply types we might append to the standard information
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, bool v) { prepareReplyResult(msg, reply).add(v); Serial.println(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, float v) { prepareReplyResult(msg, reply).add(v); Serial.println(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, int32_t v) { prepareReplyResult(msg, reply).add(v); Serial.println(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint32_t v) { prepareReplyResult(msg, reply).add((unsigned int)v); Serial.println(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint8_t v) { prepareReplyResult(msg, reply).add(v); Serial.println(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint16_t v) { prepareReplyResult(msg, reply).add(v); Serial.println(v); }
+
+
 
 //=======================================================================================================
 //============================== Dynamic Audio Objects ==================================================
 /**
  *	Route message for the creation engine to the correct function.
  */
-void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset)
+void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
     if (isStaticTarget(msg,addressOffset,"/ren*","ss")) {renameObject(msg,addressOffset);} 
-#if defined(SAFE_RELEASE) // only defined in Dynamic Audio Objects library
+#if defined(DYNAMIC_AUDIO_AVAILABLE)
     else if (isStaticTarget(msg,addressOffset,"/cr*C*","s"))  {createConnection(msg,addressOffset);} 
     else if (isStaticTarget(msg,addressOffset,"/cr*O*","ss")) {createObject(msg,addressOffset);} 
     else if (isStaticTarget(msg,addressOffset,"/d*","s"))     {destroyObject(msg,addressOffset);} 
     else if (isStaticTarget(msg,addressOffset,"/clearAl*",NULL))    {clearAllObjects(msg,addressOffset);} 
-#endif // defined(SAFE_RELEASE)
+#endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 }
 
 
-#if defined(SAFE_RELEASE) // only defined in Dynamic Audio Objects library
+#if defined(DYNAMIC_AUDIO_AVAILABLE)
 /**
  *	Destroy an [OSC]AudioStream or Connection object.
  */
@@ -248,6 +295,6 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 	if (NULL != src && NULL != dst)
 		connect(*src,(int) srcp,*dst,(int) dstp);
 }
-#endif // defined(SAFE_RELEASE)
+#endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 
 

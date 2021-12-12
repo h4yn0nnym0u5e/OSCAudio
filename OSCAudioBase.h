@@ -1,8 +1,12 @@
 #if !defined(_OSCAUDIOBASE_H_)
 #define _OSCAUDIOBASE_H_
 
-#include <OSCMessage.h>
+#include <OSCBundle.h>
 #include <Audio.h>
+
+#if defined(SAFE_RELEASE)  // only defined in Dynamic Audio Objects library
+#define DYNAMIC_AUDIO_AVAILABLE
+#endif // defined(SAFE_RELEASE)
 
 
 class OSCAudioBase
@@ -16,7 +20,7 @@ class OSCAudioBase
 	
     
     virtual ~OSCAudioBase() {if (NULL != name) free(name); linkOut(); }
-    virtual void route(OSCMessage& msg, int addressOffset)=0;
+    virtual void route(OSCMessage& msg, int addressOffset, OSCBundle&)=0;
     char* name;
     size_t nameLen;
 	AudioStream* sibling;
@@ -132,12 +136,13 @@ class OSCAudioBase
 	 * Route a message for the audio system to every known object.
 	 */
     static void routeAll(OSCMessage& msg, 	//!< received message
-						 int addressOffset)	//!< offset past the already used part of the address
+						 int addressOffset,	//!< offset past the already used part of the address
+						 OSCBundle& reply)	//!< bundle to hold reply
     {
       OSCAudioBase** ppLink = &first_route; 
       while (NULL != *ppLink)
       {
-        (*ppLink)->route(msg,addressOffset);
+        (*ppLink)->route(msg,addressOffset,reply);
         ppLink = &((*ppLink)->next_route);
       }
     }
@@ -181,7 +186,19 @@ class OSCAudioBase
 	
 	static char* sanitise(const char* src, char* dst);
 	static char* trimUnderscores(const char* src, char* dst);
-    static void routeDynamic(OSCMessage& msg, int addressOffset);
+    static void routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& reply);
+	
+	// Reply mechanisms:
+	void addReplyExecuted(OSCMessage& msg, int addressOffset, OSCBundle& reply);
+	
+	OSCMessage& prepareReplyResult(OSCMessage& msg, OSCBundle& reply);
+	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, bool v);
+	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, float v);
+	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, int32_t v);
+	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint32_t v);
+	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint8_t v);
+	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint16_t v);
+
 	
   private:
 	static void renameObject(OSCMessage& msg, int addressOffset);
@@ -202,7 +219,7 @@ class OSCAudioBase
       }
     }
 	
-#if defined(SAFE_RELEASE) // only defined in Dynamic Audio Objects library
+#if defined(DYNAMIC_AUDIO_AVAILABLE)
 //============================== Dynamic Audio Objects ==================================================
     
   private:
@@ -212,11 +229,11 @@ class OSCAudioBase
 	static void destroyObject(OSCMessage& msg, int addressOffset);
 	static void clearAllObjects(OSCMessage& msg, int addressOffset);
 	
-#endif // defined(SAFE_RELEASE)	
+#endif // defined(DYNAMIC_AUDIO_AVAILABLE)	
 };
 
 
-#if defined(SAFE_RELEASE) // only defined in Dynamic Audio Objects library
+#if defined(DYNAMIC_AUDIO_AVAILABLE) 
 //============================== Dynamic Audio Objects ==================================================
 // ============== AudioConnection ====================
 class OSCAudioConnection : public AudioConnection, OSCAudioBase
@@ -224,7 +241,7 @@ class OSCAudioConnection : public AudioConnection, OSCAudioBase
     public:
         OSCAudioConnection(const char* _name) :  OSCAudioBase(_name) {}
 
-        void route(OSCMessage& msg, int addressOffset)
+        void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
           { 
@@ -237,12 +254,12 @@ class OSCAudioConnection : public AudioConnection, OSCAudioBase
 	private:
 		void OSCconnect(OSCMessage& msg,int addressOffset,bool zeroToZero = false);
 };
-#endif // defined(SAFE_RELEASE)	
+#endif // defined(DYNAMIC_AUDIO_AVAILABLE)	
 
-#if defined(SAFE_RELEASE)
+#if defined(DYNAMIC_AUDIO_AVAILABLE)
 #include <OSCAudioAutogen-dynamic.h>
 #else
 #include <OSCAudioAutogen-static.h>
-#endif // defined(SAFE_RELEASE)
+#endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 
 #endif // !defined(_OSCAUDIOBASE_H_)
