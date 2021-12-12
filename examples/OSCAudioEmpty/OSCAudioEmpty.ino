@@ -41,11 +41,11 @@ void setup() {
   listObjects();
 }
 
-
+OSCBundle* replyStack;
 void routeAudio(OSCMessage& msg, int addressOffset)
 {
   Serial.println("audio message!");
-  OSCAudioBase::routeAll(msg,addressOffset);
+  OSCAudioBase::routeAll(msg,addressOffset,*replyStack);
 }
 
 
@@ -53,7 +53,7 @@ void routeDynamic(OSCMessage& msg, int addressOffset)
 {
 #if defined(SAFE_RELEASE)  
   Serial.println("dynamic objects message!");
-  OSCAudioBase::routeDynamic(msg,addressOffset);
+  OSCAudioBase::routeDynamic(msg,addressOffset,*replyStack);
 #else
   Serial.println("dynamic objects not available!");
 #endif // defined(SAFE_RELEASE)  
@@ -86,9 +86,11 @@ void testSanitise()
 }
 
 
-void processMessage(OSCMessage* msg)
+void processMessage(OSCMessage* msg,OSCBundle& reply)
 {
   char prt[200];
+  OSCBundle* replyPush = replyStack;
+  replyStack = &reply;
   
   if (!msg->hasError())
   {
@@ -101,14 +103,30 @@ void processMessage(OSCMessage* msg)
   }
   else
     Serial.println("error in msg");
+  
+  replyStack = replyPush;
 }
 
+
+void sendReply(OSCBundle& reply)
+{
+  // for debug
+  //reply.send(Serial); 
+  Serial.printf("\nReply has %d messages\n",reply.size());  
+
+  // for real!
+  HWSERIAL.beginPacket();
+  reply.send(HWSERIAL); 
+  HWSERIAL.endPacket();
+}
 
 // work with SLIP-protocol serial port:
 void loop()
 {
   OSCBundle bndl;
+  OSCBundle reply;
   OSCMessage msg;
+  long long tt = 0x4546474841424344;
   char firstCh = 0;
   int msgLen;
   
@@ -129,6 +147,8 @@ void loop()
     }
   }
 
+  reply.setTimetag((uint8_t*) &tt).add("/teensy1/reply"); // create first message with reply address: used for all messages
+  
   if ('#' == firstCh)
   {
     if (!bndl.hasError())  
@@ -139,7 +159,7 @@ void loop()
       {
         OSCMessage* msg = bndl.getOSCMessage(i); 
         Serial.printf("Message %d\n",i);
-        processMessage(msg);   
+        processMessage(msg,reply);   
       }  
     }
     else
@@ -153,13 +173,15 @@ void loop()
         Serial.printf("error %d in message %d\n",(int) msg->getError(),i);
       }
     }
+    sendReply(reply);
     listObjects();
   }
   else 
   {
     if ('/' == firstCh) 
     {
-      processMessage(&msg);   
+      processMessage(&msg,reply);   
+      sendReply(reply);
       listObjects();
     }
   }

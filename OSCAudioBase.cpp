@@ -19,7 +19,7 @@ static void dbgPrt(OSCMessage& msg, int addressOffset)
  *	audio functions' name spaces, so we make it a /dynamic
  *  function instead.
  */
-void OSCAudioBase::renameObject(OSCMessage& msg, int addressOffset)
+void OSCAudioBase::renameObject(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
 	char oldName[50],newName[50];
 	OSCAudioBase* pVictim;
@@ -116,8 +116,8 @@ void OSCAudioBase::addReplyExecuted(OSCMessage& msg, int addressOffset, OSCBundl
  * Fills in the standard information generated for any successful routing.
  * \return reference to the OSCMessage, ready to add any extra information, dependent on the method called
  */
-OSCMessage& OSCAudioBase::prepareReplyResult(OSCMessage& msg, 	//!< the received message
-											 OSCBundle& reply) 	//!< the bundle that will become the reply
+OSCMessage& OSCAudioBase::staticPrepareReplyResult(OSCMessage& msg, 	//!< the received message
+														  OSCBundle& reply) //!< the bundle that will become the reply
 {
 	int msgCount = reply.size(); // number of messages in bundle
 	OSCMessage* pLastMsg = reply.getOSCMessage(msgCount-1); // point to last message in reply bundle
@@ -127,18 +127,32 @@ OSCMessage& OSCAudioBase::prepareReplyResult(OSCMessage& msg, 	//!< the received
 	
 	char buf[50];
 	msg.getAddress(buf);
-	Serial.printf("%s executed %s; result was ",name,buf);
 	
 	if (0 != dataCount) // message already in use...
 		pLastMsg = &reply.add(replyAddress); // ... make ourselves a new one
 		
 	// start composing our reply:
-	pLastMsg->add(replyAddress);	// where it's going
 	pLastMsg->add(buf);				// which address the routed message was destined for
-	pLastMsg->add(name);			// which element caught the routed message
 	
 	return *pLastMsg;
 }
+
+
+/**
+ * Prepare the initial part of a reply to a message routed to us.
+ * Fills in the standard information generated for any successful routing.
+ * \return reference to the OSCMessage, ready to add any extra information, dependent on the method called
+ */
+OSCMessage& OSCAudioBase::prepareReplyResult(OSCMessage& msg, 	//!< the received message
+											 OSCBundle& reply) 	//!< the bundle that will become the reply
+{
+	char buf[50];
+	msg.getAddress(buf);
+	Serial.printf("%s executed %s; result was ",name+1,buf);
+	
+	return staticPrepareReplyResult(msg,reply).add(name+1); // add which element caught the routed message
+}
+
 
 // Despatch function overloaded with the various reply types we might append to the standard information
 void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, bool v) { prepareReplyResult(msg, reply).add(v); Serial.println(v); }
@@ -157,12 +171,12 @@ void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle&
  */
 void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
-    if (isStaticTarget(msg,addressOffset,"/ren*","ss")) {renameObject(msg,addressOffset);} 
+    if (isStaticTarget(msg,addressOffset,"/ren*","ss")) {renameObject(msg,addressOffset,reply);} 
 #if defined(DYNAMIC_AUDIO_AVAILABLE)
-    else if (isStaticTarget(msg,addressOffset,"/cr*C*","s"))  {createConnection(msg,addressOffset);} 
-    else if (isStaticTarget(msg,addressOffset,"/cr*O*","ss")) {createObject(msg,addressOffset);} 
-    else if (isStaticTarget(msg,addressOffset,"/d*","s"))     {destroyObject(msg,addressOffset);} 
-    else if (isStaticTarget(msg,addressOffset,"/clearAl*",NULL))    {clearAllObjects(msg,addressOffset);} 
+    else if (isStaticTarget(msg,addressOffset,"/cr*C*","s"))  {createConnection(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/cr*O*","ss")) {createObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/d*","s"))     {destroyObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/clearAl*",NULL))    {clearAllObjects(msg,addressOffset,reply);} 
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 }
 
@@ -171,7 +185,7 @@ void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& r
 /**
  *	Destroy an [OSC]AudioStream or Connection object.
  */
-void OSCAudioBase::destroyObject(OSCMessage& msg, int addressOffset)
+void OSCAudioBase::destroyObject(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
 	char buf[50];
 	OSCAudioBase* pVictim;
@@ -188,14 +202,16 @@ void OSCAudioBase::destroyObject(OSCMessage& msg, int addressOffset)
 	if (NULL != pVictim)
 		delete pVictim;
 	else
-		Serial.println("not found!");
+		Serial.println("not found!"); // but not really an error!
+	
+	staticPrepareReplyResult(msg,reply).add((int) OK);
 }
 
 /**
  *	Destroy all dynamic OSCAudioStream and OSCAudioConnection objects.
  *  Note that this will not destroy objects unknown to the OSCAudio system.
  */
-void OSCAudioBase::clearAllObjects(OSCMessage& msg, int addressOffset)
+void OSCAudioBase::clearAllObjects(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
 	Serial.print("clearAllObjects: ");
 	dbgPrt(msg,addressOffset);
@@ -206,42 +222,56 @@ void OSCAudioBase::clearAllObjects(OSCMessage& msg, int addressOffset)
 		Serial.flush();
 		delete first_route;
 	}
+	staticPrepareReplyResult(msg,reply).add((int) OK);
 }
 
 //============================== OSCAudioStream =========================================================
 /**
  *	Create a new [OSC]AudioStream object.
  */
-void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset)
+void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
-	char name[50],typ[50];
+	error retval = OK;
+	char objName[50],typ[50];
 	void* pNewObj = NULL;
 	msg.getString(0,typ,50);
-	msg.getString(1,name,50);
-	trimUnderscores(sanitise(name,name),name); // make the name valid
+	msg.getString(1,objName,50);
+	trimUnderscores(sanitise(objName,objName),objName); // make the name valid
 	
-	Serial.printf("createObject(%s,%s)\n",typ,name);
+	Serial.printf("createObject(%s,%s)\n",typ,objName);
 	dbgPrt(msg,addressOffset);
 	
-	if (0 == strlen(name)) 		 Serial.println("blank name"); // don't allow blank name
-	else if (NULL != find(name)) Serial.println("duplicate");  // don't allow duplicate name
-#define OSC_CLASS(a,o) else if (0 == strcmp(#a,typ)) pNewObj = new o(name);
+	if (0 == strlen(objName)) 		 
+	{
+		retval = BLANK_NAME;
+		Serial.println("blank name"); // don't allow blank name
+	}
+	else 
+		if (NULL != find(objName))
+		{
+			retval = DUPLICATE_NAME;
+			Serial.println("duplicate");  // don't allow duplicate name
+		}
+#define OSC_CLASS(a,o) else if (0 == strcmp(#a,typ)) pNewObj = new o(objName);
 	OSC_AUDIO_CLASSES // massive inefficient macro expansion to create object of required type
 #undef OSC_CLASS
 	
 	if (NULL != pNewObj)
 	{
-		Serial.printf("Created %s as a new %s at %08X\n",name, typ, (uint32_t) pNewObj);
+		Serial.printf("Created %s as a new %s at %08X\n",objName, typ, (uint32_t) pNewObj);
 	}
+		
+	staticPrepareReplyResult(msg,reply).add((int) retval);
 }
 
 //============================== OSCAudioConnection =====================================================
 /**
  *	Create a new [OSC]AudioConnection object.
  */
-void OSCAudioBase::createConnection(OSCMessage& msg, int addressOffset)
+void OSCAudioBase::createConnection(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
 	char buf[50];
+	error retval = OK;
 	
 	Serial.println("createConnection");
 	dbgPrt(msg,addressOffset);
@@ -251,10 +281,21 @@ void OSCAudioBase::createConnection(OSCMessage& msg, int addressOffset)
 	
 	if (0 != strlen(buf))
 	{
-		OSCAudioConnection* pNewConn = new OSCAudioConnection(buf);
-		(void) pNewConn;
-		Serial.printf("Created at: 0x%08X\n",(uint32_t) pNewConn);
+		if (NULL != find(buf))
+		{
+			retval = DUPLICATE_NAME;
+		}
+		else
+		{
+			OSCAudioConnection* pNewConn = new OSCAudioConnection(buf);
+			(void) pNewConn;
+			Serial.printf("Created at: 0x%08X\n",(uint32_t) pNewConn);
+		}
 	}
+	else
+		retval = BLANK_NAME;
+	
+	staticPrepareReplyResult(msg,reply).add((int) retval);
 }
 
 
@@ -262,13 +303,15 @@ void OSCAudioBase::createConnection(OSCMessage& msg, int addressOffset)
  *	Connect an [OSC]AudioConnection object to specific object ports
  */
 void OSCAudioConnection::OSCconnect(OSCMessage& msg, 
-								 int addressOffset, 
-								 bool zeroToZero) //!< true to use port 0 on both, otherwise they're in the message
+								 int addressOffset,
+								 OSCBundle& reply, 
+								 bool zeroToZero)  	//!< true to use port 0 on both, otherwise they're in the message
 {
 	char srcn[50],dstn[50];
 	AudioStream* src,*dst;
 	int srcp=0,dstp=0;
 	OSCAudioBase* tmp;
+	error retval = OK;
 	
 	Serial.println("makeConnection");
 	dbgPrt(msg,addressOffset);
@@ -294,6 +337,10 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 	
 	if (NULL != src && NULL != dst)
 		connect(*src,(int) srcp,*dst,(int) dstp);
+	else
+		retval = NOT_FOUND;
+	
+	prepareReplyResult(msg,reply).add((int) retval);
 }
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 

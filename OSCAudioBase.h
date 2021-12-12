@@ -24,6 +24,7 @@ class OSCAudioBase
     char* name;
     size_t nameLen;
 	AudioStream* sibling;
+	enum error {OK,NOT_FOUND,BLANK_NAME,DUPLICATE_NAME};
 	
 	
 	/**
@@ -191,6 +192,7 @@ class OSCAudioBase
 	// Reply mechanisms:
 	void addReplyExecuted(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 	
+	static OSCMessage& staticPrepareReplyResult(OSCMessage& msg, OSCBundle& reply);
 	OSCMessage& prepareReplyResult(OSCMessage& msg, OSCBundle& reply);
 	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, bool v);
 	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, float v);
@@ -201,7 +203,7 @@ class OSCAudioBase
 
 	
   private:
-	static void renameObject(OSCMessage& msg, int addressOffset);
+	static void renameObject(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 	size_t nameAlloc;	//!< space allocated for name: may be shorter than current name
 	// existing objects: message passing and linking in/out
     static OSCAudioBase* first_route; //!< linked list to route OSC messages to all derived instances
@@ -224,10 +226,10 @@ class OSCAudioBase
     
   private:
 	// dynamic audio objects:
-	static void createConnection(OSCMessage& msg, int addressOffset);
-	static void createObject(OSCMessage& msg, int addressOffset);
-	static void destroyObject(OSCMessage& msg, int addressOffset);
-	static void clearAllObjects(OSCMessage& msg, int addressOffset);
+	static void createConnection(OSCMessage& msg, int addressOffset, OSCBundle& reply);
+	static void createObject(OSCMessage& msg, int addressOffset, OSCBundle& reply);
+	static void destroyObject(OSCMessage& msg, int addressOffset, OSCBundle& reply);
+	static void clearAllObjects(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 	
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)	
 };
@@ -245,14 +247,14 @@ class OSCAudioConnection : public AudioConnection, OSCAudioBase
         {
           if (isMine(msg,addressOffset))
           { 
-            if (isTarget(msg,addressOffset,"/c*","ss")) {OSCconnect(msg,addressOffset,true);}
-            else if (isTarget(msg,addressOffset,"/c*","sisi")) {OSCconnect(msg,addressOffset);} 
+            if (isTarget(msg,addressOffset,"/c*","ss")) {OSCconnect(msg,addressOffset,reply,true);}
+            else if (isTarget(msg,addressOffset,"/c*","sisi")) {OSCconnect(msg,addressOffset,reply);} 
             else if (isTarget(msg,addressOffset,"/d*",NULL)) {disconnect();} 
           }
         }
 		
 	private:
-		void OSCconnect(OSCMessage& msg,int addressOffset,bool zeroToZero = false);
+		void OSCconnect(OSCMessage& msg,int addressOffset,OSCBundle& reply, bool zeroToZero = false);
 };
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)	
 
