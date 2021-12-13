@@ -21,7 +21,8 @@ static void dbgPrt(OSCMessage& msg, int addressOffset)
  */
 void OSCAudioBase::renameObject(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
-	char oldName[50],newName[50];
+	error retval = OK;
+	char oldName[50],newName[50],buf[150];
 	OSCAudioBase* pVictim;
 	
 	msg.getString(1,newName,50);
@@ -38,8 +39,17 @@ void OSCAudioBase::renameObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 			{
 				pVictim->setName(newName);
 			}
+			else
+				retval = NOT_FOUND; // object to rename not found			
 		}
+		else
+			retval = BLANK_NAME; // new name [sanitises to] an empty string			
 	}
+	else
+		retval = DUPLICATE_NAME; // object by requested name already exists
+	
+	sprintf(buf,"%s -> %s",oldName,newName);
+	staticPrepareReplyResult(msg,reply).add(buf).add(retval);
 }
 
 
@@ -202,9 +212,11 @@ void OSCAudioBase::destroyObject(OSCMessage& msg, int addressOffset, OSCBundle& 
 	if (NULL != pVictim)
 		delete pVictim;
 	else
+	{
 		Serial.println("not found!"); // but not really an error!
+	}
 	
-	staticPrepareReplyResult(msg,reply).add((int) OK);
+	staticPrepareReplyResult(msg,reply).add(buf).add((int) OK);
 }
 
 /**
@@ -222,7 +234,7 @@ void OSCAudioBase::clearAllObjects(OSCMessage& msg, int addressOffset, OSCBundle
 		Serial.flush();
 		delete first_route;
 	}
-	staticPrepareReplyResult(msg,reply).add((int) OK);
+	staticPrepareReplyResult(msg,reply).add("ALL").add((int) OK);
 }
 
 //============================== OSCAudioStream =========================================================
@@ -261,7 +273,7 @@ void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 		Serial.printf("Created %s as a new %s at %08X\n",objName, typ, (uint32_t) pNewObj);
 	}
 		
-	staticPrepareReplyResult(msg,reply).add((int) retval);
+	staticPrepareReplyResult(msg,reply).add(objName).add((int) retval);
 }
 
 //============================== OSCAudioConnection =====================================================
@@ -295,7 +307,7 @@ void OSCAudioBase::createConnection(OSCMessage& msg, int addressOffset, OSCBundl
 	else
 		retval = BLANK_NAME;
 	
-	staticPrepareReplyResult(msg,reply).add((int) retval);
+	staticPrepareReplyResult(msg,reply).add(buf).add((int) retval);
 }
 
 
@@ -307,7 +319,7 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 								 OSCBundle& reply, 
 								 bool zeroToZero)  	//!< true to use port 0 on both, otherwise they're in the message
 {
-	char srcn[50],dstn[50];
+	char srcn[50],dstn[50],buf[150];
 	AudioStream* src,*dst;
 	int srcp=0,dstp=0;
 	OSCAudioBase* tmp;
@@ -332,15 +344,20 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 	// the corresponding AudioStream: is there a better way?
 	tmp = find(srcn); src = (NULL != tmp)?tmp->sibling:NULL;
 	tmp = find(dstn); dst = (NULL != tmp)?tmp->sibling:NULL;
-
-	Serial.printf("%s:%d -> %s:%d\n",srcn,srcp,dstn,dstp);
-	
+		
 	if (NULL != src && NULL != dst)
+	{
+		sprintf(buf,"%s:%d -> %s:%d",srcn,srcp,dstn,dstp);
 		connect(*src,(int) srcp,*dst,(int) dstp);
+	}
 	else
+	{
+		sprintf(buf,"Nothing!");
 		retval = NOT_FOUND;
+	}
+	Serial.println(buf);
 	
-	prepareReplyResult(msg,reply).add((int) retval);
+	prepareReplyResult(msg,reply).set(1,buf).add((int) retval);
 }
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 
