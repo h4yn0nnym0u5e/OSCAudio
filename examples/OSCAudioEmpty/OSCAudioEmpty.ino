@@ -126,7 +126,7 @@ void loop()
   OSCBundle bndl;
   OSCBundle reply;
   OSCMessage msg;
-  long long tt = 0x4546474841424344;
+  long long tt = 0; //0x4546474841424344; // for debug: ABCDEFGH
   char firstCh = 0;
   int msgLen;
   
@@ -147,7 +147,7 @@ void loop()
     }
   }
 
-  reply.setTimetag((uint8_t*) &tt).add("/teensy1/reply"); // create first message with reply address: used for all messages
+  reply.setTimetag((uint8_t*) &tt).add("/reply"); // create first message with reply address: used for all messages
   
   if ('#' == firstCh)
   {
