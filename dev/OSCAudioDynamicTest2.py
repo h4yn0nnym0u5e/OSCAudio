@@ -60,60 +60,61 @@ ser = serial.Serial('COM5',115200,timeout=1)
 SLIPser = sliplib.SlipStream(ser,chunk_size=1)
 ######################################################################### 
 
-s1 = OSCpad('/teensy1/audio/waveform1/begin')
-s2 = OSCpad(',ffi')
-pkt = struct.pack('>' + str(len(s1))+'s' + str(len(s2))+'sffi',
-                  s1,
-                  s2,
-                  0.8,220.0,11
-                  #789.019775390625,(2.6588213443756104),0x41424344
-                  )
+pkt = OSCpackAuto('/teensy1/dynamic/clearAll')                  
 SLIPser.send_msg(pkt)
-print(pkt)
-print(SLIPser.recv_msg())
-#print(ser.read(200))
-print()
+print(SLIPser.recv_msg(),end='\n\n')
 sleep(0.5)
+
+pkt = OSCpackAuto('/teensy1/dynamic/crOb','AudioControlSGTL5000','sgtl5000')                  
+SLIPser.send_msg(pkt)
+print(SLIPser.recv_msg(),end='\n\n')
+sleep(0.5)
+
+pkt = OSCpackAuto('/teensy1/dynamic/crOb','AudioOutputI2S','i2s')
+SLIPser.send_msg(pkt)
+print(SLIPser.recv_msg(),end='\n\n')
+sleep(0.5)
+
+pkt = OSCpackAuto('/teensy1/dynamic/crOb','AudioSynthWaveform','waveform1')
+SLIPser.send_msg(pkt)
+print(SLIPser.recv_msg(),end='\n\n')
+sleep(0.5)
+
+pkt = OSCpackAuto('/teensy1/dynamic/crCo','pc1')
+SLIPser.send_msg(pkt)
+print(SLIPser.recv_msg(),end='\n\n')
+sleep(0.5)
+
+pkt = OSCpackAuto('/teensy1/dynamic/crCo','pc1')
+SLIPser.send_msg(pkt)
+print(SLIPser.recv_msg(),end='\n\n')
+sleep(0.5)
+
+pkt = OSCpackAuto('/teensy1/audio/pc1/conn','waveform1','i2s')
+SLIPser.send_msg(pkt)
+print(SLIPser.recv_msg(),end='\n\n')
+sleep(0.5)
+
+pkt = OSCpackAuto('/teensy1/audio/pc1/dis')
+SLIPser.send_msg(pkt)
+print(SLIPser.recv_msg(),end='\n\n')
+sleep(0.5)
+
+pkt = OSCpackAuto('/teensy1/audio/pc1/conn','waveform1',0,'i2s',1)
+SLIPser.send_msg(pkt)
+print(SLIPser.recv_msg(),end='\n\n')
+sleep(0.5)
+
+pkt = OSCpackAuto('/teensy1/audio/pc1/dis')
+#SLIPser.send_msg(pkt)
+#print(SLIPser.recv_msg(),end='\n\n')
+#sleep(0.5)
+
+
 
 pkt = OSCpackAuto('/teensy1/audio/sgtl5000/enabl')                  
 SLIPser.send_msg(pkt)
+print(SLIPser.recv_msg(),end='\n\n')
 sleep(0.5)
 
-pkt = OSCpackAuto('/teensy1/audio/sgtl5000/vol',0.2)                  
-SLIPser.send_msg(pkt)
-sleep(0.5)
-
-pkt = OSCpackAuto('/teensy1/audio/sgtl5000/vol',0.1)                  
-SLIPser.send_msg(pkt)
-sleep(0.5)
-
-pkt = OSCpackAuto('/teensy1/audio/waveform1/be',0)                  
-SLIPser.send_msg(pkt)
-sleep(0.5)
-
-pkt = OSCpackAuto('/teensy1/audio/mixer1/ga',1,1.0)                  
-SLIPser.send_msg(pkt)
-sleep(0.5)
-
-pkt = OSCpackAuto('/teensy1/dynamic/rena','mixer1','MAXer2')                  
-SLIPser.send_msg(pkt)
-pkt = OSCpackAuto('/teensy1/audio/MAXer2/ga',1,0.1)                  
-SLIPser.send_msg(pkt)
-sleep(0.5)
-
-pkt = OSCpackAuto('/teensy1/dynamic/rena','MAXer2','mixer1')                  
-SLIPser.send_msg(pkt)
-pkt = OSCpackAuto('/teensy1/audio/waveform1/fr',440.0)                  
-SLIPser.send_msg(pkt)
-sleep(0.5)
-
-pkt = OSCpackAuto('/teensy1/audio/waveform1/amplitude',0.1)                  
-SLIPser.send_msg(pkt)
-sleep(0.5)
-
-pkt = OSCpackAuto('/teensy1/audio/waveform1/amp',0.0)                  
-SLIPser.send_msg(pkt)
-
-pkt = OSCpackAuto('/teensy1/audio/wave_form2/fr',550.0)                  
-SLIPser.send_msg(pkt)
 ser.close()
