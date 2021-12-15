@@ -110,28 +110,37 @@ void saveFS(OSCMessage& msg, int addressOffset)
   uint8_t buf[65];
   int remain = msg.getBlobLength(1);
   int idx = 0;
+  OSCAudioBase::error retval = OSCAudioBase::OK;
   OSCMessage& repl = OSCAudioBase::staticPrepareReplyResult(msg,*replyStack);
   File saveFile;
   
   msg.getString(0,fn,50);
   saveFile = SD.open(fn,FILE_WRITE_BEGIN);
-  Serial.print("Save ");
-  while (remain > 0)
+  if (saveFile)
   {
-    int toGet = remain>64?64:remain;
-    int got = msg.getBlob(1,buf,64,idx,toGet);
-    int wrote = saveFile.write(buf,got);
-    buf[64] = 0;
-    if (remain < 64)
-      buf[remain] = 0;
-    remain -= got;
-    Serial.printf("<%s> @ %d: wrote %d, %d left\n",buf,idx,wrote,remain); Serial.flush();
-    idx += got;
+    Serial.print("Save ");
+    while (remain > 0)
+    {
+      int toGet = remain>64?64:remain;
+      int got = msg.getBlob(1,buf,64,idx,toGet);
+      int wrote = saveFile.write(buf,got);
+      buf[64] = 0;
+      if (remain < 64)
+        buf[remain] = 0;
+      remain -= got;
+      Serial.printf("<%s> @ %d: wrote %d, %d left\n",buf,idx,wrote,remain); Serial.flush();
+      idx += got;
+    }
+    saveFile.close();
+    repl.add("saved");
+    Serial.printf(" (length %d) to %s\n",msg.getBlobLength(1),fn); Serial.flush();
   }
-  saveFile.close();
-  Serial.printf(" (length %d) to %s\n",msg.getBlobLength(1),fn); Serial.flush();
-  
-  repl.add("saved").add(0);
+  else
+  {
+    retval = OSCAudioBase::NOT_FOUND;
+    repl.add("failed");
+  }    
+  repl.add(retval);
 }
 
 // retrieve blob from filesystem
@@ -143,78 +152,123 @@ void sendFS(OSCMessage& msg, int addressOffset)
   char fn[50];
   uint8_t* buf;
   int remain;
+  bool success = false;
+  OSCAudioBase::error retval = OSCAudioBase::OK;
   OSCMessage& repl = OSCAudioBase::staticPrepareReplyResult(msg,*replyStack);
   File sendFile;
   
   msg.getString(0,fn,50);
   sendFile = SD.open(fn);
-  remain = sendFile.size();
-  Serial.print("Send ");
-
-  if (NULL != (buf = (uint8_t*) malloc(remain+1)))
+  if (sendFile)
   {
-    sendFile.read(buf,remain);
-    repl.add(buf,remain); 
-    buf[remain] = 0;
-    Serial.println((char*) buf);
-    free(buf);
+    remain = sendFile.size();
+    Serial.print("Send ");
+  
+    if (NULL != (buf = (uint8_t*) malloc(remain+1)))
+    {
+      sendFile.read(buf,remain);
+      repl.add(buf,remain); 
+      buf[remain] = 0;
+      Serial.println((char*) buf);
+      free(buf);
+      success = true;
+    }
+    else
+    {
+      retval = OSCAudioBase::NO_MEMORY;
+      repl.add("failed");
+    }
+    sendFile.close();
   }
   else
+  {
+    retval = OSCAudioBase::NOT_FOUND;
     repl.add("failed");
-  sendFile.close();
-  
-  repl.add(0);
+  }  
+  repl.add(retval);
 }
 
 
-// retrieve blob from filesystem and 
-// Annoyingly, CNMAT / OSC doesn't appear to be able to build a blob's content incrementally,
-// so this operation has to load the entire file in one go, then create another copy of it
-// in the messaging structure, resulting in heap fragmentation.
-static int loadFSepth = 0; // do a recursion check
+// Delete file from filesystem
+void deleteFS(OSCMessage& msg, int addressOffset)
+{
+  char fn[50];
+  bool success;
+  OSCMessage& repl = OSCAudioBase::staticPrepareReplyResult(msg,*replyStack);
+  
+  msg.getString(0,fn,50);
+  
+  Serial.print("Delete ");
+
+  if (true == (success = SD.remove(fn)))
+    repl.add(fn); 
+  else
+    repl.add("failed");
+  
+  repl.add(success
+            ?OSCAudioBase::OK
+            :OSCAudioBase::NOT_FOUND);
+}
+
+
+// Retrieve blob from filesystem and process it as an OSC-encoded packet
+static int loadFSdepth = 0; // do a recursion check
 void loadFS(OSCMessage& msg, int addressOffset)
 {
   char fn[50];
   uint8_t* buf;
   int remain;
+  OSCAudioBase::error retval = OSCAudioBase::OK;
   OSCMessage& repl = OSCAudioBase::staticPrepareReplyResult(msg,*replyStack);
   OSCBundle myReplies;
-  File sendFile;
+  File loadFile;
 
-  loadFSepth++;
+  loadFSdepth++;
   myReplies.add("/load");
   msg.getString(0,fn,50);
-  sendFile = SD.open(fn);
-  remain = sendFile.size();
-  Serial.print("Load ");
-
-  if (NULL != (buf = (uint8_t*) malloc(remain+1)))
+  loadFile = SD.open(fn);
+  if (loadFile)
   {
-    sendFile.read(buf,remain);
-    //repl.add(buf,remain); // attaches file contents as blob
-    repl.add(fn); // attaches file name as string
-    buf[remain] = 0;
-    if ('#' == buf[0]) // got a bundle
+    remain = loadFile.size();
+    Serial.print("Load ");
+  
+    if (NULL != (buf = (uint8_t*) malloc(remain+1)))
     {
-      OSCBundle bndl;
-      bndl.fill(buf,remain);
-      Serial.println("bundle"); Serial.flush();
-      processBundle(&bndl,myReplies);
+      loadFile.read(buf,remain);
+      //repl.add(buf,remain); // attaches file contents as blob
+      repl.add(fn); // attaches file name as string
+      buf[remain] = 0;
+      if ('#' == buf[0]) // got a bundle
+      {
+        OSCBundle bndl;
+        bndl.fill(buf,remain);
+        Serial.println("bundle"); Serial.flush();
+        processBundle(&bndl,myReplies);
+      }
+      else if ('/' == buf[0]) // got a message
+      {
+        OSCMessage msg;
+        msg.fill(buf,remain);
+        Serial.println("message"); Serial.flush();
+        processMessage(&msg,myReplies);      
+      }
+      Serial.println((char*) buf);  Serial.flush();
+      free(buf);
     }
-    else if ('/' == buf[0]) // got a message
+    else
     {
-      OSCMessage msg;
-      msg.fill(buf,remain);
-      Serial.println("message"); Serial.flush();
-      processMessage(&msg,myReplies);      
+      retval = OSCAudioBase::NO_MEMORY;
+      repl.add("failed");
     }
-    Serial.println((char*) buf);  Serial.flush();
-    free(buf);
+    loadFile.close();
   }
   else
+  {
+    retval = OSCAudioBase::NOT_FOUND;
     repl.add("failed");
-  sendFile.close();
-  repl.add(0);
+  }
+
+  repl.add(retval);
   
   // tack myReplies on here:
   {
@@ -222,7 +276,7 @@ void loadFS(OSCMessage& msg, int addressOffset)
     for (int i=0;i<msgN;i++)
       replyStack->add(*myReplies.getOSCMessage(i));
   }
-  loadFSepth--;
+  loadFSdepth--;
 }
 
 // route messages to filing system:
@@ -239,6 +293,8 @@ void routeFS(OSCMessage& msg, int addressOffset)
     sendFS(msg,addressOffset);
   else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/load","s"))
     loadFS(msg,addressOffset);
+  else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/delete","s"))
+    deleteFS(msg,addressOffset);
 }
 
 
@@ -326,7 +382,7 @@ void loop()
   OSCBundle bndl;
   OSCBundle reply;
   OSCMessage msg;
-  long long tt = 0x4546474841424344; // for debug: ABCDEFGH
+  long long tt = 0; //0x4546474841424344; // for debug: ABCDEFGH
   char firstCh = 0;
   int msgLen;
 

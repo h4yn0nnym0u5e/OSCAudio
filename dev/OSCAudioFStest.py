@@ -86,10 +86,15 @@ msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/vol',0.1)]
 pkt = OSCmakeBundle(msgl)
 
 # save it to a file on Teensy instead
-pkt = OSCpackAuto('/teensy1/fs/save','test1.osc',pkt)                  
-#SLIPser.send_msg(pkt)
+pkt1 = OSCpackAuto('/teensy1/fs/save','test1.osc',pkt)                  
+#SLIPser.send_msg(pkt1)
 #print(SLIPser.recv_msg(),end='\n\n')
 #sleep(0.5)
+
+# re-create sacrificial file
+pkt3 = OSCpackAuto('/teensy1/fs/save','test3.osc',pkt)                  
+SLIPser.send_msg(pkt3)
+print(SLIPser.recv_msg(),end='\n\n')
 
 #pkt = OSCpackAuto('/teensy1/fs/save','test.txt',b'This is a long piece of data which is intended to be copied to the filesystem in pieces, because it\'s too long to fit in the buffer all at once')                  
 #SLIPser.send_msg(pkt)
@@ -105,7 +110,28 @@ print(SLIPser.recv_msg(),end='\n\n')
 pkt = OSCpackAuto('/teensy1/fs/send','test2.osc') 
 SLIPser.send_msg(pkt)
 print(SLIPser.recv_msg(),end='\n\n')
+
+# retrieve a file from the Teensy as a bundle in the reply
+pkt = OSCpackAuto('/teensy1/fs/send','test3.osc') 
+SLIPser.send_msg(pkt)
+print(SLIPser.recv_msg(),end='\n\n')
+
+# delete a file from the Teensy
+pkt = OSCpackAuto('/teensy1/fs/delete','test3.osc') 
+SLIPser.send_msg(pkt)
+print(SLIPser.recv_msg(),end='\n\n')
+
+# delete it again: probably fails
+SLIPser.send_msg(pkt)
+print(SLIPser.recv_msg(),end='\n\n')
+
+# retrieve a file from the Teensy: should fail
+pkt = OSCpackAuto('/teensy1/fs/send','test3.osc') 
+SLIPser.send_msg(pkt)
+print(SLIPser.recv_msg(),end='\n\n')
 sleep(0.5)
+
+
 
 # tell the Teensy to interpret a bundle from a file
 pkt = OSCpackAuto('/teensy1/fs/load','test1.osc') 
