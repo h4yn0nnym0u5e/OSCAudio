@@ -37,6 +37,11 @@
 #define DYNAMIC_AUDIO_AVAILABLE
 #endif // defined(SAFE_RELEASE)
 
+#if !defined(COUNT_OF)
+#define COUNT_OF(x) ((sizeof x) / (sizeof x[0]))
+#endif // !defined(COUNT_OF)
+ 
+
 #define noOSC_DEBUG_PRINT
 #if defined(OSC_DEBUG_PRINT)
 #define DEBUG_SER Serial
