@@ -116,6 +116,8 @@ void listObjects(void)
 
 
 //-----------------------------------------------------------------------------------------------------------------
+// Process a message. Because we can only extract messages from a bundle 
+// by address, we have to accept a pointer rather than a reference
 void processMessage(OSCMessage* msg,OSCBundle& reply)
 {
   char prt[200];
@@ -184,50 +186,76 @@ void sendReply(OSCBundle& reply)
 
 //-----------------------------------------------------------------------------------------------------------------
 // work with SLIP-protocol serial port:
-void loop()
+void updateOSC()
 {
-  OSCBundle bndl;
-  OSCBundle reply;
-  OSCMessage msg;
+  static enum {boot,reading,processing} state = boot;
+  static OSCBundle bndl;
+  static OSCBundle reply;
+  static OSCMessage msg;
   long long tt = 0; //0x4546474841424344; // for debug: ABCDEFGH
-  char firstCh = 0;
+  static char firstCh = 0;
   int msgLen;
 
-  Serial.print("Waiting...");
-  while (!HWSERIAL.endofPacket())
-  {    
-    msgLen = HWSERIAL.available();
-    while (msgLen--)
-    {
-      char c = HWSERIAL.read();
-      // figure out if it's a message or a bundle
-      if (0 == firstCh)
-        firstCh = c;
-      if ('#' == firstCh)
-        bndl.fill((uint8_t) c); // simple messages should result in a 1-message "bundle", but don't
+  switch (state)
+  {
+    case boot:
+      Serial.print("Waiting...");
+      bndl.empty();
+      reply.empty();
+      msg.empty();
+      firstCh = 0;
+      state = reading;
+      break;
+    
+    case reading:
+      if (!HWSERIAL.endofPacket())
+      {    
+        msgLen = HWSERIAL.available(); // only ever returns 0 or 1, actually
+        while (msgLen--)
+        {
+          char c = HWSERIAL.read();
+          // figure out if it's a message or a bundle
+          if (0 == firstCh)
+            firstCh = c;
+          if ('#' == firstCh)
+            bndl.fill((uint8_t) c); // simple messages should result in a 1-message "bundle", but don't
+          else
+            msg.fill((uint8_t) c); // so process them specifically
+        }
+      }
       else
-        msg.fill((uint8_t) c); // so process them specifically
-    }
-    updateMIDI();
+        state = processing;
+      break;
+
+    case processing:  
+      Serial.println("processing!");
+      reply.setTimetag((uint8_t*) &tt).add("/reply"); // create first message with reply address: used for all messages
+      
+      if ('#' == firstCh)
+      {
+        processBundle(&bndl,reply);
+        sendReply(reply);
+        listObjects();
+      }
+      else 
+      {
+        if ('/' == firstCh) 
+        {
+          processMessage(&msg,reply);   
+          sendReply(reply);
+          listObjects();
+        }
+      }
+      Serial.println();
+      state = boot;
+      break;
   }
-  
-  Serial.println("processing!");
-  reply.setTimetag((uint8_t*) &tt).add("/reply"); // create first message with reply address: used for all messages
-  
-  if ('#' == firstCh)
-  {
-    processBundle(&bndl,reply);
-    sendReply(reply);
-    listObjects();
-  }
-  else 
-  {
-    if ('/' == firstCh) 
-    {
-      processMessage(&msg,reply);   
-      sendReply(reply);
-      listObjects();
-    }
-  }
-  Serial.println();
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+// Simplified loop: co-operative multi-tasking, sort of
+void loop(void)
+{
+  updateOSC();
+  updateMIDI();  
 }
