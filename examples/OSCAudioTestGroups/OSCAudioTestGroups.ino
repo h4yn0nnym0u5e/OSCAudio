@@ -41,6 +41,7 @@ void listObjects(void)
   Serial.println("--------------\n");
 }
 
+void listObjectsx(void){}
 
 void setup() {
   Serial.begin(115200);
@@ -60,6 +61,7 @@ void setup() {
   OSCAudioSynthWaveform* wav1c = new OSCAudioSynthWaveform("wav1");
   delete mixer;  
   mixer = new OSCAudioMixer4("mixer");
+  
   OSCAudioGroup* voice1 = new OSCAudioGroup("voice1");
     OSCAudioGroup* v1i1 = new OSCAudioGroup("i1",voice1);
     OSCAudioGroup* v1i0 = new OSCAudioGroup("i0",voice1);
@@ -77,20 +79,16 @@ void setup() {
   Serial.println("==================\nCreation complete:");
   listObjects();
   Serial.println("now delete");
-  //delete mixer; 
-  mixer->linkOut();
+  delete mixer; // this looks OK
+  //mixer->linkOut();
   listObjects();
-  wav1c->linkOut();
-  listObjects();
-  wav1b->linkOut();
-  listObjects();
-  /*
-  //mixer = new OSCAudioMixer4("mixer"); // causes a listObjects with debug code
-  delete wav1c;
+  delete wav1c; // this seems to crash
+  //wav1c->linkOut();
   listObjects();
   delete wav1b;
+  //wav1b->linkOut();
   listObjects();
-  */
+  
   Serial.println("done");
 }
 
