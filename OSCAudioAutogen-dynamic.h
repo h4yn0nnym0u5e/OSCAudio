@@ -995,7 +995,7 @@ class OSCAudioInputTDM2 : public AudioInputTDM2, OSCAudioBase
 };
 
 // ============== AudioMixer4 ====================
-class OSCAudioMixer4 : public AudioMixer4, OSCAudioBase
+class OSCAudioMixer4 : public AudioMixer4, public OSCAudioBase
 {
     public:
         OSCAudioMixer4(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1497,7 +1497,7 @@ class OSCAudioSynthToneSweep : public AudioSynthToneSweep, OSCAudioBase
 };
 
 // ============== AudioSynthWaveform ====================
-class OSCAudioSynthWaveform : public AudioSynthWaveform, OSCAudioBase
+class OSCAudioSynthWaveform : public AudioSynthWaveform, public OSCAudioBase
 {
     public:
         OSCAudioSynthWaveform(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}

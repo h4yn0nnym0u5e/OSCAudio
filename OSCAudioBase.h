@@ -88,7 +88,7 @@ class OSCAudioBase
     }
 	
     
-    virtual ~OSCAudioBase() {if (NULL != name) free(name); linkOut(); }
+    virtual ~OSCAudioBase() {Serial.println("dtor!"); Serial.flush(); if (NULL != name) free(name); linkOut(); }
     virtual void route(OSCMessage& msg, int addressOffset, OSCBundle&)=0;
     char* name;
     size_t nameLen;
@@ -297,7 +297,7 @@ class OSCAudioBase
 		void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint8_t v);
 		void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint16_t v);
 
-	protected:
+	//protected:
 		friend class OSCAudioGroup;
 		// existing objects: message passing and linking in/out
 		static OSCAudioBase* first_route; //!< linked list to route OSC messages to all derived instances
@@ -305,7 +305,7 @@ class OSCAudioBase
 		OSCAudioBase* next_route;	//!< list of related objects
 		OSCAudioBase* next_group; //!< list of unrelated objects
 			
-  private:
+  //private:
 		static void renameObject(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 		size_t nameAlloc;	//!< space allocated for name: may be shorter than current name
 		
@@ -315,9 +315,13 @@ class OSCAudioBase
 		{
 			OSCAudioBase** ppLink = pFirst; 
 			while (NULL != *ppLink && this != *ppLink)
+			{
 				ppLink = &((*ppLink)->next_route);
+				Serial.printf("%08X ... ",(uint32_t) *ppLink); Serial.flush();
+			}
 			if (NULL != ppLink)
 			{
+				Serial.printf("Unlink!\n"); Serial.flush();
 				*ppLink = next_route;
 				next_route = NULL;
 			}
