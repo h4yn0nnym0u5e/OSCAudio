@@ -32,11 +32,12 @@ class AsyncOSCAudioInputSPDIF3 : public AsyncAudioInputSPDIF3, OSCAudioBase
 {
     public:
         AsyncOSCAudioInputSPDIF3(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        AsyncOSCAudioInputSPDIF3(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/b*",NULL)) {begin(); addReplyExecuted(msg,addressOffset,reply);} // void begin();
             else if (isTarget(msg,addressOffset,"/getA*",NULL)) {addReplyResult(msg,addressOffset,reply,(float)getAttenuation()); } // double getAttenuation() const;
             else if (isTarget(msg,addressOffset,"/getB*",NULL)) {addReplyResult(msg,addressOffset,reply,(float)getBufferedTime()); } // double getBufferedTime() const;
@@ -44,8 +45,8 @@ class AsyncOSCAudioInputSPDIF3 : public AsyncAudioInputSPDIF3, OSCAudioBase
             else if (isTarget(msg,addressOffset,"/getI*",NULL)) {addReplyResult(msg,addressOffset,reply,(float)getInputFrequency()); } // double getInputFrequency() const;
             else if (isTarget(msg,addressOffset,"/getT*",NULL)) {addReplyResult(msg,addressOffset,reply,(float)getTargetLantency()); } // double getTargetLantency() const;
             else if (isTarget(msg,addressOffset,"/i*",NULL)) {addReplyResult(msg,addressOffset,reply,isLocked()); } // static bool isLocked();
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioAmplifier ====================
@@ -53,15 +54,16 @@ class OSCAudioAmplifier : public AudioAmplifier, OSCAudioBase
 {
     public:
         OSCAudioAmplifier(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioAmplifier(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/g*","f")) {gain(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void gain(float n)
             else if (isTarget(msg,addressOffset,"/s*",";")) {slew(msg.getBoolean(0)); addReplyExecuted(msg,addressOffset,reply);} // void slew(bool doSlew)
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioAnalyzeEvent ====================
@@ -69,16 +71,17 @@ class OSCAudioAnalyzeEvent : public AudioAnalyzeEvent, OSCAudioBase
 {
     public:
         OSCAudioAnalyzeEvent(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioAnalyzeEvent(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/getC*",NULL)) {addReplyResult(msg,addressOffset,reply,getCount()); } // uint32_t getCount(void) {return count;}
             else if (isTarget(msg,addressOffset,"/getM*",NULL)) {addReplyResult(msg,addressOffset,reply,getMicros()); } // uint32_t getMicros(void) {return tstamp;}
             // else if (isTarget(msg,addressOffset,"/s*","b")) {setEventFn(msg.getBlob(1)); addReplyExecuted(msg,addressOffset,reply);} // void setEventFn(EventResponderFunction evFn,void* context);
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioAnalyzeFFT1024 ====================
@@ -86,18 +89,19 @@ class OSCAudioAnalyzeFFT1024 : public AudioAnalyzeFFT1024, OSCAudioBase
 {
     public:
         OSCAudioAnalyzeFFT1024(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioAnalyzeFFT1024(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/ava*",NULL)) {addReplyResult(msg,addressOffset,reply,available()); } // bool available() {
             else if (isTarget(msg,addressOffset,"/ave*","i")) {averageTogether(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void averageTogether(uint8_t n) {
             else if (isTarget(msg,addressOffset,"/r*","ii")) {addReplyResult(msg,addressOffset,reply,read(msg.getInt(0),msg.getInt(1))); } // float read(unsigned int binFirst, unsigned int binLast) {
             else if (isTarget(msg,addressOffset,"/r*","i")) {addReplyResult(msg,addressOffset,reply,read(msg.getInt(0))); } // float read(unsigned int binNumber) {
             else if (isTarget(msg,addressOffset,"/w*","s")) {addReplyResult(msg,addressOffset,reply,windowFunction(msg)); } // void windowFunction(const int16_t *w) {
-          }
-        }
+			}
+		}
 	private:
 		bool windowFunction(OSCMessage& msg);
 };
@@ -107,11 +111,12 @@ class OSCAudioAnalyzeFFT256 : public AudioAnalyzeFFT256, OSCAudioBase
 {
     public:
         OSCAudioAnalyzeFFT256(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioAnalyzeFFT256(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/ava*",NULL)) {addReplyResult(msg,addressOffset,reply,available()); } // bool available() {
             else if (isTarget(msg,addressOffset,"/ave*","i")) {averageTogether(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void averageTogether(uint8_t n) {
             else if (isTarget(msg,addressOffset,"/r*","ii")) {addReplyResult(msg,addressOffset,reply,read(msg.getInt(0),msg.getInt(1))); } // float read(unsigned int binFirst, unsigned int binLast) {
@@ -128,18 +133,19 @@ class OSCAudioAnalyzeNoteFrequency : public AudioAnalyzeNoteFrequency, OSCAudioB
 {
     public:
         OSCAudioAnalyzeNoteFrequency(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioAnalyzeNoteFrequency(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/a*",NULL)) {addReplyResult(msg,addressOffset,reply,available()); } // bool available( void );
             else if (isTarget(msg,addressOffset,"/b*","f")) {begin(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void begin( float threshold );
             else if (isTarget(msg,addressOffset,"/p*",NULL)) {addReplyResult(msg,addressOffset,reply,probability()); } // float probability( void );
             else if (isTarget(msg,addressOffset,"/r*",NULL)) {addReplyResult(msg,addressOffset,reply,read()); } // float read( void );
             else if (isTarget(msg,addressOffset,"/t*","f")) {threshold(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void threshold( float p );
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioAnalyzePeak ====================
@@ -147,16 +153,17 @@ class OSCAudioAnalyzePeak : public AudioAnalyzePeak, OSCAudioBase
 {
     public:
         OSCAudioAnalyzePeak(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioAnalyzePeak(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/a*",NULL)) {addReplyResult(msg,addressOffset,reply,available()); } // bool available(void) {
             else if (isTarget(msg,addressOffset,"/readP*",NULL)) {addReplyResult(msg,addressOffset,reply,readPeakToPeak()); } // float readPeakToPeak(void) {
             else if (isTarget(msg,addressOffset,"/read",NULL)) {addReplyResult(msg,addressOffset,reply,read()); } // float read(void) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioAnalyzePrint ====================
@@ -164,6 +171,7 @@ class OSCAudioAnalyzePrint : public AudioAnalyzePrint, OSCAudioBase
 {
     public:
         OSCAudioAnalyzePrint(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioAnalyzePrint(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
         ~OSCAudioAnalyzePrint() { free(namePtr);} 
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
@@ -187,15 +195,16 @@ class OSCAudioAnalyzeRMS : public AudioAnalyzeRMS, OSCAudioBase
 {
     public:
         OSCAudioAnalyzeRMS(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioAnalyzeRMS(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/a*",NULL)) {addReplyResult(msg,addressOffset,reply,available()); } // bool available(void) {
             else if (isTarget(msg,addressOffset,"/r*",NULL)) {addReplyResult(msg,addressOffset,reply,read()); } // float read(void);
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioAnalyzeToneDetect ====================
@@ -203,18 +212,19 @@ class OSCAudioAnalyzeToneDetect : public AudioAnalyzeToneDetect, OSCAudioBase
 {
     public:
         OSCAudioAnalyzeToneDetect(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioAnalyzeToneDetect(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/a*",NULL)) {addReplyResult(msg,addressOffset,reply,available()); } // bool available(void) {
             else if (isTarget(msg,addressOffset,"/f*","fi")) {frequency(msg.getFloat(0),msg.getInt(1)); addReplyExecuted(msg,addressOffset,reply);} // void frequency(float freq, uint16_t cycles=10) {
             else if (isTarget(msg,addressOffset,"/r*",NULL)) {addReplyResult(msg,addressOffset,reply,read()); } // float read(void);
             else if (isTarget(msg,addressOffset,"/s*","iii")) {set_params(msg.getInt(0),msg.getInt(1),msg.getInt(2)); addReplyExecuted(msg,addressOffset,reply);} // void set_params(int32_t coef, uint16_t cycles, uint16_t len);
             else if (isTarget(msg,addressOffset,"/t*","f")) {threshold(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void threshold(float level) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioControlAK4558 ====================
@@ -222,11 +232,12 @@ class OSCAudioControlAK4558 : public AudioControlAK4558, OSCAudioBase
 {
     public:
         OSCAudioControlAK4558(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioControlAK4558(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/disableI*",NULL)) {addReplyResult(msg,addressOffset,reply,disableIn()); } // bool disableIn(void);	//powers down ADC
             else if (isTarget(msg,addressOffset,"/disableO*",NULL)) {addReplyResult(msg,addressOffset,reply,disableOut()); } // bool disableOut(void);	//powers down DAC
             else if (isTarget(msg,addressOffset,"/disable",NULL)) {addReplyResult(msg,addressOffset,reply,disable()); } // bool disable(void) { return (disableIn()&&disableOut()); }	//powers down ADC/DAC
@@ -238,8 +249,8 @@ class OSCAudioControlAK4558 : public AudioControlAK4558, OSCAudioBase
             else if (isTarget(msg,addressOffset,"/volumeL*","f")) {addReplyResult(msg,addressOffset,reply,volumeLeft(msg.getFloat(0))); } // bool volumeLeft(float n);	//sets LOUT volume to n (range 0.0 - 1.0)
             else if (isTarget(msg,addressOffset,"/volumeR*","f")) {addReplyResult(msg,addressOffset,reply,volumeRight(msg.getFloat(0))); } // bool volumeRight(float n);	//sets ROUT volume to n (range 0.0 - 1.0)
             else if (isTarget(msg,addressOffset,"/volume","f")) {addReplyResult(msg,addressOffset,reply,volume(msg.getFloat(0))); } // bool volume(float n);	//sets LOUT/ROUT volume to n (range 0.0 - 1.0)
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioControlCS42448 ====================
@@ -247,11 +258,12 @@ class OSCAudioControlCS42448 : public AudioControlCS42448, OSCAudioBase
 {
     public:
         OSCAudioControlCS42448(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioControlCS42448(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/d*",NULL)) {addReplyResult(msg,addressOffset,reply,disable()); } // bool disable(void) {
             else if (isTarget(msg,addressOffset,"/e*",NULL)) {addReplyResult(msg,addressOffset,reply,enable()); } // bool enable(void);
             else if (isTarget(msg,addressOffset,"/inputL*","f")) {addReplyResult(msg,addressOffset,reply,inputLevel(msg.getFloat(0))); } // bool inputLevel(float level) {
@@ -260,8 +272,8 @@ class OSCAudioControlCS42448 : public AudioControlCS42448, OSCAudioBase
             else if (isTarget(msg,addressOffset,"/s*","i")) {setAddress(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void setAddress(uint8_t addr) {
             else if (isTarget(msg,addressOffset,"/v*","f")) {addReplyResult(msg,addressOffset,reply,volume(msg.getFloat(0))); } // bool volume(float level) {
             else if (isTarget(msg,addressOffset,"/v*","if")) {addReplyResult(msg,addressOffset,reply,volume(msg.getInt(0),msg.getFloat(1))); } // bool volume(int channel, float level) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioControlCS4272 ====================
@@ -269,11 +281,12 @@ class OSCAudioControlCS4272 : public AudioControlCS4272, OSCAudioBase
 {
     public:
         OSCAudioControlCS4272(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioControlCS4272(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/da*","ff")) {addReplyResult(msg,addressOffset,reply,dacVolume(msg.getFloat(0),msg.getFloat(1))); } // bool dacVolume(float left, float right);
             else if (isTarget(msg,addressOffset,"/da*","f")) {addReplyResult(msg,addressOffset,reply,dacVolume(msg.getFloat(0))); } // bool dacVolume(float n) { return volumeInteger(n * 127 + 0.499f); }
             else if (isTarget(msg,addressOffset,"/disableD*",NULL)) {addReplyResult(msg,addressOffset,reply,disableDither()); } // bool disableDither(void);
@@ -288,8 +301,8 @@ class OSCAudioControlCS4272 : public AudioControlCS4272, OSCAudioBase
             else if (isTarget(msg,addressOffset,"/unmuteO*",NULL)) {addReplyResult(msg,addressOffset,reply,unmuteOutput()); } // bool unmuteOutput(void);
             else if (isTarget(msg,addressOffset,"/v*","ff")) {addReplyResult(msg,addressOffset,reply,volume(msg.getFloat(0),msg.getFloat(1))); } // bool volume(float left, float right);
             else if (isTarget(msg,addressOffset,"/v*","f")) {addReplyResult(msg,addressOffset,reply,volume(msg.getFloat(0))); } // bool volume(float n) { return volumeInteger(n * 127 + 0.499f); }
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioControlSGTL5000 ====================
@@ -297,11 +310,12 @@ class OSCAudioControlSGTL5000 : public AudioControlSGTL5000, OSCAudioBase
 {
     public:
         OSCAudioControlSGTL5000(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioControlSGTL5000(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/adcHighPassFilterD*",NULL)) {addReplyResult(msg,addressOffset,reply,(uint16_t)adcHighPassFilterDisable()); } // unsigned short adcHighPassFilterDisable(void);
             else if (isTarget(msg,addressOffset,"/adcHighPassFilterE*",NULL)) {addReplyResult(msg,addressOffset,reply,(uint16_t)adcHighPassFilterEnable()); } // unsigned short adcHighPassFilterEnable(void);
             else if (isTarget(msg,addressOffset,"/adcHighPassFilterF*",NULL)) {addReplyResult(msg,addressOffset,reply,(uint16_t)adcHighPassFilterFreeze()); } // unsigned short adcHighPassFilterFreeze(void);
@@ -349,8 +363,8 @@ class OSCAudioControlSGTL5000 : public AudioControlSGTL5000, OSCAudioBase
             else if (isTarget(msg,addressOffset,"/unmuteL*",NULL)) {addReplyResult(msg,addressOffset,reply,unmuteLineout()); } // bool unmuteLineout(void) { return write(0x0024, ana_ctrl & ~(1<<8)); }
             else if (isTarget(msg,addressOffset,"/v*","ff")) {addReplyResult(msg,addressOffset,reply,volume(msg.getFloat(0),msg.getFloat(1))); } // bool volume(float left, float right);
             else if (isTarget(msg,addressOffset,"/v*","f")) {addReplyResult(msg,addressOffset,reply,volume(msg.getFloat(0))); } // bool volume(float n) { return volumeInteger(n * 129 + 0.499f); }
-          }
-        }
+			}
+		}
 	private:
 		void eqFilter(OSCMessage& msg);
 };
@@ -360,11 +374,12 @@ class OSCAudioControlTLV320AIC3206 : public AudioControlTLV320AIC3206, OSCAudioB
 {
     public:
         OSCAudioControlTLV320AIC3206(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioControlTLV320AIC3206(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/aic_r*","ii")) {addReplyResult(msg,addressOffset,reply,(uint32_t)aic_readPage(msg.getInt(0),msg.getInt(1))); } // unsigned int aic_readPage(uint8_t page, uint8_t reg);
             else if (isTarget(msg,addressOffset,"/aic_w*","iii")) {addReplyResult(msg,addressOffset,reply,aic_writePage(msg.getInt(0),msg.getInt(1),msg.getInt(2))); } // bool aic_writePage(uint8_t page, uint8_t reg, uint8_t val);
             else if (isTarget(msg,addressOffset,"/d*",NULL)) {addReplyResult(msg,addressOffset,reply,disable()); } // bool disable(void);
@@ -395,18 +410,19 @@ class OSCAudioControlWM8731 : public AudioControlWM8731, OSCAudioBase
 {
     public:
         OSCAudioControlWM8731(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioControlWM8731(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/d*",NULL)) {addReplyResult(msg,addressOffset,reply,disable()); } // bool disable(void) { return false; }
             else if (isTarget(msg,addressOffset,"/e*",NULL)) {addReplyResult(msg,addressOffset,reply,enable()); } // bool enable(void);
             else if (isTarget(msg,addressOffset,"/inputL*","f")) {addReplyResult(msg,addressOffset,reply,inputLevel(msg.getFloat(0))); } // bool inputLevel(float n); // range: 0.0f to 1.0f
             else if (isTarget(msg,addressOffset,"/inputS*","i")) {addReplyResult(msg,addressOffset,reply,inputSelect(msg.getInt(0))); } // bool inputSelect(int n);
             else if (isTarget(msg,addressOffset,"/v*","f")) {addReplyResult(msg,addressOffset,reply,volume(msg.getFloat(0))); } // bool volume(float n) { return volumeInteger(n * 80.0f + 47.499f); }
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioControlWM8731master ====================
@@ -414,14 +430,15 @@ class OSCAudioControlWM8731master : public AudioControlWM8731master, OSCAudioBas
 {
     public:
         OSCAudioControlWM8731master(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioControlWM8731master(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/e*",NULL)) {addReplyResult(msg,addressOffset,reply,enable()); } // bool enable(void);
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioEffectBitcrusher ====================
@@ -429,15 +446,16 @@ class OSCAudioEffectBitcrusher : public AudioEffectBitcrusher, OSCAudioBase
 {
     public:
         OSCAudioEffectBitcrusher(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectBitcrusher(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/b*","i")) {bits(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void bits(uint8_t b) {
             else if (isTarget(msg,addressOffset,"/s*","f")) {sampleRate(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void sampleRate(float hz) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioEffectDelay ====================
@@ -445,15 +463,16 @@ class OSCAudioEffectDelay : public AudioEffectDelay, OSCAudioBase
 {
     public:
         OSCAudioEffectDelay(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectDelay(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/de*","if")) {delay(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addressOffset,reply);} // void delay(uint8_t channel, float milliseconds) {
             else if (isTarget(msg,addressOffset,"/di*","i")) {disable(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void disable(uint8_t channel) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioEffectDelayExternal ====================
@@ -461,15 +480,16 @@ class OSCAudioEffectDelayExternal : public AudioEffectDelayExternal, OSCAudioBas
 {
     public:
         OSCAudioEffectDelayExternal(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectDelayExternal(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/de*","if")) {delay(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addressOffset,reply);} // void delay(uint8_t channel, float milliseconds) {
             else if (isTarget(msg,addressOffset,"/di*","i")) {disable(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void disable(uint8_t channel) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioEffectDigitalCombine ====================
@@ -477,14 +497,15 @@ class OSCAudioEffectDigitalCombine : public AudioEffectDigitalCombine, OSCAudioB
 {
     public:
         OSCAudioEffectDigitalCombine(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectDigitalCombine(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/s*","i")) {setCombineMode(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void setCombineMode(int mode_in) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioEffectEnvelope ====================
@@ -492,11 +513,12 @@ class OSCAudioEffectEnvelope : public AudioEffectEnvelope, OSCAudioBase
 {
     public:
         OSCAudioEffectEnvelope(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectEnvelope(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/a*","f")) {attack(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void attack(float milliseconds) {
             else if (isTarget(msg,addressOffset,"/dec*","f")) {decay(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void decay(float milliseconds) {
             else if (isTarget(msg,addressOffset,"/del*","f")) {delay(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void delay(float milliseconds) {
@@ -508,8 +530,8 @@ class OSCAudioEffectEnvelope : public AudioEffectEnvelope, OSCAudioBase
             else if (isTarget(msg,addressOffset,"/releaseN*","f")) {releaseNoteOn(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void releaseNoteOn(float milliseconds) {
             else if (isTarget(msg,addressOffset,"/release","f")) {release(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void release(float milliseconds) {
             else if (isTarget(msg,addressOffset,"/s*","f")) {sustain(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void sustain(float level) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioEffectExpEnvelope ====================
@@ -517,11 +539,12 @@ class OSCAudioEffectExpEnvelope : public AudioEffectExpEnvelope, OSCAudioBase
 {
     public:
         OSCAudioEffectExpEnvelope(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectExpEnvelope(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/a*","ff")) {attack(msg.getFloat(0),msg.getFloat(1)); addReplyExecuted(msg,addressOffset,reply);} // void attack(float milliseconds, float target_factor = TF)
             else if (isTarget(msg,addressOffset,"/c*",NULL)) {close(); addReplyExecuted(msg,addressOffset,reply);} // void close(){
             else if (isTarget(msg,addressOffset,"/dec*","ff")) {decay(msg.getFloat(0),msg.getFloat(1)); addReplyExecuted(msg,addressOffset,reply);} // void decay(float milliseconds, float target_factor = TF)
@@ -535,8 +558,8 @@ class OSCAudioEffectExpEnvelope : public AudioEffectExpEnvelope, OSCAudioBase
             else if (isTarget(msg,addressOffset,"/noteOn",NULL)) {noteOn(); addReplyExecuted(msg,addressOffset,reply);} // void noteOn();
             else if (isTarget(msg,addressOffset,"/r*","ff")) {release(msg.getFloat(0),msg.getFloat(1)); addReplyExecuted(msg,addressOffset,reply);} // void release(float milliseconds, float target_factor = TF)
             else if (isTarget(msg,addressOffset,"/s*","f")) {sustain(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void sustain(float level)
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioEffectFade ====================
@@ -544,15 +567,16 @@ class OSCAudioEffectFade : public AudioEffectFade, OSCAudioBase
 {
     public:
         OSCAudioEffectFade(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectFade(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/fadeI*","i")) {fadeIn(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void fadeIn(uint32_t milliseconds) {
             else if (isTarget(msg,addressOffset,"/fadeO*","i")) {fadeOut(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void fadeOut(uint32_t milliseconds) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioEffectFreeverb ====================
@@ -560,15 +584,16 @@ class OSCAudioEffectFreeverb : public AudioEffectFreeverb, OSCAudioBase
 {
     public:
         OSCAudioEffectFreeverb(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectFreeverb(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/d*","f")) {damping(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void damping(float n) {
             else if (isTarget(msg,addressOffset,"/r*","f")) {roomsize(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void roomsize(float n) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioEffectFreeverbStereo ====================
@@ -576,15 +601,16 @@ class OSCAudioEffectFreeverbStereo : public AudioEffectFreeverbStereo, OSCAudioB
 {
     public:
         OSCAudioEffectFreeverbStereo(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectFreeverbStereo(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/d*","f")) {damping(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void damping(float n) {
             else if (isTarget(msg,addressOffset,"/r*","f")) {roomsize(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void roomsize(float n) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioEffectGranular ====================
@@ -592,6 +618,7 @@ class OSCAudioEffectGranular : public AudioEffectGranular, OSCAudioBase
 {
     public:
         OSCAudioEffectGranular(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectGranular(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
         ~OSCAudioEffectGranular() { free(sample_bank);} 
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
@@ -615,15 +642,16 @@ class OSCAudioEffectMidSide : public AudioEffectMidSide, OSCAudioBase
 {
     public:
         OSCAudioEffectMidSide(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectMidSide(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/d*",NULL)) {decode(); addReplyExecuted(msg,addressOffset,reply);} // void decode() { encoding = false; }
             else if (isTarget(msg,addressOffset,"/e*",NULL)) {encode(); addReplyExecuted(msg,addressOffset,reply);} // void encode() { encoding = true; }
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioEffectMultiply ====================
@@ -631,13 +659,14 @@ class OSCAudioEffectMultiply : public AudioEffectMultiply, OSCAudioBase
 {
     public:
         OSCAudioEffectMultiply(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectMultiply(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioEffectRectifier ====================
@@ -645,13 +674,14 @@ class OSCAudioEffectRectifier : public AudioEffectRectifier, OSCAudioBase
 {
     public:
         OSCAudioEffectRectifier(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectRectifier(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioEffectReverb ====================
@@ -659,14 +689,15 @@ class OSCAudioEffectReverb : public AudioEffectReverb, OSCAudioBase
 {
     public:
         OSCAudioEffectReverb(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectReverb(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/r*","f")) {reverbTime(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void reverbTime(float);
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioEffectWaveFolder ====================
@@ -674,13 +705,14 @@ class OSCAudioEffectWaveFolder : public AudioEffectWaveFolder, OSCAudioBase
 {
     public:
         OSCAudioEffectWaveFolder(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectWaveFolder(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioEffectWaveshaper ====================
@@ -688,14 +720,15 @@ class OSCAudioEffectWaveshaper : public AudioEffectWaveshaper, OSCAudioBase
 {
     public:
         OSCAudioEffectWaveshaper(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectWaveshaper(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             // if (isTarget(msg,addressOffset,"/s*","bi")) {shape(msg.getBlob(0),msg.getInt(1)); addReplyExecuted(msg,addressOffset,reply);} // void shape(float* waveshape, int length);
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioFilterBiquad ====================
@@ -703,11 +736,12 @@ class OSCAudioFilterBiquad : public AudioFilterBiquad, OSCAudioBase
 {
     public:
         OSCAudioFilterBiquad(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioFilterBiquad(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/setB*","iff")) {setBandpass(msg.getInt(0),msg.getFloat(1),msg.getFloat(2)); addReplyExecuted(msg,addressOffset,reply);} // void setBandpass(uint32_t stage, float frequency, float q = 1.0) {
             else if (isTarget(msg,addressOffset,"/setC*","iddddd")) {setCoefficients(msg); addReplyExecuted(msg,addressOffset,reply);} // void setCoefficients(uint32_t stage, const double *coefficients) {
             else if (isTarget(msg,addressOffset,"/setC*","iiiiii")) {setCoefficients(msg); addReplyExecuted(msg,addressOffset,reply);} // void setCoefficients(uint32_t stage, const int *coefficients);
@@ -727,15 +761,16 @@ class OSCAudioFilterFIR : public AudioFilterFIR, OSCAudioBase
 {
     public:
         OSCAudioFilterFIR(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioFilterFIR(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             // if (isTarget(msg,addressOffset,"/b*","bi")) {begin(msg.getBlob(0),msg.getInt(1)); addReplyExecuted(msg,addressOffset,reply);} // void begin(const short *cp, int n_coeffs) {
             if (isTarget(msg,addressOffset,"/e*",NULL)) {end(); addReplyExecuted(msg,addressOffset,reply);} // void end(void) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioFilterLadder ====================
@@ -743,19 +778,20 @@ class OSCAudioFilterLadder : public AudioFilterLadder, OSCAudioBase
 {
     public:
         OSCAudioFilterLadder(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioFilterLadder(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/f*","f")) {frequency(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void frequency(float FC);
             else if (isTarget(msg,addressOffset,"/inp*","f")) {inputDrive(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void inputDrive(float drv);
             else if (isTarget(msg,addressOffset,"/int*","i")) {interpolationMethod((AudioFilterLadderInterpolation) msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void interpolationMethod(AudioFilterLadderInterpolation im);
             else if (isTarget(msg,addressOffset,"/o*","f")) {octaveControl(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void octaveControl(float octaves);
             else if (isTarget(msg,addressOffset,"/p*","f")) {passbandGain(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void passbandGain(float passbandgain);
             else if (isTarget(msg,addressOffset,"/r*","f")) {resonance(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void resonance(float reson);
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioFilterStateVariable ====================
@@ -763,16 +799,17 @@ class OSCAudioFilterStateVariable : public AudioFilterStateVariable, OSCAudioBas
 {
     public:
         OSCAudioFilterStateVariable(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioFilterStateVariable(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/f*","f")) {frequency(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void frequency(float freq) {
             else if (isTarget(msg,addressOffset,"/o*","f")) {octaveControl(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void octaveControl(float n) {
             else if (isTarget(msg,addressOffset,"/r*","f")) {resonance(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void resonance(float q) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioInputAnalog ====================
@@ -780,13 +817,14 @@ class OSCAudioInputAnalog : public AudioInputAnalog, OSCAudioBase
 {
     public:
         OSCAudioInputAnalog(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioInputAnalog(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioInputAnalogStereo ====================
@@ -794,13 +832,14 @@ class OSCAudioInputAnalogStereo : public AudioInputAnalogStereo, OSCAudioBase
 {
     public:
         OSCAudioInputAnalogStereo(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioInputAnalogStereo(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioInputI2S ====================
@@ -808,13 +847,14 @@ class OSCAudioInputI2S : public AudioInputI2S, OSCAudioBase
 {
     public:
         OSCAudioInputI2S(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioInputI2S(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioInputI2S2 ====================
@@ -822,13 +862,14 @@ class OSCAudioInputI2S2 : public AudioInputI2S2, OSCAudioBase
 {
     public:
         OSCAudioInputI2S2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioInputI2S2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioInputI2SHex ====================
@@ -836,13 +877,14 @@ class OSCAudioInputI2SHex : public AudioInputI2SHex, OSCAudioBase
 {
     public:
         OSCAudioInputI2SHex(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioInputI2SHex(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioInputI2SOct ====================
@@ -850,13 +892,14 @@ class OSCAudioInputI2SOct : public AudioInputI2SOct, OSCAudioBase
 {
     public:
         OSCAudioInputI2SOct(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioInputI2SOct(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioInputI2SQuad ====================
@@ -864,13 +907,14 @@ class OSCAudioInputI2SQuad : public AudioInputI2SQuad, OSCAudioBase
 {
     public:
         OSCAudioInputI2SQuad(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioInputI2SQuad(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioInputPDM ====================
@@ -878,13 +922,14 @@ class OSCAudioInputPDM : public AudioInputPDM, OSCAudioBase
 {
     public:
         OSCAudioInputPDM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioInputPDM(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioInputPDM2 ====================
@@ -892,13 +937,14 @@ class OSCAudioInputPDM2 : public AudioInputPDM2, OSCAudioBase
 {
     public:
         OSCAudioInputPDM2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioInputPDM2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioInputSPDIF3 ====================
@@ -906,15 +952,16 @@ class OSCAudioInputSPDIF3 : public AudioInputSPDIF3, OSCAudioBase
 {
     public:
         OSCAudioInputSPDIF3(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioInputSPDIF3(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/p*",NULL)) {addReplyResult(msg,addressOffset,reply,pllLocked()); } // static bool pllLocked(void);
             else if (isTarget(msg,addressOffset,"/s*",NULL)) {addReplyResult(msg,addressOffset,reply,(uint32_t)sampleRate()); } // static unsigned int sampleRate(void);
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioInputTDM ====================
@@ -922,13 +969,14 @@ class OSCAudioInputTDM : public AudioInputTDM, OSCAudioBase
 {
     public:
         OSCAudioInputTDM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioInputTDM(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioInputTDM2 ====================
@@ -936,13 +984,14 @@ class OSCAudioInputTDM2 : public AudioInputTDM2, OSCAudioBase
 {
     public:
         OSCAudioInputTDM2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioInputTDM2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioMixer4 ====================
@@ -950,14 +999,15 @@ class OSCAudioMixer4 : public AudioMixer4, OSCAudioBase
 {
     public:
         OSCAudioMixer4(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioMixer4(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/g*","if")) {gain(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addressOffset,reply);} // void gain(unsigned int channel, float gain) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioOutputADAT ====================
@@ -965,14 +1015,15 @@ class OSCAudioOutputADAT : public AudioOutputADAT, OSCAudioBase
 {
     public:
         OSCAudioOutputADAT(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputADAT(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/m*",";")) {mute_PCM(msg.getBoolean(0)); addReplyExecuted(msg,addressOffset,reply);} // static void mute_PCM(const bool mute);
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioOutputAnalog ====================
@@ -980,14 +1031,15 @@ class OSCAudioOutputAnalog : public AudioOutputAnalog, OSCAudioBase
 {
     public:
         OSCAudioOutputAnalog(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputAnalog(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/a*","i")) {analogReference(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void analogReference(int ref);
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioOutputAnalogStereo ====================
@@ -995,14 +1047,15 @@ class OSCAudioOutputAnalogStereo : public AudioOutputAnalogStereo, OSCAudioBase
 {
     public:
         OSCAudioOutputAnalogStereo(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputAnalogStereo(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/a*","i")) {analogReference(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void analogReference(int ref);
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioOutputI2S ====================
@@ -1010,13 +1063,14 @@ class OSCAudioOutputI2S : public AudioOutputI2S, OSCAudioBase
 {
     public:
         OSCAudioOutputI2S(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputI2S(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioOutputI2S2 ====================
@@ -1024,13 +1078,14 @@ class OSCAudioOutputI2S2 : public AudioOutputI2S2, OSCAudioBase
 {
     public:
         OSCAudioOutputI2S2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputI2S2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioOutputI2SHex ====================
@@ -1038,13 +1093,14 @@ class OSCAudioOutputI2SHex : public AudioOutputI2SHex, OSCAudioBase
 {
     public:
         OSCAudioOutputI2SHex(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputI2SHex(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioOutputI2SOct ====================
@@ -1052,13 +1108,14 @@ class OSCAudioOutputI2SOct : public AudioOutputI2SOct, OSCAudioBase
 {
     public:
         OSCAudioOutputI2SOct(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputI2SOct(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioOutputI2SQuad ====================
@@ -1066,13 +1123,14 @@ class OSCAudioOutputI2SQuad : public AudioOutputI2SQuad, OSCAudioBase
 {
     public:
         OSCAudioOutputI2SQuad(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputI2SQuad(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioOutputMQS ====================
@@ -1080,13 +1138,14 @@ class OSCAudioOutputMQS : public AudioOutputMQS, OSCAudioBase
 {
     public:
         OSCAudioOutputMQS(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputMQS(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioOutputPT8211 ====================
@@ -1094,13 +1153,14 @@ class OSCAudioOutputPT8211 : public AudioOutputPT8211, OSCAudioBase
 {
     public:
         OSCAudioOutputPT8211(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputPT8211(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioOutputPT8211_2 ====================
@@ -1108,13 +1168,14 @@ class OSCAudioOutputPT8211_2 : public AudioOutputPT8211_2, OSCAudioBase
 {
     public:
         OSCAudioOutputPT8211_2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputPT8211_2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioOutputPWM ====================
@@ -1122,13 +1183,14 @@ class OSCAudioOutputPWM : public AudioOutputPWM, OSCAudioBase
 {
     public:
         OSCAudioOutputPWM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputPWM(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioOutputSPDIF ====================
@@ -1136,14 +1198,15 @@ class OSCAudioOutputSPDIF : public AudioOutputSPDIF, OSCAudioBase
 {
     public:
         OSCAudioOutputSPDIF(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputSPDIF(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/m*",";")) {mute_PCM(msg.getBoolean(0)); addReplyExecuted(msg,addressOffset,reply);} // static void mute_PCM(const bool mute);
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioOutputSPDIF2 ====================
@@ -1151,14 +1214,15 @@ class OSCAudioOutputSPDIF2 : public AudioOutputSPDIF2, OSCAudioBase
 {
     public:
         OSCAudioOutputSPDIF2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputSPDIF2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/m*",";")) {mute_PCM(msg.getBoolean(0)); addReplyExecuted(msg,addressOffset,reply);} // static void mute_PCM(const bool mute);
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioOutputSPDIF3 ====================
@@ -1166,15 +1230,16 @@ class OSCAudioOutputSPDIF3 : public AudioOutputSPDIF3, OSCAudioBase
 {
     public:
         OSCAudioOutputSPDIF3(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputSPDIF3(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/m*",";")) {mute_PCM(msg.getBoolean(0)); addReplyExecuted(msg,addressOffset,reply);} // static void mute_PCM(const bool mute);
             // NOT DEFINED: else if (isTarget(msg,addressOffset,"/p*",NULL)) {addReplyResult(msg,addressOffset,reply,pll_locked()); } // static bool pll_locked(void);
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioOutputTDM ====================
@@ -1182,13 +1247,14 @@ class OSCAudioOutputTDM : public AudioOutputTDM, OSCAudioBase
 {
     public:
         OSCAudioOutputTDM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputTDM(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioOutputTDM2 ====================
@@ -1196,13 +1262,14 @@ class OSCAudioOutputTDM2 : public AudioOutputTDM2, OSCAudioBase
 {
     public:
         OSCAudioOutputTDM2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputTDM2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
-          }
-        }
+          {
+			}
+		}
 };
 
 // ============== AudioPlayMemory ====================
@@ -1210,11 +1277,12 @@ class OSCAudioPlayMemory : public AudioPlayMemory, OSCAudioBase
 {
     public:
         OSCAudioPlayMemory(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioPlayMemory(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/i*",NULL)) {addReplyResult(msg,addressOffset,reply,isPlaying()); } // bool isPlaying(void) { return playing; }
             else if (isTarget(msg,addressOffset,"/l*",NULL)) {addReplyResult(msg,addressOffset,reply,lengthMillis()); } // uint32_t lengthMillis(void);
             else if (isTarget(msg,addressOffset,"/pl*","i")) {play(msg); addReplyExecuted(msg,addressOffset,reply);} // void play(const unsigned int *data);
@@ -1231,11 +1299,12 @@ class OSCAudioPlayQueue : public AudioPlayQueue, OSCAudioBase
 {
     public:
         OSCAudioPlayQueue(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioPlayQueue(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/a*",NULL)) {addReplyResult(msg,addressOffset,reply,available()); } // bool available(void);
             else if (isTarget(msg,addressOffset,"/g*",NULL)) {addReplyResult(msg,addressOffset,reply,(uint32_t)getBuffer()); } // int16_t * getBuffer(void);
             else if (isTarget(msg,addressOffset,"/playB*",NULL)) {playBuffer(); addReplyExecuted(msg,addressOffset,reply);} // void playBuffer(void);
@@ -1243,8 +1312,8 @@ class OSCAudioPlayQueue : public AudioPlayQueue, OSCAudioBase
             else if (isTarget(msg,addressOffset,"/play","i")) {play(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void play(int16_t data);
             else if (isTarget(msg,addressOffset,"/se*","i")) {setMaxBuffers(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void setMaxBuffers(uint8_t);
             // NOT DEFINED: else if (isTarget(msg,addressOffset,"/st*",NULL)) {stop(); addReplyExecuted(msg,addressOffset,reply);} // void stop(void);
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioPlaySdRaw ====================
@@ -1252,11 +1321,12 @@ class OSCAudioPlaySdRaw : public AudioPlaySdRaw, OSCAudioBase
 {
     public:
         OSCAudioPlaySdRaw(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioPlaySdRaw(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/b*",NULL)) {begin(); addReplyExecuted(msg,addressOffset,reply);} // void begin(void);
             else if (isTarget(msg,addressOffset,"/i*",NULL)) {addReplyResult(msg,addressOffset,reply,isPlaying()); } // bool isPlaying(void) { return playing; }
             else if (isTarget(msg,addressOffset,"/l*",NULL)) {addReplyResult(msg,addressOffset,reply,lengthMillis()); } // uint32_t lengthMillis(void);
@@ -1274,6 +1344,7 @@ class OSCAudioPlaySdWav : public AudioPlaySdWav, OSCAudioBase
 {
     public:
         OSCAudioPlaySdWav(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioPlaySdWav(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
@@ -1299,6 +1370,7 @@ class OSCAudioPlaySerialflashRaw : public AudioPlaySerialflashRaw, OSCAudioBase
 {
     public:
         OSCAudioPlaySerialflashRaw(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioPlaySerialflashRaw(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
@@ -1321,6 +1393,7 @@ class OSCAudioRecordQueue : public AudioRecordQueue, OSCAudioBase
 {
     public:
         OSCAudioRecordQueue(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioRecordQueue(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
@@ -1341,15 +1414,16 @@ class OSCAudioSynthKarplusStrong : public AudioSynthKarplusStrong, OSCAudioBase
 {
     public:
         OSCAudioSynthKarplusStrong(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthKarplusStrong(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/noteOf*","f")) {noteOff(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void noteOff(float velocity) {
             else if (isTarget(msg,addressOffset,"/noteOn","ff")) {noteOn(msg.getFloat(0),msg.getFloat(1)); addReplyExecuted(msg,addressOffset,reply);} // void noteOn(float frequency, float velocity) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioSynthNoisePink ====================
@@ -1357,14 +1431,15 @@ class OSCAudioSynthNoisePink : public AudioSynthNoisePink, OSCAudioBase
 {
     public:
         OSCAudioSynthNoisePink(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthNoisePink(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/a*","f")) {amplitude(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void amplitude(float n) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioSynthNoiseWhite ====================
@@ -1372,14 +1447,15 @@ class OSCAudioSynthNoiseWhite : public AudioSynthNoiseWhite, OSCAudioBase
 {
     public:
         OSCAudioSynthNoiseWhite(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthNoiseWhite(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/a*","f")) {amplitude(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void amplitude(float n) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioSynthSimpleDrum ====================
@@ -1387,18 +1463,19 @@ class OSCAudioSynthSimpleDrum : public AudioSynthSimpleDrum, OSCAudioBase
 {
     public:
         OSCAudioSynthSimpleDrum(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthSimpleDrum(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/f*","f")) {frequency(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void frequency(float freq)
             else if (isTarget(msg,addressOffset,"/l*","i")) {length(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void length(int32_t milliseconds)
             else if (isTarget(msg,addressOffset,"/n*",NULL)) {noteOn(); addReplyExecuted(msg,addressOffset,reply);} // void noteOn();
             else if (isTarget(msg,addressOffset,"/p*","f")) {pitchMod(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void pitchMod(float depth);
             else if (isTarget(msg,addressOffset,"/s*","f")) {secondMix(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void secondMix(float level);
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioSynthToneSweep ====================
@@ -1406,16 +1483,17 @@ class OSCAudioSynthToneSweep : public AudioSynthToneSweep, OSCAudioBase
 {
     public:
         OSCAudioSynthToneSweep(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthToneSweep(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/i*",NULL)) {addReplyResult(msg,addressOffset,reply,(uint8_t)isPlaying()); } // unsigned char isPlaying(void);
             else if (isTarget(msg,addressOffset,"/p*","fiif")) {addReplyResult(msg,addressOffset,reply,(bool)play(msg.getFloat(0),msg.getInt(1),msg.getInt(2),msg.getFloat(3))); } // boolean play(float t_amp,int t_lo,int t_hi,float t_time);
             else if (isTarget(msg,addressOffset,"/r*",NULL)) {addReplyResult(msg,addressOffset,reply,read()); } // float read(void) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioSynthWaveform ====================
@@ -1423,6 +1501,7 @@ class OSCAudioSynthWaveform : public AudioSynthWaveform, OSCAudioBase
 {
     public:
         OSCAudioSynthWaveform(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthWaveform(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
         ~OSCAudioSynthWaveform() { free(arbdata);} 
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
@@ -1449,16 +1528,17 @@ class OSCAudioSynthWaveformDc : public AudioSynthWaveformDc, OSCAudioBase
 {
     public:
         OSCAudioSynthWaveformDc(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthWaveformDc(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/a*","f")) {amplitude(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void amplitude(float n) {
             else if (isTarget(msg,addressOffset,"/a*","ff")) {amplitude(msg.getFloat(0),msg.getFloat(1)); addReplyExecuted(msg,addressOffset,reply);} // void amplitude(float n, float milliseconds) {
             else if (isTarget(msg,addressOffset,"/r*",NULL)) {addReplyResult(msg,addressOffset,reply,read()); } // float read(void) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioSynthWaveformModulated ====================
@@ -1466,11 +1546,13 @@ class OSCAudioSynthWaveformModulated : public AudioSynthWaveformModulated, OSCAu
 {
     public:
         OSCAudioSynthWaveformModulated(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthWaveformModulated(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        ~OSCAudioSynthWaveformModulated() { free(arbdata);} 
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/am*","f")) {amplitude(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void amplitude(float n) {	// 0 to 1.0
             else if (isTarget(msg,addressOffset,"/ar*","bf")) {addReplyResult(msg,addressOffset,reply,arbitraryWaveform(msg)); } // void arbitraryWaveform(const int16_t *data, float maxFreq) {
             else if (isTarget(msg,addressOffset,"/b*","ffi")) {begin(msg.getFloat(0),msg.getFloat(1),msg.getInt(2)); addReplyExecuted(msg,addressOffset,reply);} // void begin(float t_amp, float t_freq, short t_type) {
@@ -1491,15 +1573,16 @@ class OSCAudioSynthWaveformPWM : public AudioSynthWaveformPWM, OSCAudioBase
 {
     public:
         OSCAudioSynthWaveformPWM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthWaveformPWM(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/a*","f")) {amplitude(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void amplitude(float n) {
             else if (isTarget(msg,addressOffset,"/f*","f")) {frequency(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void frequency(float freq) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioSynthWaveformSine ====================
@@ -1507,16 +1590,17 @@ class OSCAudioSynthWaveformSine : public AudioSynthWaveformSine, OSCAudioBase
 {
     public:
         OSCAudioSynthWaveformSine(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthWaveformSine(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/a*","f")) {amplitude(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void amplitude(float n) {
             else if (isTarget(msg,addressOffset,"/f*","f")) {frequency(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void frequency(float freq) {
             else if (isTarget(msg,addressOffset,"/p*","f")) {phase(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void phase(float angle) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioSynthWaveformSineHires ====================
@@ -1524,16 +1608,17 @@ class OSCAudioSynthWaveformSineHires : public AudioSynthWaveformSineHires, OSCAu
 {
     public:
         OSCAudioSynthWaveformSineHires(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthWaveformSineHires(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/a*","f")) {amplitude(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void amplitude(float n) {
             else if (isTarget(msg,addressOffset,"/f*","f")) {frequency(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void frequency(float freq) {
             else if (isTarget(msg,addressOffset,"/p*","f")) {phase(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void phase(float angle) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioSynthWaveformSineModulated ====================
@@ -1541,16 +1626,17 @@ class OSCAudioSynthWaveformSineModulated : public AudioSynthWaveformSineModulate
 {
     public:
         OSCAudioSynthWaveformSineModulated(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthWaveformSineModulated(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
-          { 
+          {
             if (isTarget(msg,addressOffset,"/a*","f")) {amplitude(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void amplitude(float n) {
             else if (isTarget(msg,addressOffset,"/f*","f")) {frequency(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void frequency(float freq) {
             else if (isTarget(msg,addressOffset,"/p*","f")) {phase(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void phase(float angle) {
-          }
-        }
+			}
+		}
 };
 
 // ============== AudioSynthWavetable ====================
@@ -1558,6 +1644,7 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, OSCAudioBase
 {
     public:
         OSCAudioSynthWavetable(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthWavetable(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
