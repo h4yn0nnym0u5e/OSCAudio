@@ -88,7 +88,7 @@ class OSCAudioBase
     }
 	
     
-    virtual ~OSCAudioBase() {Serial.println("dtor!"); Serial.flush(); if (NULL != name) free(name); linkOut(); }
+    virtual ~OSCAudioBase() {Serial.printf("dtor %08X!\n",(uint32_t) this); Serial.flush(); if (NULL != name) free(name); linkOut(); }
     virtual void route(OSCMessage& msg, int addressOffset, OSCBundle&)=0;
     char* name;
     size_t nameLen;
@@ -370,10 +370,14 @@ class OSCAudioBase
 #if defined(DYNAMIC_AUDIO_AVAILABLE) 
 //============================== Dynamic Audio Objects ==================================================
 // ============== AudioConnection ====================
-class OSCAudioConnection : public AudioConnection, OSCAudioBase
+class OSCAudioConnection : OSCAudioBase, public AudioConnection
 {
   public:
 		OSCAudioConnection(const char* _name) :  OSCAudioBase(_name) {}
+		OSCAudioConnection(const char* _name, AudioStream& src, AudioStream& dst) :  OSCAudioBase(_name),AudioConnection(src,dst) {}
+		OSCAudioConnection(const char* _name, AudioStream* src, AudioStream* dst) :  OSCAudioBase(_name),AudioConnection(*src,*dst) {}
+		OSCAudioConnection(const char* _name, AudioStream& src, uint8_t srcO, AudioStream& dst, uint8_t dstI) :  OSCAudioBase(_name),AudioConnection(src,srcO,dst,dstI) {}
+		OSCAudioConnection(const char* _name, AudioStream* src, uint8_t srcO, AudioStream* dst, uint8_t dstI) :  OSCAudioBase(_name),AudioConnection(*src,srcO,*dst,dstI) {}
 
 		void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 		{
@@ -405,6 +409,12 @@ class OSCAudioGroup : public OSCAudioBase
 				Serial.printf("%s group re-linked:\n",name);
 				listObjects();
 			}
+		}
+		
+		~OSCAudioGroup()
+		{
+			while (NULL != next_group)
+				delete next_group;			
 		}
 
 		/**
