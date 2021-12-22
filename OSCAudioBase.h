@@ -138,7 +138,7 @@ class OSCAudioBase
 		/**
 		 * Check to see if message is directed at audio instances whose name matches ours
 		 */
-			bool isMine(OSCMessage& msg, int addressOffset) {return msg.match(name,addressOffset) == (int) nameLen+1;}
+		bool isMine(OSCMessage& msg, int addressOffset) {return msg.match(name,addressOffset) == (int) nameLen+1;}
 		
 		
 		/**
@@ -209,15 +209,26 @@ class OSCAudioBase
 						 int addressOffset,	//!< offset past the already used part of the address
 						 OSCBundle& reply)	//!< bundle to hold reply
     {
-      OSCAudioBase** ppLink = &first_route; 
+      routeFrom(&first_route,msg,addressOffset,reply); 
+    }
+
+
+		/**
+		 * Route a message for the audio system to every object linked after given starting point.
+		 */
+    static void routeFrom(OSCAudioBase** ppLink, //!< pointer to starting link
+						 OSCMessage& msg, 	//!< received message
+						 int addressOffset,	//!< offset past the already used part of the address
+						 OSCBundle& reply)	//!< bundle to hold reply
+    {
       while (NULL != *ppLink)
       {
         (*ppLink)->route(msg,addressOffset,reply);
         ppLink = &((*ppLink)->next_route);
       }
-    }
-
-
+		}
+		
+		
 		/**
 		 * Find an OSC audio object by name
 		 */
@@ -425,10 +436,15 @@ class OSCAudioGroup : public OSCAudioBase
 			return next_group;
 		}
 		
+		
+		/**
+		 * Route message to members of this group, if the group name matches.
+		 */
 		void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 		{
 			if (isMine(msg,addressOffset))
 			{ 
+				routeFrom(&next_group,msg,addressOffset+nameLen+1,reply);
 			}
 		}		
 };
