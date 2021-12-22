@@ -163,7 +163,7 @@ class OSCAudioAnalyzePeak : public AudioAnalyzePeak, OSCAudioBase
 class OSCAudioAnalyzePrint : public AudioAnalyzePrint, OSCAudioBase
 {
     public:
-        OSCAudioAnalyzePrint(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioAnalyzePrint(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this), namePtr(0) {}
         ~OSCAudioAnalyzePrint() { free(namePtr);} 
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
@@ -591,7 +591,7 @@ class OSCAudioEffectFreeverbStereo : public AudioEffectFreeverbStereo, OSCAudioB
 class OSCAudioEffectGranular : public AudioEffectGranular, OSCAudioBase
 {
     public:
-        OSCAudioEffectGranular(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectGranular(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this), sample_bank(0) {}
         ~OSCAudioEffectGranular() { free(sample_bank);} 
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
@@ -1422,7 +1422,7 @@ class OSCAudioSynthToneSweep : public AudioSynthToneSweep, OSCAudioBase
 class OSCAudioSynthWaveform : public AudioSynthWaveform, OSCAudioBase
 {
     public:
-        OSCAudioSynthWaveform(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthWaveform(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this), arbdata(0) {}
         ~OSCAudioSynthWaveform() { free(arbdata);} 
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
@@ -1465,7 +1465,8 @@ class OSCAudioSynthWaveformDc : public AudioSynthWaveformDc, OSCAudioBase
 class OSCAudioSynthWaveformModulated : public AudioSynthWaveformModulated, OSCAudioBase
 {
     public:
-        OSCAudioSynthWaveformModulated(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthWaveformModulated(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this), arbdata(0) {}
+        ~OSCAudioSynthWaveformModulated() { free(arbdata);} 
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {

@@ -77,9 +77,11 @@ class OSCAudioAnalyzeFFT1024 : public AudioAnalyzeFFT1024, OSCAudioBase
             else if (isTarget(msg,addressOffset,"/ave*","i")) {averageTogether(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void averageTogether(uint8_t n) {
             else if (isTarget(msg,addressOffset,"/r*","ii")) {addReplyResult(msg,addressOffset,reply,read(msg.getInt(0),msg.getInt(1))); } // float read(unsigned int binFirst, unsigned int binLast) {
             else if (isTarget(msg,addressOffset,"/r*","i")) {addReplyResult(msg,addressOffset,reply,read(msg.getInt(0))); } // float read(unsigned int binNumber) {
-            // else if (isTarget(msg,addressOffset,"/w*","b")) {windowFunction(msg.getBlob(0)); addReplyExecuted(msg,addressOffset,reply);} // void windowFunction(const int16_t *w) {
-          }
-        }
+            else if (isTarget(msg,addressOffset,"/w*","s")) {addReplyResult(msg,addressOffset,reply,windowFunction(msg)); } // void windowFunction(const int16_t *w) {
+			}
+		}
+	private:
+		bool windowFunction(OSCMessage& msg);
 };
 
 // ============== AudioAnalyzeFFT256 ====================
@@ -96,9 +98,11 @@ class OSCAudioAnalyzeFFT256 : public AudioAnalyzeFFT256, OSCAudioBase
             else if (isTarget(msg,addressOffset,"/ave*","i")) {averageTogether(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void averageTogether(uint8_t n) {
             else if (isTarget(msg,addressOffset,"/r*","ii")) {addReplyResult(msg,addressOffset,reply,read(msg.getInt(0),msg.getInt(1))); } // float read(unsigned int binFirst, unsigned int binLast) {
             else if (isTarget(msg,addressOffset,"/r*","i")) {addReplyResult(msg,addressOffset,reply,read(msg.getInt(0))); } // float read(unsigned int binNumber) {
-            // else if (isTarget(msg,addressOffset,"/w*","b")) {windowFunction(msg.getBlob(0)); addReplyExecuted(msg,addressOffset,reply);} // void windowFunction(const int16_t *w) {
-          }
-        }
+            else if (isTarget(msg,addressOffset,"/w*","s")) {addReplyResult(msg,addressOffset,reply,windowFunction(msg)); } // void windowFunction(const int16_t *w) {
+			}
+		}
+	private:
+		bool windowFunction(OSCMessage& msg);
 };
 
 // ============== AudioAnalyzeNoteFrequency ====================
@@ -141,7 +145,8 @@ class OSCAudioAnalyzePeak : public AudioAnalyzePeak, OSCAudioBase
 class OSCAudioAnalyzePrint : public AudioAnalyzePrint, OSCAudioBase
 {
     public:
-        OSCAudioAnalyzePrint(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioAnalyzePrint(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this), namePtr(0) {}
+        ~OSCAudioAnalyzePrint() { free(namePtr);} 
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
@@ -149,11 +154,14 @@ class OSCAudioAnalyzePrint : public AudioAnalyzePrint, OSCAudioBase
           { 
             if (isTarget(msg,addressOffset,"/d*","i")) {delay(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void delay(uint32_t num) { delay_length = num; }
             else if (isTarget(msg,addressOffset,"/l*","i")) {length(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void length(uint32_t num) { print_length = num; }
-            // else if (isTarget(msg,addressOffset,"/n*","s")) {name(msg.getString(0)); addReplyExecuted(msg,addressOffset,reply);} // void name(const char *str) { myname = str; }
+            else if (isTarget(msg,addressOffset,"/n*","s")) {addReplyResult(msg,addressOffset,reply,name(msg)); } // void name(const char *str) { myname = str; }
             // NOT DEFINED: else if (isTarget(msg,addressOffset,"/t*","fi")) {trigger(msg.getFloat(0),msg.getInt(1)); addReplyExecuted(msg,addressOffset,reply);} // void trigger(float level, int edge);
             else if (isTarget(msg,addressOffset,"/t*",NULL)) {trigger(); addReplyExecuted(msg,addressOffset,reply);} // void trigger(void);
           }
         }
+	private:
+		bool name(OSCMessage& msg);
+		char* namePtr;
 };
 
 // ============== AudioAnalyzeRMS ====================
@@ -291,7 +299,7 @@ class OSCAudioControlSGTL5000 : public AudioControlSGTL5000, OSCAudioBase
             else if (isTarget(msg,addressOffset,"/dacVolume","ff")) {addReplyResult(msg,addressOffset,reply,(uint16_t)dacVolume(msg.getFloat(0),msg.getFloat(1))); } // unsigned short dacVolume(float left, float right);
             else if (isTarget(msg,addressOffset,"/dacVolume","f")) {addReplyResult(msg,addressOffset,reply,(uint16_t)dacVolume(msg.getFloat(0))); } // unsigned short dacVolume(float n);
             else if (isTarget(msg,addressOffset,"/di*",NULL)) {addReplyResult(msg,addressOffset,reply,disable()); } // bool disable(void) { return false; }
-            // else if (isTarget(msg,addressOffset,"/ena*","b")) {addReplyResult(msg,addressOffset,reply,enable(msg.getBlob(1))); } // bool enable(const unsigned extMCLK, const uint32_t pllFreq = (4096.0l * AUDIO_SAMPLE_RATE_EXACT) ); //With extMCLK > 0, the SGTL acts as Master
+            else if (isTarget(msg,addressOffset,"/ena*","ii")) {addReplyResult(msg,addressOffset,reply,enable(msg.getInt(0),msg.getInt(1))); } // bool enable(const unsigned extMCLK, const uint32_t pllFreq = (4096.0l * AUDIO_SAMPLE_RATE_EXACT) ); //With extMCLK > 0, the SGTL acts as Master
             else if (isTarget(msg,addressOffset,"/ena*",NULL)) {addReplyResult(msg,addressOffset,reply,enable()); } // bool enable(void);//For Teensy LC the SGTL acts as master, for all other Teensys as slave.
             else if (isTarget(msg,addressOffset,"/enhanceBassD*",NULL)) {addReplyResult(msg,addressOffset,reply,(uint16_t)enhanceBassDisable()); } // unsigned short enhanceBassDisable(void);
             else if (isTarget(msg,addressOffset,"/enhanceBassE*",NULL)) {addReplyResult(msg,addressOffset,reply,(uint16_t)enhanceBassEnable()); } // unsigned short enhanceBassEnable(void);
@@ -301,7 +309,7 @@ class OSCAudioControlSGTL5000 : public AudioControlSGTL5000, OSCAudioBase
             else if (isTarget(msg,addressOffset,"/eqBands","ff")) {eqBands(msg.getFloat(0),msg.getFloat(1)); addReplyExecuted(msg,addressOffset,reply);} // void eqBands(float bass, float treble);
             else if (isTarget(msg,addressOffset,"/eqBand","if")) {addReplyResult(msg,addressOffset,reply,(uint16_t)eqBand(msg.getInt(0),msg.getFloat(1))); } // unsigned short eqBand(uint8_t bandNum, float n);
             else if (isTarget(msg,addressOffset,"/eqFilterC*","i")) {addReplyResult(msg,addressOffset,reply,(uint16_t)eqFilterCount(msg.getInt(0))); } // unsigned short eqFilterCount(uint8_t n);
-            // else if (isTarget(msg,addressOffset,"/eqFilter","ib")) {eqFilter(msg.getInt(0),msg.getBlob(1)); addReplyExecuted(msg,addressOffset,reply);} // void eqFilter(uint8_t filterNum, int *filterParameters);
+            else if (isTarget(msg,addressOffset,"/eqFilter","ib")) {eqFilter(msg); addReplyExecuted(msg,addressOffset,reply);} // void eqFilter(uint8_t filterNum, int *filterParameters);
             else if (isTarget(msg,addressOffset,"/eqS*","i")) {addReplyResult(msg,addressOffset,reply,(uint16_t)eqSelect(msg.getInt(0))); } // unsigned short eqSelect(uint8_t n);
             else if (isTarget(msg,addressOffset,"/h*","i")) {addReplyResult(msg,addressOffset,reply,headphoneSelect(msg.getInt(0))); } // bool headphoneSelect(int n) {
             else if (isTarget(msg,addressOffset,"/inputL*","f")) {addReplyResult(msg,addressOffset,reply,inputLevel(msg.getFloat(0))); } // bool inputLevel(float n) {return false;}
@@ -325,6 +333,8 @@ class OSCAudioControlSGTL5000 : public AudioControlSGTL5000, OSCAudioBase
             else if (isTarget(msg,addressOffset,"/v*","f")) {addReplyResult(msg,addressOffset,reply,volume(msg.getFloat(0))); } // bool volume(float n) { return volumeInteger(n * 129 + 0.499f); }
           }
         }
+	private:
+		void eqFilter(OSCMessage& msg);
 };
 
 // ============== AudioControlTLV320AIC3206 ====================
@@ -350,7 +360,7 @@ class OSCAudioControlTLV320AIC3206 : public AudioControlTLV320AIC3206, OSCAudioB
             else if (isTarget(msg,addressOffset,"/o*","i")) {addReplyResult(msg,addressOffset,reply,outputSelect(msg.getInt(0))); } // bool outputSelect(int n);  //use AIC3206_OUTPUT_HEADPHONE_JACK_OUT or one of other choices defined earlier
             else if (isTarget(msg,addressOffset,"/r*",NULL)) {addReplyResult(msg,addressOffset,reply,(int32_t)readMicDetect()); } // int  readMicDetect(void);
             else if (isTarget(msg,addressOffset,"/setH*",";ff")) {setHPFonADC(msg.getBoolean(0),msg.getFloat(1),msg.getFloat(2)); addReplyExecuted(msg,addressOffset,reply);} // void setHPFonADC(bool enable, float cutoff_Hz, float fs_Hz);
-            // else if (isTarget(msg,addressOffset,"/setII*","ib")) {setIIRCoeffOnADC(msg.getInt(0),msg.getBlob(1)); addReplyExecuted(msg,addressOffset,reply);} // void setIIRCoeffOnADC(int chan, uint32_t *coeff);  //for chan, use AIC3206_BOTH_CHAN or AIC3206_LEFT_CHAN or AIC3206_RIGHT_CHAN
+            else if (isTarget(msg,addressOffset,"/setII*","ib")) {setIIRCoeffOnADC(msg); addReplyExecuted(msg,addressOffset,reply);} // void setIIRCoeffOnADC(int chan, uint32_t *coeff);  //for chan, use AIC3206_BOTH_CHAN or AIC3206_LEFT_CHAN or AIC3206_RIGHT_CHAN
             else if (isTarget(msg,addressOffset,"/setIn*","f")) {addReplyResult(msg,addressOffset,reply,setInputGain_dB(msg.getFloat(0))); } // bool setInputGain_dB(float n);
             else if (isTarget(msg,addressOffset,"/setM*","i")) {addReplyResult(msg,addressOffset,reply,setMicBias(msg.getInt(0))); } // bool setMicBias(int n);  //use AIC3206_MIC_BIAS_OFF or AIC3206_MIC_BIAS_2_5 or one of other choices defined earlier
             else if (isTarget(msg,addressOffset,"/u*","i")) {addReplyResult(msg,addressOffset,reply,updateInputBasedOnMicDetect(msg.getInt(0))); } // bool updateInputBasedOnMicDetect(int setting = AIC3206_INPUT_IN1); //which input to monitor
@@ -358,6 +368,8 @@ class OSCAudioControlTLV320AIC3206 : public AudioControlTLV320AIC3206, OSCAudioB
             else if (isTarget(msg,addressOffset,"/volume","f")) {addReplyResult(msg,addressOffset,reply,volume(msg.getFloat(0))); } // bool volume(float n);
           }
         }
+	private:
+		void setIIRCoeffOnADC(OSCMessage& msg);
 };
 
 // ============== AudioControlWM8731 ====================
@@ -534,7 +546,8 @@ class OSCAudioEffectFreeverbStereo : public AudioEffectFreeverbStereo, OSCAudioB
 class OSCAudioEffectGranular : public AudioEffectGranular, OSCAudioBase
 {
     public:
-        OSCAudioEffectGranular(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectGranular(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this), sample_bank(0) {}
+        ~OSCAudioEffectGranular() { free(sample_bank);} 
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
@@ -542,11 +555,14 @@ class OSCAudioEffectGranular : public AudioEffectGranular, OSCAudioBase
           { 
             if (isTarget(msg,addressOffset,"/beginF*","f")) {beginFreeze(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void beginFreeze(float grain_length) {
             else if (isTarget(msg,addressOffset,"/beginP*","f")) {beginPitchShift(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void beginPitchShift(float grain_length) {
-            // else if (isTarget(msg,addressOffset,"/begin","bi")) {begin(msg.getBlob(0),msg.getInt(1)); addReplyExecuted(msg,addressOffset,reply);} // void begin(int16_t *sample_bank_def, int16_t max_len_def);
+            else if (isTarget(msg,addressOffset,"/begin","bi")) {begin(msg); addReplyExecuted(msg,addressOffset,reply);} // void begin(int16_t *sample_bank_def, int16_t max_len_def);
             else if (isTarget(msg,addressOffset,"/se*","f")) {setSpeed(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void setSpeed(float ratio) {
             else if (isTarget(msg,addressOffset,"/st*",NULL)) {stop(); addReplyExecuted(msg,addressOffset,reply);} // void stop();
           }
         }
+	private:
+		void begin(OSCMessage& msg);
+		int16_t* sample_bank;
 };
 
 // ============== AudioEffectMidSide ====================
@@ -648,8 +664,8 @@ class OSCAudioFilterBiquad : public AudioFilterBiquad, OSCAudioBase
           if (isMine(msg,addressOffset))
           { 
             if (isTarget(msg,addressOffset,"/setB*","iff")) {setBandpass(msg.getInt(0),msg.getFloat(1),msg.getFloat(2)); addReplyExecuted(msg,addressOffset,reply);} // void setBandpass(uint32_t stage, float frequency, float q = 1.0) {
-            // else if (isTarget(msg,addressOffset,"/setC*","ib")) {setCoefficients(msg.getInt(0),msg.getBlob(1)); addReplyExecuted(msg,addressOffset,reply);} // void setCoefficients(uint32_t stage, const double *coefficients) {
-            // else if (isTarget(msg,addressOffset,"/setC*","ib")) {setCoefficients(msg.getInt(0),msg.getBlob(1)); addReplyExecuted(msg,addressOffset,reply);} // void setCoefficients(uint32_t stage, const int *coefficients);
+            else if (isTarget(msg,addressOffset,"/setC*","iddddd")) {setCoefficients(msg); addReplyExecuted(msg,addressOffset,reply);} // void setCoefficients(uint32_t stage, const double *coefficients) {
+            else if (isTarget(msg,addressOffset,"/setC*","iiiiii")) {setCoefficients(msg); addReplyExecuted(msg,addressOffset,reply);} // void setCoefficients(uint32_t stage, const int *coefficients);
             else if (isTarget(msg,addressOffset,"/setHighS*","ifff")) {setHighShelf(msg.getInt(0),msg.getFloat(1),msg.getFloat(2),msg.getFloat(3)); addReplyExecuted(msg,addressOffset,reply);} // void setHighShelf(uint32_t stage, float frequency, float gain, float slope = 1.0f) {
             else if (isTarget(msg,addressOffset,"/setHighp*","iff")) {setHighpass(msg.getInt(0),msg.getFloat(1),msg.getFloat(2)); addReplyExecuted(msg,addressOffset,reply);} // void setHighpass(uint32_t stage, float frequency, float q = 0.7071) {
             else if (isTarget(msg,addressOffset,"/setLowS*","ifff")) {setLowShelf(msg.getInt(0),msg.getFloat(1),msg.getFloat(2),msg.getFloat(3)); addReplyExecuted(msg,addressOffset,reply);} // void setLowShelf(uint32_t stage, float frequency, float gain, float slope = 1.0f) {
@@ -657,6 +673,8 @@ class OSCAudioFilterBiquad : public AudioFilterBiquad, OSCAudioBase
             else if (isTarget(msg,addressOffset,"/setN*","iff")) {setNotch(msg.getInt(0),msg.getFloat(1),msg.getFloat(2)); addReplyExecuted(msg,addressOffset,reply);} // void setNotch(uint32_t stage, float frequency, float q = 1.0) {
           }
         }
+	private:
+		void setCoefficients(OSCMessage& msg);
 };
 
 // ============== AudioFilterFIR ====================
@@ -1154,11 +1172,13 @@ class OSCAudioPlayMemory : public AudioPlayMemory, OSCAudioBase
           { 
             if (isTarget(msg,addressOffset,"/i*",NULL)) {addReplyResult(msg,addressOffset,reply,isPlaying()); } // bool isPlaying(void) { return playing; }
             else if (isTarget(msg,addressOffset,"/l*",NULL)) {addReplyResult(msg,addressOffset,reply,lengthMillis()); } // uint32_t lengthMillis(void);
-            // else if (isTarget(msg,addressOffset,"/pl*","b")) {play(msg.getBlob(0)); addReplyExecuted(msg,addressOffset,reply);} // void play(const unsigned int *data);
+            else if (isTarget(msg,addressOffset,"/pl*","i")) {play(msg); addReplyExecuted(msg,addressOffset,reply);} // void play(const unsigned int *data);
             else if (isTarget(msg,addressOffset,"/po*",NULL)) {addReplyResult(msg,addressOffset,reply,positionMillis()); } // uint32_t positionMillis(void);
             else if (isTarget(msg,addressOffset,"/s*",NULL)) {stop(); addReplyExecuted(msg,addressOffset,reply);} // void stop(void);
           }
         }
+	private:
+		void play(OSCMessage& msg);
 };
 
 // ============== AudioPlayQueue ====================
@@ -1195,11 +1215,13 @@ class OSCAudioPlaySdRaw : public AudioPlaySdRaw, OSCAudioBase
             if (isTarget(msg,addressOffset,"/b*",NULL)) {begin(); addReplyExecuted(msg,addressOffset,reply);} // void begin(void);
             else if (isTarget(msg,addressOffset,"/i*",NULL)) {addReplyResult(msg,addressOffset,reply,isPlaying()); } // bool isPlaying(void) { return playing; }
             else if (isTarget(msg,addressOffset,"/l*",NULL)) {addReplyResult(msg,addressOffset,reply,lengthMillis()); } // uint32_t lengthMillis(void);
-            // else if (isTarget(msg,addressOffset,"/pl*","s")) {addReplyResult(msg,addressOffset,reply,play(msg.getString(0))); } // bool play(const char *filename);
+            else if (isTarget(msg,addressOffset,"/pl*","s")) {play(msg); addReplyExecuted(msg,addressOffset,reply);} // bool play(const char *filename);
             else if (isTarget(msg,addressOffset,"/po*",NULL)) {addReplyResult(msg,addressOffset,reply,positionMillis()); } // uint32_t positionMillis(void);
             else if (isTarget(msg,addressOffset,"/s*",NULL)) {stop(); addReplyExecuted(msg,addressOffset,reply);} // void stop(void);
-          }
-        }
+			}
+		}
+	private:
+		void play(OSCMessage& msg);
 };
 
 // ============== AudioPlaySdWav ====================
@@ -1217,12 +1239,14 @@ class OSCAudioPlaySdWav : public AudioPlaySdWav, OSCAudioBase
             else if (isTarget(msg,addressOffset,"/isPl*",NULL)) {addReplyResult(msg,addressOffset,reply,isPlaying()); } // bool isPlaying(void);
             else if (isTarget(msg,addressOffset,"/isS*",NULL)) {addReplyResult(msg,addressOffset,reply,isStopped()); } // bool isStopped(void);
             else if (isTarget(msg,addressOffset,"/l*",NULL)) {addReplyResult(msg,addressOffset,reply,lengthMillis()); } // uint32_t lengthMillis(void);
-            // else if (isTarget(msg,addressOffset,"/pl*","s")) {addReplyResult(msg,addressOffset,reply,play(msg.getString(0))); } // bool play(const char *filename);
+            else if (isTarget(msg,addressOffset,"/pl*","s")) {play(msg); addReplyExecuted(msg,addressOffset,reply);} // bool play(const char *filename);
             else if (isTarget(msg,addressOffset,"/po*",NULL)) {addReplyResult(msg,addressOffset,reply,positionMillis()); } // uint32_t positionMillis(void);
             else if (isTarget(msg,addressOffset,"/s*",NULL)) {stop(); addReplyExecuted(msg,addressOffset,reply);} // void stop(void);
             else if (isTarget(msg,addressOffset,"/t*",NULL)) {togglePlayPause(); addReplyExecuted(msg,addressOffset,reply);} // void togglePlayPause(void);
-          }
-        }
+			}
+		}
+	private:
+		void play(OSCMessage& msg);
 };
 
 // ============== AudioPlaySerialflashRaw ====================
@@ -1238,11 +1262,13 @@ class OSCAudioPlaySerialflashRaw : public AudioPlaySerialflashRaw, OSCAudioBase
             if (isTarget(msg,addressOffset,"/b*",NULL)) {begin(); addReplyExecuted(msg,addressOffset,reply);} // void begin(void);
             else if (isTarget(msg,addressOffset,"/i*",NULL)) {addReplyResult(msg,addressOffset,reply,isPlaying()); } // bool isPlaying(void) { return playing; }
             else if (isTarget(msg,addressOffset,"/l*",NULL)) {addReplyResult(msg,addressOffset,reply,lengthMillis()); } // uint32_t lengthMillis(void);
-            // else if (isTarget(msg,addressOffset,"/pl*","s")) {addReplyResult(msg,addressOffset,reply,play(msg.getString(0))); } // bool play(const char *filename);
+            else if (isTarget(msg,addressOffset,"/pl*","s")) {play(msg); addReplyExecuted(msg,addressOffset,reply);} // bool play(const char *filename);
             else if (isTarget(msg,addressOffset,"/po*",NULL)) {addReplyResult(msg,addressOffset,reply,positionMillis()); } // uint32_t positionMillis(void);
             else if (isTarget(msg,addressOffset,"/s*",NULL)) {stop(); addReplyExecuted(msg,addressOffset,reply);} // void stop(void);
-          }
-        }
+			}
+		}
+	private:
+		void play(OSCMessage& msg);
 };
 
 // ============== AudioRecordQueue ====================
@@ -1351,22 +1377,26 @@ class OSCAudioSynthToneSweep : public AudioSynthToneSweep, OSCAudioBase
 class OSCAudioSynthWaveform : public AudioSynthWaveform, OSCAudioBase
 {
     public:
-        OSCAudioSynthWaveform(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthWaveform(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this), arbdata(0) {}
+        ~OSCAudioSynthWaveform() { free(arbdata);} 
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
           { 
             if (isTarget(msg,addressOffset,"/am*","f")) {amplitude(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void amplitude(float n) {	// 0 to 1.0
-            // else if (isTarget(msg,addressOffset,"/ar*","bf")) {arbitraryWaveform(msg.getBlob(0),msg.getFloat(1)); addReplyExecuted(msg,addressOffset,reply);} // void arbitraryWaveform(const int16_t *data, float maxFreq) {
+            else if (isTarget(msg,addressOffset,"/ar*","bf")) {addReplyResult(msg,addressOffset,reply,arbitraryWaveform(msg)); } // void arbitraryWaveform(const int16_t *data, float maxFreq) {
             else if (isTarget(msg,addressOffset,"/b*","ffi")) {begin(msg.getFloat(0),msg.getFloat(1),msg.getInt(2)); addReplyExecuted(msg,addressOffset,reply);} // void begin(float t_amp, float t_freq, short t_type) {
             else if (isTarget(msg,addressOffset,"/b*","i")) {begin(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void begin(short t_type) {
             else if (isTarget(msg,addressOffset,"/f*","f")) {frequency(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void frequency(float freq) {
             else if (isTarget(msg,addressOffset,"/o*","f")) {offset(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void offset(float n) {
             else if (isTarget(msg,addressOffset,"/ph*","f")) {phase(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void phase(float angle) {
             else if (isTarget(msg,addressOffset,"/pu*","f")) {pulseWidth(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void pulseWidth(float n) {	// 0.0 to 1.0
-          }
-        }
+			}
+		}
+	private:
+		bool arbitraryWaveform(OSCMessage& msg);
+		int16_t* arbdata;
 };
 
 // ============== AudioSynthWaveformDc ====================
@@ -1390,14 +1420,15 @@ class OSCAudioSynthWaveformDc : public AudioSynthWaveformDc, OSCAudioBase
 class OSCAudioSynthWaveformModulated : public AudioSynthWaveformModulated, OSCAudioBase
 {
     public:
-        OSCAudioSynthWaveformModulated(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioSynthWaveformModulated(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this), arbdata(0) {}
+        ~OSCAudioSynthWaveformModulated() { free(arbdata);} 
 
         void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
         {
           if (isMine(msg,addressOffset))
           { 
             if (isTarget(msg,addressOffset,"/am*","f")) {amplitude(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void amplitude(float n) {	// 0 to 1.0
-            // else if (isTarget(msg,addressOffset,"/ar*","bf")) {arbitraryWaveform(msg.getBlob(0),msg.getFloat(1)); addReplyExecuted(msg,addressOffset,reply);} // void arbitraryWaveform(const int16_t *data, float maxFreq) {
+            else if (isTarget(msg,addressOffset,"/ar*","bf")) {addReplyResult(msg,addressOffset,reply,arbitraryWaveform(msg)); } // void arbitraryWaveform(const int16_t *data, float maxFreq) {
             else if (isTarget(msg,addressOffset,"/b*","ffi")) {begin(msg.getFloat(0),msg.getFloat(1),msg.getInt(2)); addReplyExecuted(msg,addressOffset,reply);} // void begin(float t_amp, float t_freq, short t_type) {
             else if (isTarget(msg,addressOffset,"/b*","i")) {begin(msg.getInt(0)); addReplyExecuted(msg,addressOffset,reply);} // void begin(short t_type) {
             else if (isTarget(msg,addressOffset,"/frequencyM*","f")) {frequencyModulation(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void frequencyModulation(float octaves) {
@@ -1406,6 +1437,9 @@ class OSCAudioSynthWaveformModulated : public AudioSynthWaveformModulated, OSCAu
             else if (isTarget(msg,addressOffset,"/p*","f")) {phaseModulation(msg.getFloat(0)); addReplyExecuted(msg,addressOffset,reply);} // void phaseModulation(float degrees) {
           }
         }
+	private:
+		bool arbitraryWaveform(OSCMessage& msg);
+		int16_t* arbdata;
 };
 
 // ============== AudioSynthWaveformPWM ====================
