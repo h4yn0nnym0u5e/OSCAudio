@@ -54,6 +54,7 @@ void OSCAudioBase::renameObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 	error retval = OK;
 	char oldName[50],newName[50],buf[150];
 	OSCAudioBase* pVictim;
+	//OSCAudioBase** thisGroupRoot = pParent;
 	
 	msg.getString(1,newName,50);
 	OSC_SPTF("new name is %s, size %d\n",newName,msg.getDataLength(1));
@@ -287,7 +288,8 @@ OSCAudioBase::error DynamicAudioCreateObject(char* typ,char* objName)
 /**
  *	Create a new [OSC]AudioStream object.
  */
-OSCAudioBase::error DynamicAudioCreateObject(char* typ,char* objName)
+OSCAudioBase::error DynamicAudioCreateObject(char* typ,			//!< type of [OSC]AudioStream object to create
+																						 char* objName)	//!< name of object: may include /path/to/group
 {
 	OSCAudioBase::error retval = OSCAudioBase::OK;
 	void* pNewObj = NULL;

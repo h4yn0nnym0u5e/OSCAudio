@@ -64,7 +64,7 @@ class OSCAudioBase
 {
   public:
     OSCAudioBase(const char* _name,AudioStream* _sibling = NULL) : 
-				name(NULL), sibling(_sibling), next_group(NULL)
+				name(NULL), sibling(_sibling), next_group(NULL), pParent(&first_route)
     {
       setName(_name); 
       linkIn(); 
@@ -136,11 +136,11 @@ class OSCAudioBase
 	
 	
 		/**
-		 * Check to see if message is directed at audio instances whose name matches ours
+		 * Return true if message is directed at audio instances whose name matches ours
 		 */
 		bool isMine(OSCMessage& msg, int addressOffset) {return msg.match(name,addressOffset) == (int) nameLen+1;}
 		
-		
+				
 		/**
 		 * Check to see if message's parameter types match those expected for the 
 		 * candidate function to be called.
@@ -242,7 +242,8 @@ class OSCAudioBase
 		 * starting from a point in the connection tree
 		 */
 		static OSCAudioBase* find(const char* _name,			//!< object to find
-															OSCAudioBase** ppLink)	//!< where to start
+															OSCAudioBase** ppLink,	//!< where to start
+															bool intoGroups = true)	//!< look in groups as well
 		{
 			OSCAudioBase* result = NULL;
 			
@@ -255,10 +256,13 @@ class OSCAudioBase
 					break;
 				}
 				
-				// now look in our group, if any
-				result = find(_name,&((*ppLink)->next_group));
-				if (NULL != result)
-					break;
+				// if allowed, look in our group, if any
+				if (intoGroups)
+				{
+					result = find(_name,&((*ppLink)->next_group));
+					if (NULL != result)
+						break;
+				}
 				
 				// not found, go on down the list
 				ppLink = &((*ppLink)->next_route);
@@ -267,10 +271,57 @@ class OSCAudioBase
 			return result;			
 		}
 
+
+		/**
+		 * Implement a proper route and callback strategy,
+		 * with a context pointer to pass to the callback function
+		 * when we find a match
+		 */
+		static void callBack(OSCMessage& msg,
+												 int offset,
+												 int hitAtOffset,
+												 OSCAudioBase* ooi,
+												 void (*cbk)(OSCAudioBase*,OSCMessage&,int,void*),
+												 void* context,
+												 bool enterGroups)
+		{
+			while (NULL != ooi)
+			{
+				int o2 = msg.match(ooi->name,offset);
+				if (o2 > 0) // matched at least some
+				{
+					if (offset+o2 >= hitAtOffset) // should be == at target 
+						cbk(ooi,msg,offset,context); // found target, do callback for it
+					else // only partial match so far...
+					{
+						if (enterGroups) // ...if allowed...
+							callBack(msg,offset+o2,hitAtOffset,ooi->getNextGroup(),cbk,context,enterGroups); // ...recurse down the groups
+					}
+				}
+				ooi = ooi->getNext(); // chain to next object at this level
+			}
+		}
+
+
+		static void callBack(const char* addr,
+												 void (*cbk)(OSCAudioBase*,OSCMessage&,int,void*),
+												 void* context = NULL,
+												 OSCAudioBase* ooi = NULL,
+												 bool enterGroups = true)
+		{
+				OSCMessage msg(addr);
+				int hitAtOffset = strlen(addr);
+				if (NULL == ooi)
+					ooi = first_route;
+				
+				callBack(msg,0,hitAtOffset,ooi,cbk,context,enterGroups);
+		}
+		
+		 
 		/**
 		 * Return pointer to first OSC audio object
 		 */
-			static OSCAudioBase* getFirst(void)	
+		static OSCAudioBase* getFirst(void)	
 		{
 			return first_route;
 		}
@@ -278,7 +329,7 @@ class OSCAudioBase
 		/**
 		 * Return pointer to next OSC audio object after given one
 		 */
-			OSCAudioBase* getNext(void)
+		OSCAudioBase* getNext(void)
 		{
 			return next_route;
 		}
