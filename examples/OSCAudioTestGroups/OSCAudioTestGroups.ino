@@ -157,6 +157,8 @@ void setup() {
   */
   
   char* addr = "/voice1/i*/w*";
+  char* grp = "/voice1/i0";
+  char* wpat = "/w*";
   /*
   OSCMessage msg(addr);
   int o = 0;
@@ -178,11 +180,14 @@ void setup() {
   OSCAudioBase::callBack("/w*",testCallBack,NULL,NULL,false); // top-level only search
 
   OSCAudioGroup* i0base; // has to be group or we can't add members
-  OSCAudioBase::callBack("/voice1/i0",testCallBack,&i0base); // find specific group
-  Serial.printf("Found at %08X\n",(uint32_t) i0base);
+  OSCAudioBase::callBack(grp,testCallBack,&i0base); // find specific group
+  Serial.printf("%s found at %08X\n",grp,(uint32_t) i0base);
   OSCAudioSynthWaveformModulated* wav3 = new OSCAudioSynthWaveformModulated("wav3",*i0base); // create a new group member
-  OSCAudioBase::callBack("/w*",testCallBack,NULL,i0base->getNextGroup()); // search group for "w*" objects
-     
+  OSCAudioBase::callBack(wpat,testCallBack,NULL,i0base->getNextGroup()); // search group for "w*" objects
+
+  Serial.printf("%d instances of %s\n",OSCAudioBase::hitCount(addr),addr);
+  Serial.printf("%d instances of %s in %s\n",OSCAudioBase::hitCount(wpat,i0base->getNextGroup(),false),wpat,grp);
+   
   Serial.println("done");
 }
 

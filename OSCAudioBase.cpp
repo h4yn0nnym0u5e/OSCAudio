@@ -208,6 +208,22 @@ void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle&
 
 //=======================================================================================================
 //============================== Dynamic Audio Objects ==================================================
+static void hitCountCB(OSCAudioBase* ooi,OSCMessage& msg,int offset,int* count) {(*count)++;}
+/**
+ *	Count the number of objects that match the supplied address.
+ */
+int OSCAudioBase::hitCount(const char* addr,	//!< address to match
+										OSCAudioBase* ooi = NULL,	//!< where in structure to start from (default is root)
+										bool enterGroups = true)	//!< whether to allow matches in sub-groups
+{
+	int result = 0;
+	
+	callBack(addr,hitCountCB,&result,ooi,enterGroups);
+	
+	return result;
+}
+		 
+
 /**
  *	Route message for the creation engine to the correct function.
  */

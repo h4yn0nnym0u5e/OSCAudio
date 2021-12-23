@@ -317,6 +317,10 @@ class OSCAudioBase
 				callBack(msg,0,hitAtOffset,ooi,cbk,context,enterGroups);
 		}
 		
+		
+		static int hitCount(const char* addr,
+												OSCAudioBase* ooi = NULL,
+												bool enterGroups = true);
 		 
 		/**
 		 * Return pointer to first OSC audio object
