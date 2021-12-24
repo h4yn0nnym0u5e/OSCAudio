@@ -245,10 +245,13 @@ void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& r
 {
     if (isStaticTarget(msg,addressOffset,"/ren*","ss")) {renameObject(msg,addressOffset,reply);} 
 #if defined(DYNAMIC_AUDIO_AVAILABLE)
-    else if (isStaticTarget(msg,addressOffset,"/cr*C*","s"))  {createConnection(msg,addressOffset,reply);} 
-    else if (isStaticTarget(msg,addressOffset,"/cr*O*","ss")) {createObject(msg,addressOffset,reply);} 
-    else if (isStaticTarget(msg,addressOffset,"/d*","s"))     {destroyObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/crC*","s"))  	{createConnection(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/crO*","ss"))	{createObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/crO*","sss"))	{createObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/crG*","ss"))	{Serial.println("group"); createGroup(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/d*","s"))			{destroyObject(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/clearAl*",NULL))    {clearAllObjects(msg,addressOffset,reply);} 
+		else OSC_SPTF("No match\n");
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 }
 
@@ -358,9 +361,11 @@ OSCAudioBase::error DynamicAudioCreateObject(char* typ,			//!< type of [OSC]Audi
 void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
 	error retval = OK;
-	char objName[50],typ[50];
+	char objNameX[50],typ[50];
+	char* objName = objNameX+1;
 	msg.getString(0,typ,50);
 	msg.getString(1,objName,50);
+	*objNameX = '/'; // needed for duplicate checking
 	trimUnderscores(sanitise(objName,objName),objName); // make the name valid
 	
 	OSC_SPTF("createObject(%s,%s)\n",typ,objName);
@@ -369,6 +374,61 @@ void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 	retval = DynamicAudioCreateObject(typ,objName);
 		
 	staticPrepareReplyResult(msg,reply).add(objName).add((int) retval);
+}
+
+
+//============================== OSCAudioGroup =====================================================
+void createGroupCB(OSCAudioBase* parent,OSCMessage& msg,int offset,void* context)
+{
+	char* buf = (char*) context;
+	OSCAudioBase::error retval = OSCAudioBase::OK;
+	OSCAudioBase* png = parent;
+	
+	if (NULL != png)
+			png = parent->next_group;
+	
+	if (0 != OSCAudioBase::hitCount(buf,png,false))
+	{
+		retval = OSCAudioBase::DUPLICATE_NAME;
+		(void) retval;
+	}
+	else
+	{
+		OSCAudioGroup* pNewGroup = new OSCAudioGroup(buf+1,(OSCAudioGroup*) parent);
+		(void) pNewGroup;
+		OSC_SPTF("Created at: 0x%08X, parent %08X\n",(uint32_t) pNewGroup,(uint32_t) (pNewGroup->pParent));
+	}	
+}
+
+
+/**
+ *	Create a new OSCAudioGroup object.
+ */
+void OSCAudioBase::createGroup(OSCMessage& msg, int addressOffset, OSCBundle& reply)
+{
+	char path[50], bufn[50];
+	error retval = OK;
+	char* buf = bufn+1;
+	
+	OSC_SPLN("createGroup");
+	OSC_DBGP(msg,addressOffset);
+	msg.getString(0,path,50);
+	msg.getString(1,buf,50);
+	*bufn = '/'; // needed for duplicate checking
+	trimUnderscores(sanitise(buf,buf),buf); // make the name valid
+	OSC_SPLN(buf);
+	
+	if (0 != strlen(buf))
+	{
+		if ('/' == *path && 1 == strlen(path)) // create directly at root
+			createGroupCB(NULL,msg,0,bufn);
+		else	// sub-group of existing group
+			callBack(path,createGroupCB,bufn);
+	}
+	else
+		retval = BLANK_NAME;
+	
+	staticPrepareReplyResult(msg,reply).add(buf).add((int) retval);
 }
 
 

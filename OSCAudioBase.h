@@ -42,7 +42,7 @@
 #endif // !defined(COUNT_OF)
  
 
-#define noOSC_DEBUG_PRINT
+#define OSC_DEBUG_PRINT
 #if defined(OSC_DEBUG_PRINT)
 #define DEBUG_SER Serial
 #define OSC_SPRT(...) DEBUG_SER.print(__VA_ARGS__)
@@ -314,6 +314,7 @@ class OSCAudioBase
 		{
 			while (NULL != ooi)
 			{
+				OSC_SPTF("%08X ...",(uint32_t) ooi);
 				int o2 = msg.match(ooi->name,offset);
 				if (o2 > 0) // matched at least some
 				{
@@ -327,6 +328,7 @@ class OSCAudioBase
 				}
 				ooi = ooi->getNext(); // chain to next object at this level
 			}
+			OSC_SPLN();
 		}
 
 
@@ -453,6 +455,7 @@ class OSCAudioBase
 		// dynamic audio objects:
 		static void createConnection(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 		static void createObject(OSCMessage& msg, int addressOffset, OSCBundle& reply);
+		static void createGroup(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 		static void destroyObject(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 		static void clearAllObjects(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 	
