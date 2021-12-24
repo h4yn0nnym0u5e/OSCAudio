@@ -30,6 +30,20 @@
 #include "OSCAudioBase.h"
 OSCAudioBase* OSCAudioBase::first_route = NULL;
 
+#define OSC_CLASS(a,o) \
+OSCAudioBase* mk1_##o(const char* nm) {return (OSCAudioBase*) new o(nm);} \
+OSCAudioBase* mk2_##o(const char* nm,OSCAudioGroup& grp) {return (OSCAudioBase*) new o(nm,grp);} 
+OSC_AUDIO_CLASSES
+#undef OSC_CLASS
+
+#define OSC_CLASS(a,o) {#a,mk1_##o,mk2_##o},
+const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
+  OSC_AUDIO_CLASSES
+};
+#undef OSC_CLASS
+
+size_t OSCAudioBase::countOfAudioTypes(void) {return COUNT_OF(audioTypes);}
+
 static void dbgPrt(OSCMessage& msg, int addressOffset)
 {
 	char prt[50];
@@ -208,7 +222,7 @@ void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle&
 
 //=======================================================================================================
 //============================== Dynamic Audio Objects ==================================================
-static void hitCountCB(OSCAudioBase* ooi,OSCMessage& msg,int offset,int* count) {(*count)++;}
+static void hitCountCB(OSCAudioBase* ooi,OSCMessage& msg,int offset,void* count) {(*(int*) count)++;}
 /**
  *	Count the number of objects that match the supplied address.
  */
@@ -309,6 +323,7 @@ OSCAudioBase::error DynamicAudioCreateObject(char* typ,			//!< type of [OSC]Audi
 {
 	OSCAudioBase::error retval = OSCAudioBase::OK;
 	void* pNewObj = NULL;
+	int objIdx;
 	
 	if (0 == strlen(objName)) 		 
 	{
@@ -321,9 +336,10 @@ OSCAudioBase::error DynamicAudioCreateObject(char* typ,			//!< type of [OSC]Audi
 			retval = OSCAudioBase::DUPLICATE_NAME;
 			OSC_SPLN("duplicate");  // don't allow duplicate name
 		}
-#define OSC_CLASS(a,o) else if (0 == strcmp(#a,typ)) pNewObj = new o(objName);
-	OSC_AUDIO_CLASSES // massive inefficient macro expansion to create object of required type
-#undef OSC_CLASS
+
+	objIdx = OSCAudioBase::getTypeIndex(typ); // see if we've got a valid object type
+	if (objIdx >= 0) // found it
+			pNewObj = OSCAudioBase::audioTypes[objIdx].mkRoot(objName);
 	
 	if (NULL != pNewObj)
 	{

@@ -60,6 +60,16 @@
 
 extern void listObjects(void);
 
+
+class OSCAudioBase;
+class OSCAudioGroup;
+typedef struct OSCAudioTypes_s {
+  const char* name;	//!< the name of the [OSC]AudioStream type
+  OSCAudioBase* (*mkRoot)(const char*); //!< make object at root
+  OSCAudioBase* (*mkGroup)(const char*,OSCAudioGroup&); //!< make object within group
+} OSCAudioTypes_t;
+
+
 class OSCAudioBase
 {
   public:
@@ -94,6 +104,8 @@ class OSCAudioBase
     size_t nameLen;
 		AudioStream* sibling;
 		enum error {OK,NOT_FOUND,BLANK_NAME,DUPLICATE_NAME,NO_DYNAMIC,NO_MEMORY};
+		static const OSCAudioTypes_t audioTypes[];
+		static size_t countOfAudioTypes(void);
 	
 	
 		/**
@@ -133,7 +145,22 @@ class OSCAudioBase
 			}		
 				}
 		}
-	
+		
+		
+		/**
+		 * Return index of AudioStream type in the audioTypes[] array, given its name.
+		 * -1 means name wasn't found.
+		 */
+		static int getTypeIndex(const char* name)
+		{
+			int objIdx;
+			
+			for (objIdx = OSCAudioBase::countOfAudioTypes()-1;objIdx>=0;objIdx--)
+				if (0 == strcmp(OSCAudioBase::audioTypes[objIdx].name,name))
+					break;
+				
+			return objIdx;
+		}
 	
 		/**
 		 * Return true if message is directed at audio instances whose name matches ours
