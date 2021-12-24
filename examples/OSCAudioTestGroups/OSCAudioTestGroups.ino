@@ -6,6 +6,7 @@
 
 //#include "dynamic-util.h"
 #include "OSCAudioBase.h"
+#include "various.h"
 
 
 //=============================================================
@@ -15,6 +16,29 @@ void testCallBack(OSCAudioBase* ooi,OSCMessage& msg,int offset,void* context)
   if (NULL != context)
     *((OSCAudioGroup**) context) = (OSCAudioGroup*) ooi;
 }
+
+
+//=============================================================
+#define OSC_CLASS(a,o) \
+OSCAudioBase* mk1_##o(const char* nm) {return (OSCAudioBase*) new o(nm);} \
+OSCAudioBase* mk2_##o(const char* nm,OSCAudioGroup& grp) {return (OSCAudioBase*) new o(nm,grp);} 
+OSC_AUDIO_CLASSES
+#undef OSC_CLASS
+
+/* doesn't work here...
+typedef struct streamTypes_s {
+  const char* name;
+  OSCAudioBase* (*mkRoot[])(const char*); //!< make object at root
+  OSCAudioBase* (*mkGroup[])(const char*,OSCAudioGroup&); //!< make object within group
+} streamTypes_t;
+*/
+
+#define OSC_CLASS(a,o) {#a,mk1_##o,mk2_##o},
+//#define OSC_CLASS(a,o) {#a,mk1_##o},
+streamTypes_t streamTypes[] = {
+  OSC_AUDIO_CLASSES
+#undef OSC_CLASS 
+};
 
 
 //=============================================================
@@ -31,6 +55,9 @@ void setup() {
 
   //-------------------------------
   AudioMemory(50); // no idea what we'll need, so allow plenty
+  //-------------------------------
+  for (size_t i=0;i<COUNT_OF(streamTypes);i++)
+    Serial.println(streamTypes[i].name);
   //-------------------------------
   OSCAudioMixer4* mixer = new OSCAudioMixer4("mixer");
   OSCAudioSynthWaveform* wav1c = new OSCAudioSynthWaveform("wav1");    (void) wav1c;
@@ -57,6 +84,7 @@ void setup() {
   OSCAudioOutputI2S* i2s = new OSCAudioOutputI2S("i2s");    (void) i2s;
   Serial.println("==================\nCreation complete:");
   listObjects();
+//----------------------------------------------------------------------------------------------------------------  
   /*
   Serial.println("now delete");
   delete mixer; // this looks OK
@@ -79,6 +107,7 @@ void setup() {
   listObjects();
   */
   
+//----------------------------------------------------------------------------------------------------------------  
   const char* addr = "/voice1/i*/w*";
   const char* grp = "/voice1/i0";
   const char* wpat = "/w*";
@@ -110,9 +139,20 @@ void setup() {
 
   Serial.printf("%d instances of %s\n",OSCAudioBase::hitCount(addr),addr);
   Serial.printf("%d instances of %s in %s\n",OSCAudioBase::hitCount(wpat,i0base->getNextGroup(),false),wpat,grp);
+  Serial.println("================");
+//---------------------------------------------------------------------------------------------------------------- 
+  OSCMessage testMsg;
+  OSCBundle reply;
+  long long tt = 0;
+  
+  testMsg.empty(); reply.empty(); reply.setTimetag((uint8_t*) &tt).add("/reply");
+  testMsg.setAddress("/crOb").add("AudioMixer4").add("mixerL");
+  OSCAudioBase::routeDynamic(testMsg,0,reply);
+  //listObjects(); // not required if command worked!
    
-  Serial.println("done");
+  Serial.println("\n*** done ***");
 }
+
 
 
 //=============================================================
