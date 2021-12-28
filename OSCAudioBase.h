@@ -42,7 +42,7 @@
 #endif // !defined(COUNT_OF)
  
 
-#define noOSC_DEBUG_PRINT
+#define OSC_DEBUG_PRINT
 #if defined(OSC_DEBUG_PRINT)
 #define DEBUG_SER Serial
 #define OSC_SPRT(...) DEBUG_SER.print(__VA_ARGS__)
@@ -85,12 +85,13 @@ class OSCAudioBase
     }
 	
 	// Construct a group member
-    OSCAudioBase(const char* _name,						//!< name of this object
-								 OSCAudioBase& first,	//!< group to become member of
-								 AudioStream* _sibling = NULL) : 
+    OSCAudioBase(const char* _name,		//!< name of this object
+				 OSCAudioBase& first,	//!< group to become member of
+				 AudioStream* _sibling = NULL) : 
 				name(NULL), sibling(_sibling), next_group(NULL), pParent(NULL)
     {
 		setName(_name); 
+		linkInGroup(&first);
 		OSC_SPTF("%s base created; member of %s:\n",name,first.name);
     }
 	
@@ -341,10 +342,16 @@ class OSCAudioBase
 		callBack(msg,0,hitAtOffset,ooi,cbk,context,enterGroups);
 	}
 	
-	
+	// count matches to pattern
 	static int hitCount(const char* addr,
 						OSCAudioBase* ooi = NULL,
 						bool enterGroups = true);
+				
+	// count matches and return last matching object
+	static int findMatch(const char* addr,		//!< address to match
+						OSCAudioBase* ooi,		//!< where in structure to start from (default is root)
+						OSCAudioBase** found,	//!< last-found matching object
+						bool enterGroups);		//!< whether to allow matches in sub-groups
 	 
 	/**
 	 * Return pointer to first OSC audio object
@@ -392,8 +399,8 @@ class OSCAudioBase
 	// existing objects: message passing and linking in/out
 	static OSCAudioBase* first_route; //!< linked list to route OSC messages to all derived instances
 	//OSCAudioBase** pFirst; 		//!< pointer back to list head
-	OSCAudioBase*  next_route;	//!< list of related objects
-	OSCAudioGroup* next_group; //!< list of unrelated objects
+	OSCAudioBase* next_route;	//!< list of related objects
+	OSCAudioBase* next_group; //!< list of unrelated objects
 			
 //private:
 	static void renameObject(OSCMessage& msg, int addressOffset, OSCBundle& reply);
@@ -403,6 +410,7 @@ class OSCAudioBase
 	// Link in: this occurs even if we're going to be a group member, before
 	// the OSCAudioGroup is constructed
 	void linkIn(OSCAudioBase** pFirst = &first_route) {next_route = *pFirst; *pFirst = this;}
+	void linkInGroup(OSCAudioBase* grp);
 	
 	// Link out: if we're a group member then we're not on the main routing
 	// list, and the ~OSCAudioGroup destructor will already have unlinked us
@@ -481,79 +489,12 @@ class OSCAudioConnection : OSCAudioBase, public AudioConnection
 class OSCAudioGroup : public OSCAudioBase
 {
   public:
-	OSCAudioGroup(const char* _name, OSCAudioGroup* parent = NULL) 
-							:  OSCAudioBase(_name), first_src(NULL), first_dst(NULL) 
-	{
-		if (NULL != parent) // we're a group member not on the main routing list
-		{
-			linkOut();
-			linkInGroup(parent);
-			//pFirst = &(parent->next_group);
-			OSC_SPTF("%s group re-linked:\n",name);
-			listObjects();
-		}
-	}
-	
-	~OSCAudioGroup()
-	{
-		while (NULL != next_group)
-			delete next_group;			
-		while (NULL != first_src)
-			delete first_src;			
-		while (NULL != first_dst)
-			delete first_dst;	
-		linkOutGroup();
-	}
-
-	/**
-	 * Return pointer to next OSC audio group after given one
-	 */
-	virtual	OSCAudioBase* getNextGroup(void)
-	{
-		return next_group;
-	}
-	
-	
-	/**
-	 * Route message to members of this group, if the group name matches.
-	 */
-	void route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
-	{
-		int nameOff = isMine(msg,addressOffset);
-		if (nameOff > 0)
-		{ 
-			routeFrom((OSCAudioBase**) &next_group,msg,addressOffset+nameOff,reply);
-		}
-	}
-	
-	// Link in and out of the grouping lists
-	void linkInGroup(OSCAudioGroup* parent) 
-	{
-		if (NULL != parent)
-		{
-			next_group = parent->next_group; 
-			parent->next_group = this;
-			pParent = parent;
-		}
-	}
-	
-	void linkOutGroup() 
-	{
-		if (NULL == pParent) // in main routing list...
-			linkOut();				 // ...unlink from that
-		else
-		{
-			OSCAudioGroup** ppLink = &(pParent->next_group); 
-			
-			while (NULL != *ppLink && this != *ppLink)
-				ppLink = &((*ppLink)->next_group);
-			if (NULL != ppLink)
-			{
-				*ppLink = next_group;
-				next_group = NULL;
-			}
-		}
-	}
+	OSCAudioGroup(const char* _name, OSCAudioGroup* parent = NULL);
+	~OSCAudioGroup();
+	virtual	OSCAudioBase* getNextGroup(void);;
+	void route(OSCMessage& msg, int addressOffset, OSCBundle& reply);
+	void linkInGroup(OSCAudioGroup* parent);	
+	void linkOutGroup();
 		
   protected:
 	friend class OSCAudioConnection;

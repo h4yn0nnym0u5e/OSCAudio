@@ -56,6 +56,17 @@ static void dbgPrt(OSCMessage& msg, int addressOffset)
 	Serial.println(); 
 }
 
+// Link into a grouping lists
+void OSCAudioBase::linkInGroup(OSCAudioBase* p) 
+{
+	OSCAudioGroup* parent = (OSCAudioGroup*) p;
+	if (NULL != parent)
+	{
+		next_route = parent->next_group; 
+		parent->next_group = this;
+		pParent = parent;
+	}
+}
 
 /**
  *	Rename an [OSC]AudioStream or Connection object.
@@ -227,8 +238,8 @@ static void hitCountCB(OSCAudioBase* ooi,OSCMessage& msg,int offset,void* count)
  *	Count the number of objects that match the supplied address.
  */
 int OSCAudioBase::hitCount(const char* addr,	//!< address to match
-													OSCAudioBase* ooi,	//!< where in structure to start from (default is root)
-													bool enterGroups)		//!< whether to allow matches in sub-groups
+							OSCAudioBase* ooi,	//!< where in structure to start from (default is root)
+							bool enterGroups)	//!< whether to allow matches in sub-groups
 {
 	int result = 0;
 	
@@ -236,6 +247,31 @@ int OSCAudioBase::hitCount(const char* addr,	//!< address to match
 	
 	return result;
 }
+
+
+struct findMatch_s {int count; OSCAudioBase* hit;};
+static void findMatchCB(OSCAudioBase* ooi,OSCMessage& msg,int offset,void* ctxt) 
+{
+	findMatch_s* context = (findMatch_s*) ctxt;
+	context->count++;
+	context->hit = ooi;
+}
+/**
+ *	Count the number of objects that match the supplied address, and return a pointer to the last found
+ */
+int OSCAudioBase::findMatch(const char* addr,		//!< address to match
+							OSCAudioBase* ooi,		//!< where in structure to start from (default is root)
+							OSCAudioBase** found,	//!< last-found matching object
+							bool enterGroups)		//!< whether to allow matches in sub-groups
+{
+	findMatch_s result = {0};
+	
+	callBack(addr,findMatchCB,(void*) &result,ooi,enterGroups);
+	*found = result.hit;
+	
+	return result.count;
+}
+		 
 		 
 
 /**
@@ -412,6 +448,84 @@ void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 
 
 //============================== OSCAudioGroup =====================================================
+OSCAudioGroup::OSCAudioGroup(const char* _name, OSCAudioGroup* parent) 
+							:  OSCAudioBase(_name), first_src(NULL), first_dst(NULL) 
+{
+	if (NULL != parent) // we're a group member not on the main routing list
+	{
+		linkOut();
+		linkInGroup(parent);
+		OSC_SPTF("%s group re-linked:\n",name);
+		listObjects();
+	}
+}
+
+	
+OSCAudioGroup::~OSCAudioGroup()
+{
+	while (NULL != next_group)
+		delete next_group;			
+	while (NULL != first_src)
+		delete first_src;			
+	while (NULL != first_dst)
+		delete first_dst;	
+	linkOutGroup();
+}
+
+/**
+ * Return pointer to next OSC audio group after given one
+ */
+OSCAudioBase* OSCAudioGroup::getNextGroup(void)
+{
+	return next_group;
+}
+	
+	
+/**
+ * Route message to members of this group, if the group name matches.
+ */
+void OSCAudioGroup::route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
+{
+	int nameOff = isMine(msg,addressOffset);
+	if (nameOff > 0)
+	{ 
+		routeFrom((OSCAudioBase**) &next_group,msg,addressOffset+nameOff,reply);
+	}
+}
+
+// Link in and out of the grouping lists
+void OSCAudioGroup::linkInGroup(OSCAudioGroup* parent) 
+{
+	if (NULL != parent)
+	{
+		next_route = parent->next_group; 
+		parent->next_group = this;
+		pParent = parent;
+	}
+}
+
+void OSCAudioGroup::linkOutGroup() 
+{
+	if (NULL == pParent) // in main routing list...
+		linkOut();				 // ...unlink from that
+	else
+	{
+		OSCAudioBase** ppLink = &(pParent->next_group); 
+		
+		while (NULL != *ppLink && this != *ppLink)
+			ppLink = &((*ppLink)->next_group);
+		if (NULL != ppLink)
+		{
+			*ppLink = next_group;
+			next_group = NULL;
+		}
+	}
+}
+
+
+
+
+
 void createGroupCB(OSCAudioBase* parent,OSCMessage& msg,int offset,void* context)
 {
 	char* buf = (char*) context;
@@ -499,6 +613,7 @@ void OSCAudioBase::createConnection(OSCMessage& msg, int addressOffset, OSCBundl
 	
 	staticPrepareReplyResult(msg,reply).add(buf).add((int) retval);
 }
+
 
 
 /**
