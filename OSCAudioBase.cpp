@@ -552,8 +552,10 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 
 void OSCAudioConnection::route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
-	if (isMine(msg,addressOffset))
+	int nameOff = isMine(msg,addressOffset);
+	if (nameOff > 0)
 	{ 
+		addressOffset += nameOff;
 		if (isTarget(msg,addressOffset,"/c*","ss")) {OSCconnect(msg,addressOffset,reply,true);}
 		else if (isTarget(msg,addressOffset,"/c*","sisi")) {OSCconnect(msg,addressOffset,reply);} 
 		else if (isTarget(msg,addressOffset,"/d*",NULL)) {disconnect();} 
