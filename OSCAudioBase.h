@@ -42,7 +42,7 @@
 #endif // !defined(COUNT_OF)
  
 
-#define OSC_DEBUG_PRINT
+#define noOSC_DEBUG_PRINT
 #if defined(OSC_DEBUG_PRINT)
 #define DEBUG_SER Serial
 #define OSC_SPRT(...) DEBUG_SER.print(__VA_ARGS__)

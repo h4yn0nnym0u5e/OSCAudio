@@ -258,12 +258,12 @@ OSCMessage& OSCAudioBase::prepareReplyResult(OSCMessage& msg, 	//!< the received
 
 
 // Despatch function overloaded with the various reply types we might append to the standard information
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, bool v) { prepareReplyResult(msg, reply).add(v); Serial.println(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, float v) { prepareReplyResult(msg, reply).add(v); Serial.println(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, int32_t v) { prepareReplyResult(msg, reply).add(v); Serial.println(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint32_t v) { prepareReplyResult(msg, reply).add((unsigned int)v); Serial.println(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint8_t v) { prepareReplyResult(msg, reply).add(v); Serial.println(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint16_t v) { prepareReplyResult(msg, reply).add(v); Serial.println(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, bool v) { prepareReplyResult(msg, reply).add(v); OSC_SPLN(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, float v) { prepareReplyResult(msg, reply).add(v); OSC_SPLN(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, int32_t v) { prepareReplyResult(msg, reply).add(v); OSC_SPLN(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint32_t v) { prepareReplyResult(msg, reply).add((unsigned int)v); OSC_SPLN(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint8_t v) { prepareReplyResult(msg, reply).add(v); OSC_SPLN(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint16_t v) { prepareReplyResult(msg, reply).add(v); OSC_SPLN(v); }
 
 
 
@@ -320,9 +320,9 @@ void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& r
     else if (isStaticTarget(msg,addressOffset,"/crC*","s"))  	{createConnection(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/crO*","ss"))	{createObject(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/crO*","sss"))	{createObject(msg,addressOffset,reply);} 
-    else if (isStaticTarget(msg,addressOffset,"/crG*","ss"))	{Serial.println("group"); createGroup(msg,addressOffset,reply);} 
-    else if (isStaticTarget(msg,addressOffset,"/d*","s"))			{destroyObject(msg,addressOffset,reply);} 
-    else if (isStaticTarget(msg,addressOffset,"/clearAl*",NULL))    {clearAllObjects(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/crG*","ss"))	{createGroup(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/d*","s"))		{destroyObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/clearAl*",NULL)) {clearAllObjects(msg,addressOffset,reply);} 
 		else OSC_SPTF("No match\n");
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 }
@@ -679,15 +679,32 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 	OSC_DBGP(msg,addressOffset);
 	
 	msg.getString(0,srcn,50);
+	if ('/' != *srcn) // sleazy hack for the time being...
+	{
+		msg.getString(0,srcn+1,49);
+		srcn[0] = '/';
+	}
 	trimUnderscores(sanitise(srcn,srcn,1),srcn); // make the source name valid
 	if (!zeroToZero)
 	{
 		srcp = msg.getInt(1);
 		msg.getString(2,dstn,50);
+		if ('/' != *dstn)
+		{
+			msg.getString(2,dstn+1,49);
+			dstn[0] = '/';
+		}
 		dstp = msg.getInt(3);
 	}
 	else
+	{
 		msg.getString(1,dstn,50);
+		if ('/' != *dstn)
+		{
+			msg.getString(1,dstn+1,49);
+			dstn[0] = '/';
+		}
+	}		
 	trimUnderscores(sanitise(dstn,dstn,1),dstn); // make the destination name valid
 	
 	// Find the named OSCAudioBase objects and convert to
@@ -718,7 +735,7 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 		}
 	}
 	else
-		sprintf(buf,"Bad path");
+		sprintf(buf,"Bad path(s): %s, %s",srcn,dstn);
 	OSC_SPLN(buf);
 	
 	prepareReplyResult(msg,reply).set(1,buf).add((int) retval);
@@ -727,21 +744,21 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 
 void OSCAudioConnection::mkLinks(OSCAudioBase& src, OSCAudioBase& dst)
 {
-	Serial.printf("Link %08X to source %08X (parent %08X)\n",
+	OSC_SPTF("Link %08X to source %08X (parent %08X)\n",
 					(uint32_t) this,
 					(uint32_t) &src,
 					(uint32_t) src.pParent
 					);
 					
 	linkInSrc(src.pParent);
-	listObjects();
-	Serial.printf(" and dest %08X (parent %08X)\n\n",
+	//listObjects();
+	OSC_SPTF(" and dest %08X (parent %08X)\n\n",
 					(uint32_t) &dst,
 					(uint32_t) dst.pParent
 					);
 					
 	linkInDst(dst.pParent);
-	listObjects();
+	//listObjects();
 }
 
 
@@ -750,7 +767,6 @@ void OSCAudioConnection::route(OSCMessage& msg, int addressOffset, OSCBundle& re
 	int nameOff = isMine(msg,addressOffset);
 	if (nameOff > 0)
 	{ 
-		Serial.printf("It's for %s!\n",name);
 		addressOffset += nameOff;
 		if (isTarget(msg,addressOffset,"/c*","ss")) {OSCconnect(msg,addressOffset,reply,true);}
 		else if (isTarget(msg,addressOffset,"/c*","sisi")) {OSCconnect(msg,addressOffset,reply);} 
