@@ -549,6 +549,67 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 	
 	prepareReplyResult(msg,reply).set(1,buf).add((int) retval);
 }
+
+void OSCAudioConnection::route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
+{
+	if (isMine(msg,addressOffset))
+	{ 
+		if (isTarget(msg,addressOffset,"/c*","ss")) {OSCconnect(msg,addressOffset,reply,true);}
+		else if (isTarget(msg,addressOffset,"/c*","sisi")) {OSCconnect(msg,addressOffset,reply);} 
+		else if (isTarget(msg,addressOffset,"/d*",NULL)) {disconnect();} 
+	}
+}
+
+// Link in and out of the connection lists
+void OSCAudioConnection::linkInSrc(OSCAudioGroup* parent) 
+{
+	if (NULL != parent)
+	{
+		next_src = parent->first_src; 
+		parent->first_src = this;
+	}
+}
+
+void OSCAudioConnection::linkOutSrc() 
+{
+	if (NULL != pParent)
+	{
+		OSCAudioConnection** ppLink = &(pParent->first_src); 			
+		while (NULL != *ppLink && this != *ppLink)
+			ppLink = &((*ppLink)->next_src);
+		if (NULL != ppLink)
+		{
+			*ppLink = next_src;
+			next_src = NULL;
+		}
+	}
+}
+
+// Link in and out of the connection lists
+void OSCAudioConnection::linkInDst(OSCAudioGroup* parent) 
+{
+	if (NULL != parent)
+	{
+		next_route = parent->first_dst; 
+		parent->first_dst = this;
+	}
+}
+
+void OSCAudioConnection::linkOutDst() 
+{
+	if (NULL != pParent)
+	{
+		OSCAudioConnection** ppLink = &(pParent->first_dst); 			
+		while (NULL != *ppLink && this != *ppLink)
+			ppLink = &((*ppLink)->next_dst);
+		if (NULL != ppLink)
+		{
+			*ppLink = next_dst;
+			next_dst = NULL;
+		}
+	}
+}
+
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 
 
