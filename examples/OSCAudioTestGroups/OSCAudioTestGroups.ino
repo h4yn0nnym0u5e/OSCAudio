@@ -19,6 +19,7 @@ void testCallBack(OSCAudioBase* ooi,OSCMessage& msg,int offset,void* context)
 
 
 //=============================================================
+#if 0
 #define OSC_CLASS(a,o) \
 OSCAudioBase* mk1_##o(const char* nm) {return (OSCAudioBase*) new o(nm);} \
 OSCAudioBase* mk2_##o(const char* nm,OSCAudioGroup& grp) {return (OSCAudioBase*) new o(nm,grp);} 
@@ -39,7 +40,7 @@ streamTypes_t streamTypes[] = {
   OSC_AUDIO_CLASSES
 #undef OSC_CLASS 
 };
-
+#endif
 
 //=============================================================
 void setup() {
@@ -56,8 +57,8 @@ void setup() {
   //-------------------------------
   AudioMemory(50); // no idea what we'll need, so allow plenty
   //-------------------------------
-  for (size_t i=0;i<COUNT_OF(streamTypes);i++)
-    Serial.println(streamTypes[i].name);
+  for (size_t i=0;i<OSCAudioBase::countOfAudioTypes();i++)
+    Serial.println(OSCAudioBase::audioTypes[i].name);
   //-------------------------------
   OSCAudioMixer4* mixer = new OSCAudioMixer4("mixer");
   OSCAudioSynthWaveform* wav1c = new OSCAudioSynthWaveform("wav1");    (void) wav1c;
@@ -75,6 +76,7 @@ void setup() {
         OSCAudioConnection* p1 = new OSCAudioConnection("p1",mixer,0,prtr,0);    (void) p1;
       OSCAudioSynthWaveform* wav1 = new OSCAudioSynthWaveform("wav1",*v1i0);    (void) wav1;
       OSCAudioSynthWaveformModulated* wav2 = new OSCAudioSynthWaveformModulated("wav2",*v1i0);    (void) wav2;
+        OSCAudioConnection* p3 = new OSCAudioConnection("p3",wav2,0,mixer2,0);    (void) p3;
       
       OSCAudioMixer4* mixer2b = new OSCAudioMixer4("mixer",*v1i1);    (void) mixer2b;
       OSCAudioSynthWaveform* wav1b = new OSCAudioSynthWaveform("wav1",*v1i1);    (void) wav1b;
@@ -111,6 +113,10 @@ void setup() {
   const char* addr = "/voice1/i*/w*";
   const char* grp = "/voice1/i0";
   const char* wpat = "/w*";
+  const char* wavOK = "/voice1/i0/wav3";
+  const char* wavBad1 = "/voice1/i0/wav99";
+  const char* wavBad2 = "/voice1/i0/wav*";
+  
   /*
   OSCMessage msg(addr);
   int o = 0;
@@ -126,6 +132,7 @@ void setup() {
   Serial.println(o+ msg.match("/wav2",o));
   Serial.println(o+ msg.match("/mixer",o));
   */
+  
   goFind(addr); // protoype of lbrary code
   
   OSCAudioBase::callBack(addr,testCallBack); // use library
@@ -139,6 +146,16 @@ void setup() {
 
   Serial.printf("%d instances of %s\n",OSCAudioBase::hitCount(addr),addr);
   Serial.printf("%d instances of %s in %s\n",OSCAudioBase::hitCount(wpat,i0base->getNextGroup(),false),wpat,grp);
+
+  OSCAudioBase* ooi;
+  int count;
+  count = OSCAudioBase::findMatch(wavOK,&ooi);
+  Serial.printf("%d instances of %s, last at %08X\n",count,wavOK,ooi);
+  count = OSCAudioBase::findMatch(wavBad1,&ooi);
+  Serial.printf("%d instances of %s, last at %08X\n",count,wavBad1,ooi);
+  count = OSCAudioBase::findMatch(wavBad2,&ooi);
+  Serial.printf("%d instances of %s, last at %08X\n",count,wavBad2,ooi);
+  
   Serial.println("================");
 //---------------------------------------------------------------------------------------------------------------- 
   OSCMessage testMsg;
@@ -148,7 +165,26 @@ void setup() {
   testMsg.empty(); reply.empty(); reply.setTimetag((uint8_t*) &tt).add("/reply");
   testMsg.setAddress("/crOb").add("AudioMixer4").add("mixerL");
   OSCAudioBase::routeDynamic(testMsg,0,reply);
-  //listObjects(); // not required if command worked!
+  listObjects(); // not required if command worked!
+
+  //delete p3; // OK
+  //delete wav3;  // OK
+  //delete wav2; // OK
+  //delete v1i0; // OK
+  //listObjects();
+  
+  testMsg.empty(); reply.empty(); reply.setTimetag((uint8_t*) &tt).add("/reply");
+  testMsg.setAddress("/crConn").add("p5");
+  OSCAudioBase::routeDynamic(testMsg,0,reply);
+  listObjects(); // not required if command worked!
+
+  testMsg.empty(); reply.empty(); reply.setTimetag((uint8_t*) &tt).add("/reply");
+  testMsg.setAddress("/p5/co").add("/voice1/i0/wav3").add(0).add("/voice1/i0/mixer").add(3);
+  //testMsg.send(Serial);
+  OSCAudioBase::routeAll(testMsg,0,reply);
+  //reply.send(Serial);
+  listObjects(); // not required if command worked!
+
    
   Serial.println("\n*** done ***");
 }

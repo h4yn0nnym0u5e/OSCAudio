@@ -30,6 +30,11 @@
 #include "OSCAudioBase.h"
 OSCAudioBase* OSCAudioBase::first_route = NULL;
 
+
+/* ******************************************************************
+ * Generate an array with the names of all the available AudioStream-derived objects,
+ * together with pointers to the functions to call to create instances of each.
+ */
 #define OSC_CLASS(a,o) \
 OSCAudioBase* mk1_##o(const char* nm) {return (OSCAudioBase*) new o(nm);} \
 OSCAudioBase* mk2_##o(const char* nm,OSCAudioGroup& grp) {return (OSCAudioBase*) new o(nm,grp);} 
@@ -42,7 +47,10 @@ const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
 };
 #undef OSC_CLASS
 
+// Return number of available audio objects
 size_t OSCAudioBase::countOfAudioTypes(void) {return COUNT_OF(audioTypes);}
+// ********* end of magic array generator stuff ********************
+
 
 static void dbgPrt(OSCMessage& msg, int addressOffset)
 {
@@ -56,7 +64,8 @@ static void dbgPrt(OSCMessage& msg, int addressOffset)
 	Serial.println(); 
 }
 
-// Link into a grouping lists
+
+// Link into a grouping list
 void OSCAudioBase::linkInGroup(OSCAudioBase* p) 
 {
 	OSCAudioGroup* parent = (OSCAudioGroup*) p;
@@ -67,6 +76,31 @@ void OSCAudioBase::linkInGroup(OSCAudioBase* p)
 		pParent = parent;
 	}
 }
+
+
+// Unlink from a grouping list
+void OSCAudioBase::linkOutGroup(OSCAudioGroup** p) 
+{
+	OSCAudioGroup* parent = *p;
+	if (NULL != parent)
+	{
+		OSCAudioBase** ppLink = &(parent->next_group);
+		
+		while (NULL != *ppLink && this != *ppLink)
+		{
+			ppLink = &((*ppLink)->next_route);
+			OSC_SPTF("%08X ... ",(uint32_t) *ppLink); OSC_SFSH();
+		}
+		if (NULL != ppLink)
+		{
+			OSC_SPTF("Unlink!\n"); OSC_SFSH();
+			*ppLink = next_route;
+			next_route = NULL;
+		}		
+		*p = NULL;
+	}	
+}
+
 
 /**
  *	Rename an [OSC]AudioStream or Connection object.
@@ -116,13 +150,15 @@ void OSCAudioBase::renameObject(OSCMessage& msg, int addressOffset, OSCBundle& r
  * \return pointer to result string (same as dst)
  */
 char* OSCAudioBase::sanitise(const char* src, //!< source string
-							       char* dst) //!< destination string: may be same as src
+							       char* dst, //!< destination string: may be same as src
+								   int offset) //!< offset into sanitisation string: set to 1 to allow /
 {
 	char* dstCopy = dst;
+	const char* toChange = "/ #*,?[]{}";
 	
 	while (0 != *src)
 	{
-		if (NULL == strchr(" #*,/?[]{}",*src))
+		if (NULL == strchr(toChange+offset,*src))
 			*dst++ = *src;
 		else
 			*dst++ = '_';
@@ -260,8 +296,8 @@ static void findMatchCB(OSCAudioBase* ooi,OSCMessage& msg,int offset,void* ctxt)
  *	Count the number of objects that match the supplied address, and return a pointer to the last found
  */
 int OSCAudioBase::findMatch(const char* addr,		//!< address to match
-							OSCAudioBase* ooi,		//!< where in structure to start from (default is root)
 							OSCAudioBase** found,	//!< last-found matching object
+							OSCAudioBase* ooi,		//!< where in structure to start from (default is root)
 							bool enterGroups)		//!< whether to allow matches in sub-groups
 {
 	findMatch_s result = {0};
@@ -582,6 +618,16 @@ void OSCAudioBase::createGroup(OSCMessage& msg, int addressOffset, OSCBundle& re
 
 //============================== OSCAudioConnection =====================================================
 /**
+ * Destroy an OSCAudioConnection: ensure it's unlinked from its lists.
+ */
+OSCAudioConnection::~OSCAudioConnection(void)
+{
+	linkOutSrc();
+	linkOutDst();
+}
+
+
+/**
  *	Create a new [OSC]AudioConnection object.
  */
 void OSCAudioBase::createConnection(OSCMessage& msg, int addressOffset, OSCBundle& reply)
@@ -615,7 +661,6 @@ void OSCAudioBase::createConnection(OSCMessage& msg, int addressOffset, OSCBundl
 }
 
 
-
 /**
  *	Connect an [OSC]AudioConnection object to specific object ports
  */
@@ -625,16 +670,16 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 								 bool zeroToZero)  	//!< true to use port 0 on both, otherwise they're in the message
 {
 	char srcn[50],dstn[50],buf[150];
-	AudioStream* src,*dst;
-	int srcp=0,dstp=0;
-	OSCAudioBase* tmp;
+	AudioStream* src = NULL,*dst = NULL;
+	int srcp=0,dstp=0,count;
+	OSCAudioBase* srcB,*dstB;
 	error retval = OK;
 	
 	OSC_SPLN("makeConnection");
 	OSC_DBGP(msg,addressOffset);
 	
 	msg.getString(0,srcn,50);
-	trimUnderscores(sanitise(srcn,srcn),srcn); // make the source name valid
+	trimUnderscores(sanitise(srcn,srcn,1),srcn); // make the source name valid
 	if (!zeroToZero)
 	{
 		srcp = msg.getInt(1);
@@ -643,39 +688,76 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 	}
 	else
 		msg.getString(1,dstn,50);
-	trimUnderscores(sanitise(dstn,dstn),dstn); // make the destination name valid
+	trimUnderscores(sanitise(dstn,dstn,1),dstn); // make the destination name valid
 	
 	// Find the named OSCAudioBase objects and convert to
 	// the corresponding AudioStream: is there a better way?
-	tmp = find(srcn); src = (NULL != tmp)?tmp->sibling:NULL;
-	tmp = find(dstn); dst = (NULL != tmp)?tmp->sibling:NULL;
-		
-	if (NULL != src && NULL != dst)
+	if (1 == (count = findMatch(srcn,&srcB))) // just one source, please
 	{
-		sprintf(buf,"%s:%d -> %s:%d",srcn,srcp,dstn,dstp);
-		connect(*src,(int) srcp,*dst,(int) dstp);
+		src = srcB->sibling;
+		if (1 == (count = findMatch(dstn,&dstB))) // and one destination!
+			dst = dstB->sibling;			
+		else
+			retval = AMBIGUOUS_PATH;
 	}
 	else
+		retval = AMBIGUOUS_PATH;
+	
+	if (OK == retval)
 	{
-		sprintf(buf,"Nothing!");
-		retval = NOT_FOUND;
+		if (NULL != src && NULL != dst)
+		{
+			sprintf(buf,"%s:%d -> %s:%d",srcn,srcp,dstn,dstp);
+			connect(*src,(int) srcp,*dst,(int) dstp); // make the audio connection
+			mkLinks(*srcB,*dstB); // make the OSC linkages
+		}
+		else
+		{
+			sprintf(buf,"Nothing!");
+			retval = NOT_FOUND;
+		}
 	}
+	else
+		sprintf(buf,"Bad path");
 	OSC_SPLN(buf);
 	
 	prepareReplyResult(msg,reply).set(1,buf).add((int) retval);
 }
+
+
+void OSCAudioConnection::mkLinks(OSCAudioBase& src, OSCAudioBase& dst)
+{
+	Serial.printf("Link %08X to source %08X (parent %08X)\n",
+					(uint32_t) this,
+					(uint32_t) &src,
+					(uint32_t) src.pParent
+					);
+					
+	linkInSrc(src.pParent);
+	listObjects();
+	Serial.printf(" and dest %08X (parent %08X)\n\n",
+					(uint32_t) &dst,
+					(uint32_t) dst.pParent
+					);
+					
+	linkInDst(dst.pParent);
+	listObjects();
+}
+
 
 void OSCAudioConnection::route(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
 	int nameOff = isMine(msg,addressOffset);
 	if (nameOff > 0)
 	{ 
+		Serial.printf("It's for %s!\n",name);
 		addressOffset += nameOff;
 		if (isTarget(msg,addressOffset,"/c*","ss")) {OSCconnect(msg,addressOffset,reply,true);}
 		else if (isTarget(msg,addressOffset,"/c*","sisi")) {OSCconnect(msg,addressOffset,reply);} 
 		else if (isTarget(msg,addressOffset,"/d*",NULL)) {disconnect();} 
 	}
 }
+
 
 // Link in and out of the connection lists
 void OSCAudioConnection::linkInSrc(OSCAudioGroup* parent) 
@@ -684,14 +766,16 @@ void OSCAudioConnection::linkInSrc(OSCAudioGroup* parent)
 	{
 		next_src = parent->first_src; 
 		parent->first_src = this;
+		pSrcParent = parent;
 	}
 }
 
+
 void OSCAudioConnection::linkOutSrc() 
 {
-	if (NULL != pParent)
+	if (NULL != pSrcParent)
 	{
-		OSCAudioConnection** ppLink = &(pParent->first_src); 			
+		OSCAudioConnection** ppLink = &(pSrcParent->first_src); 			
 		while (NULL != *ppLink && this != *ppLink)
 			ppLink = &((*ppLink)->next_src);
 		if (NULL != ppLink)
@@ -707,16 +791,17 @@ void OSCAudioConnection::linkInDst(OSCAudioGroup* parent)
 {
 	if (NULL != parent)
 	{
-		next_route = parent->first_dst; 
+		next_dst = parent->first_dst; 
 		parent->first_dst = this;
+		pDstParent = parent;
 	}
 }
 
 void OSCAudioConnection::linkOutDst() 
 {
-	if (NULL != pParent)
+	if (NULL != pDstParent)
 	{
-		OSCAudioConnection** ppLink = &(pParent->first_dst); 			
+		OSCAudioConnection** ppLink = &(pDstParent->first_dst); 			
 		while (NULL != *ppLink && this != *ppLink)
 			ppLink = &((*ppLink)->next_dst);
 		if (NULL != ppLink)

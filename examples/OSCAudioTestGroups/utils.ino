@@ -1,3 +1,9 @@
+void prIndent(int indent)
+{
+  for (int i=0;i<indent;i++)
+    Serial.print(' ');  
+}
+
 
 //=============================================================
 void listObjects(OSCAudioBase* obj,int indent=0)
@@ -7,8 +13,9 @@ void listObjects(OSCAudioBase* obj,int indent=0)
   while (depth < 5 && NULL != obj)
   {
     OSCAudioBase* grp = obj->getNextGroup();
-    for (int i=0;i<indent;i++)
-      Serial.print(' ');
+    OSCAudioConnection* conn = obj->getFirstSrc();
+    
+    prIndent(indent);
     Serial.printf("%s is at %08X; route: %08X",obj->name,(uint32_t) obj,(uint32_t) obj->getNext()); Serial.flush();
     if (NULL != grp)
     {
@@ -17,6 +24,32 @@ void listObjects(OSCAudioBase* obj,int indent=0)
     }
     else
       Serial.println(); Serial.flush();   
+
+    if (NULL != conn)
+    {
+      prIndent(indent+2);
+      Serial.println("source connections:");
+      while (NULL != conn)
+      {
+        prIndent(indent+4);
+        Serial.println(conn->name);
+        conn = conn->getNextSrc();
+      }
+    }
+    
+    conn = obj->getFirstDst();
+    if (NULL != conn)
+    {
+      prIndent(indent+2);
+      Serial.println("destination connections:");
+      while (NULL != conn)
+      {
+        prIndent(indent+4);
+        Serial.println(conn->name);
+        conn = conn->getNextDst();
+      }
+    }    
+      
     //Serial.printf("group %08X\n",(uint32_t) (obj->getNextGroup()));
     Serial.flush();
 

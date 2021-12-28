@@ -28,7 +28,7 @@
  */
 
 // ============== AsyncAudioInputSPDIF3 ====================
-class AsyncOSCAudioInputSPDIF3 : public AsyncAudioInputSPDIF3, OSCAudioBase
+class AsyncOSCAudioInputSPDIF3 : public AsyncAudioInputSPDIF3, public OSCAudioBase
 {
     public:
         AsyncOSCAudioInputSPDIF3(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -52,7 +52,7 @@ class AsyncOSCAudioInputSPDIF3 : public AsyncAudioInputSPDIF3, OSCAudioBase
 };
 
 // ============== AudioAmplifier ====================
-class OSCAudioAmplifier : public AudioAmplifier, OSCAudioBase
+class OSCAudioAmplifier : public AudioAmplifier, public OSCAudioBase
 {
     public:
         OSCAudioAmplifier(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -71,7 +71,7 @@ class OSCAudioAmplifier : public AudioAmplifier, OSCAudioBase
 };
 
 // ============== AudioAnalyzeEvent ====================
-class OSCAudioAnalyzeEvent : public AudioAnalyzeEvent, OSCAudioBase
+class OSCAudioAnalyzeEvent : public AudioAnalyzeEvent, public OSCAudioBase
 {
     public:
         OSCAudioAnalyzeEvent(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -91,7 +91,7 @@ class OSCAudioAnalyzeEvent : public AudioAnalyzeEvent, OSCAudioBase
 };
 
 // ============== AudioAnalyzeFFT1024 ====================
-class OSCAudioAnalyzeFFT1024 : public AudioAnalyzeFFT1024, OSCAudioBase
+class OSCAudioAnalyzeFFT1024 : public AudioAnalyzeFFT1024, public OSCAudioBase
 {
     public:
         OSCAudioAnalyzeFFT1024(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -115,7 +115,7 @@ class OSCAudioAnalyzeFFT1024 : public AudioAnalyzeFFT1024, OSCAudioBase
 };
 
 // ============== AudioAnalyzeFFT256 ====================
-class OSCAudioAnalyzeFFT256 : public AudioAnalyzeFFT256, OSCAudioBase
+class OSCAudioAnalyzeFFT256 : public AudioAnalyzeFFT256, public OSCAudioBase
 {
     public:
         OSCAudioAnalyzeFFT256(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -139,7 +139,7 @@ class OSCAudioAnalyzeFFT256 : public AudioAnalyzeFFT256, OSCAudioBase
 };
 
 // ============== AudioAnalyzeNoteFrequency ====================
-class OSCAudioAnalyzeNoteFrequency : public AudioAnalyzeNoteFrequency, OSCAudioBase
+class OSCAudioAnalyzeNoteFrequency : public AudioAnalyzeNoteFrequency, public OSCAudioBase
 {
     public:
         OSCAudioAnalyzeNoteFrequency(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -161,7 +161,7 @@ class OSCAudioAnalyzeNoteFrequency : public AudioAnalyzeNoteFrequency, OSCAudioB
 };
 
 // ============== AudioAnalyzePeak ====================
-class OSCAudioAnalyzePeak : public AudioAnalyzePeak, OSCAudioBase
+class OSCAudioAnalyzePeak : public AudioAnalyzePeak, public OSCAudioBase
 {
     public:
         OSCAudioAnalyzePeak(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -181,7 +181,7 @@ class OSCAudioAnalyzePeak : public AudioAnalyzePeak, OSCAudioBase
 };
 
 // ============== AudioAnalyzePrint ====================
-class OSCAudioAnalyzePrint : public AudioAnalyzePrint, OSCAudioBase
+class OSCAudioAnalyzePrint : public AudioAnalyzePrint, public OSCAudioBase
 {
     public:
         OSCAudioAnalyzePrint(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this), namePtr(0) {}
@@ -207,7 +207,7 @@ class OSCAudioAnalyzePrint : public AudioAnalyzePrint, OSCAudioBase
 };
 
 // ============== AudioAnalyzeRMS ====================
-class OSCAudioAnalyzeRMS : public AudioAnalyzeRMS, OSCAudioBase
+class OSCAudioAnalyzeRMS : public AudioAnalyzeRMS, public OSCAudioBase
 {
     public:
         OSCAudioAnalyzeRMS(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -226,7 +226,7 @@ class OSCAudioAnalyzeRMS : public AudioAnalyzeRMS, OSCAudioBase
 };
 
 // ============== AudioAnalyzeToneDetect ====================
-class OSCAudioAnalyzeToneDetect : public AudioAnalyzeToneDetect, OSCAudioBase
+class OSCAudioAnalyzeToneDetect : public AudioAnalyzeToneDetect, public OSCAudioBase
 {
     public:
         OSCAudioAnalyzeToneDetect(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -248,7 +248,7 @@ class OSCAudioAnalyzeToneDetect : public AudioAnalyzeToneDetect, OSCAudioBase
 };
 
 // ============== AudioControlAK4558 ====================
-class OSCAudioControlAK4558 : public AudioControlAK4558, OSCAudioBase
+class OSCAudioControlAK4558 : public AudioControlAK4558, public OSCAudioBase
 {
     public:
         OSCAudioControlAK4558(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -276,7 +276,7 @@ class OSCAudioControlAK4558 : public AudioControlAK4558, OSCAudioBase
 };
 
 // ============== AudioControlCS42448 ====================
-class OSCAudioControlCS42448 : public AudioControlCS42448, OSCAudioBase
+class OSCAudioControlCS42448 : public AudioControlCS42448, public OSCAudioBase
 {
     public:
         OSCAudioControlCS42448(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -301,7 +301,7 @@ class OSCAudioControlCS42448 : public AudioControlCS42448, OSCAudioBase
 };
 
 // ============== AudioControlCS4272 ====================
-class OSCAudioControlCS4272 : public AudioControlCS4272, OSCAudioBase
+class OSCAudioControlCS4272 : public AudioControlCS4272, public OSCAudioBase
 {
     public:
         OSCAudioControlCS4272(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -332,7 +332,7 @@ class OSCAudioControlCS4272 : public AudioControlCS4272, OSCAudioBase
 };
 
 // ============== AudioControlSGTL5000 ====================
-class OSCAudioControlSGTL5000 : public AudioControlSGTL5000, OSCAudioBase
+class OSCAudioControlSGTL5000 : public AudioControlSGTL5000, public OSCAudioBase
 {
     public:
         OSCAudioControlSGTL5000(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -398,7 +398,7 @@ class OSCAudioControlSGTL5000 : public AudioControlSGTL5000, OSCAudioBase
 };
 
 // ============== AudioControlTLV320AIC3206 ====================
-class OSCAudioControlTLV320AIC3206 : public AudioControlTLV320AIC3206, OSCAudioBase
+class OSCAudioControlTLV320AIC3206 : public AudioControlTLV320AIC3206, public OSCAudioBase
 {
     public:
         OSCAudioControlTLV320AIC3206(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -436,7 +436,7 @@ class OSCAudioControlTLV320AIC3206 : public AudioControlTLV320AIC3206, OSCAudioB
 };
 
 // ============== AudioControlWM8731 ====================
-class OSCAudioControlWM8731 : public AudioControlWM8731, OSCAudioBase
+class OSCAudioControlWM8731 : public AudioControlWM8731, public OSCAudioBase
 {
     public:
         OSCAudioControlWM8731(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -458,7 +458,7 @@ class OSCAudioControlWM8731 : public AudioControlWM8731, OSCAudioBase
 };
 
 // ============== AudioControlWM8731master ====================
-class OSCAudioControlWM8731master : public AudioControlWM8731master, OSCAudioBase
+class OSCAudioControlWM8731master : public AudioControlWM8731master, public OSCAudioBase
 {
     public:
         OSCAudioControlWM8731master(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -476,7 +476,7 @@ class OSCAudioControlWM8731master : public AudioControlWM8731master, OSCAudioBas
 };
 
 // ============== AudioEffectBitcrusher ====================
-class OSCAudioEffectBitcrusher : public AudioEffectBitcrusher, OSCAudioBase
+class OSCAudioEffectBitcrusher : public AudioEffectBitcrusher, public OSCAudioBase
 {
     public:
         OSCAudioEffectBitcrusher(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -495,7 +495,7 @@ class OSCAudioEffectBitcrusher : public AudioEffectBitcrusher, OSCAudioBase
 };
 
 // ============== AudioEffectDelay ====================
-class OSCAudioEffectDelay : public AudioEffectDelay, OSCAudioBase
+class OSCAudioEffectDelay : public AudioEffectDelay, public OSCAudioBase
 {
     public:
         OSCAudioEffectDelay(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -514,7 +514,7 @@ class OSCAudioEffectDelay : public AudioEffectDelay, OSCAudioBase
 };
 
 // ============== AudioEffectDelayExternal ====================
-class OSCAudioEffectDelayExternal : public AudioEffectDelayExternal, OSCAudioBase
+class OSCAudioEffectDelayExternal : public AudioEffectDelayExternal, public OSCAudioBase
 {
     public:
         OSCAudioEffectDelayExternal(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -533,7 +533,7 @@ class OSCAudioEffectDelayExternal : public AudioEffectDelayExternal, OSCAudioBas
 };
 
 // ============== AudioEffectDigitalCombine ====================
-class OSCAudioEffectDigitalCombine : public AudioEffectDigitalCombine, OSCAudioBase
+class OSCAudioEffectDigitalCombine : public AudioEffectDigitalCombine, public OSCAudioBase
 {
     public:
         OSCAudioEffectDigitalCombine(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -551,7 +551,7 @@ class OSCAudioEffectDigitalCombine : public AudioEffectDigitalCombine, OSCAudioB
 };
 
 // ============== AudioEffectEnvelope ====================
-class OSCAudioEffectEnvelope : public AudioEffectEnvelope, OSCAudioBase
+class OSCAudioEffectEnvelope : public AudioEffectEnvelope, public OSCAudioBase
 {
     public:
         OSCAudioEffectEnvelope(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -579,7 +579,7 @@ class OSCAudioEffectEnvelope : public AudioEffectEnvelope, OSCAudioBase
 };
 
 // ============== AudioEffectExpEnvelope ====================
-class OSCAudioEffectExpEnvelope : public AudioEffectExpEnvelope, OSCAudioBase
+class OSCAudioEffectExpEnvelope : public AudioEffectExpEnvelope, public OSCAudioBase
 {
     public:
         OSCAudioEffectExpEnvelope(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -609,7 +609,7 @@ class OSCAudioEffectExpEnvelope : public AudioEffectExpEnvelope, OSCAudioBase
 };
 
 // ============== AudioEffectFade ====================
-class OSCAudioEffectFade : public AudioEffectFade, OSCAudioBase
+class OSCAudioEffectFade : public AudioEffectFade, public OSCAudioBase
 {
     public:
         OSCAudioEffectFade(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -628,7 +628,7 @@ class OSCAudioEffectFade : public AudioEffectFade, OSCAudioBase
 };
 
 // ============== AudioEffectFreeverb ====================
-class OSCAudioEffectFreeverb : public AudioEffectFreeverb, OSCAudioBase
+class OSCAudioEffectFreeverb : public AudioEffectFreeverb, public OSCAudioBase
 {
     public:
         OSCAudioEffectFreeverb(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -647,7 +647,7 @@ class OSCAudioEffectFreeverb : public AudioEffectFreeverb, OSCAudioBase
 };
 
 // ============== AudioEffectFreeverbStereo ====================
-class OSCAudioEffectFreeverbStereo : public AudioEffectFreeverbStereo, OSCAudioBase
+class OSCAudioEffectFreeverbStereo : public AudioEffectFreeverbStereo, public OSCAudioBase
 {
     public:
         OSCAudioEffectFreeverbStereo(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -666,7 +666,7 @@ class OSCAudioEffectFreeverbStereo : public AudioEffectFreeverbStereo, OSCAudioB
 };
 
 // ============== AudioEffectGranular ====================
-class OSCAudioEffectGranular : public AudioEffectGranular, OSCAudioBase
+class OSCAudioEffectGranular : public AudioEffectGranular, public OSCAudioBase
 {
     public:
         OSCAudioEffectGranular(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this), sample_bank(0) {}
@@ -692,7 +692,7 @@ class OSCAudioEffectGranular : public AudioEffectGranular, OSCAudioBase
 };
 
 // ============== AudioEffectMidSide ====================
-class OSCAudioEffectMidSide : public AudioEffectMidSide, OSCAudioBase
+class OSCAudioEffectMidSide : public AudioEffectMidSide, public OSCAudioBase
 {
     public:
         OSCAudioEffectMidSide(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -711,7 +711,7 @@ class OSCAudioEffectMidSide : public AudioEffectMidSide, OSCAudioBase
 };
 
 // ============== AudioEffectMultiply ====================
-class OSCAudioEffectMultiply : public AudioEffectMultiply, OSCAudioBase
+class OSCAudioEffectMultiply : public AudioEffectMultiply, public OSCAudioBase
 {
     public:
         OSCAudioEffectMultiply(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -728,7 +728,7 @@ class OSCAudioEffectMultiply : public AudioEffectMultiply, OSCAudioBase
 };
 
 // ============== AudioEffectRectifier ====================
-class OSCAudioEffectRectifier : public AudioEffectRectifier, OSCAudioBase
+class OSCAudioEffectRectifier : public AudioEffectRectifier, public OSCAudioBase
 {
     public:
         OSCAudioEffectRectifier(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -745,7 +745,7 @@ class OSCAudioEffectRectifier : public AudioEffectRectifier, OSCAudioBase
 };
 
 // ============== AudioEffectReverb ====================
-class OSCAudioEffectReverb : public AudioEffectReverb, OSCAudioBase
+class OSCAudioEffectReverb : public AudioEffectReverb, public OSCAudioBase
 {
     public:
         OSCAudioEffectReverb(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -763,7 +763,7 @@ class OSCAudioEffectReverb : public AudioEffectReverb, OSCAudioBase
 };
 
 // ============== AudioEffectWaveFolder ====================
-class OSCAudioEffectWaveFolder : public AudioEffectWaveFolder, OSCAudioBase
+class OSCAudioEffectWaveFolder : public AudioEffectWaveFolder, public OSCAudioBase
 {
     public:
         OSCAudioEffectWaveFolder(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -780,7 +780,7 @@ class OSCAudioEffectWaveFolder : public AudioEffectWaveFolder, OSCAudioBase
 };
 
 // ============== AudioEffectWaveshaper ====================
-class OSCAudioEffectWaveshaper : public AudioEffectWaveshaper, OSCAudioBase
+class OSCAudioEffectWaveshaper : public AudioEffectWaveshaper, public OSCAudioBase
 {
     public:
         OSCAudioEffectWaveshaper(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -798,7 +798,7 @@ class OSCAudioEffectWaveshaper : public AudioEffectWaveshaper, OSCAudioBase
 };
 
 // ============== AudioFilterBiquad ====================
-class OSCAudioFilterBiquad : public AudioFilterBiquad, OSCAudioBase
+class OSCAudioFilterBiquad : public AudioFilterBiquad, public OSCAudioBase
 {
     public:
         OSCAudioFilterBiquad(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -825,7 +825,7 @@ class OSCAudioFilterBiquad : public AudioFilterBiquad, OSCAudioBase
 };
 
 // ============== AudioFilterFIR ====================
-class OSCAudioFilterFIR : public AudioFilterFIR, OSCAudioBase
+class OSCAudioFilterFIR : public AudioFilterFIR, public OSCAudioBase
 {
     public:
         OSCAudioFilterFIR(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -844,7 +844,7 @@ class OSCAudioFilterFIR : public AudioFilterFIR, OSCAudioBase
 };
 
 // ============== AudioFilterLadder ====================
-class OSCAudioFilterLadder : public AudioFilterLadder, OSCAudioBase
+class OSCAudioFilterLadder : public AudioFilterLadder, public OSCAudioBase
 {
     public:
         OSCAudioFilterLadder(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -867,7 +867,7 @@ class OSCAudioFilterLadder : public AudioFilterLadder, OSCAudioBase
 };
 
 // ============== AudioFilterStateVariable ====================
-class OSCAudioFilterStateVariable : public AudioFilterStateVariable, OSCAudioBase
+class OSCAudioFilterStateVariable : public AudioFilterStateVariable, public OSCAudioBase
 {
     public:
         OSCAudioFilterStateVariable(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -887,7 +887,7 @@ class OSCAudioFilterStateVariable : public AudioFilterStateVariable, OSCAudioBas
 };
 
 // ============== AudioInputAnalog ====================
-class OSCAudioInputAnalog : public AudioInputAnalog, OSCAudioBase
+class OSCAudioInputAnalog : public AudioInputAnalog, public OSCAudioBase
 {
     public:
         OSCAudioInputAnalog(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -904,7 +904,7 @@ class OSCAudioInputAnalog : public AudioInputAnalog, OSCAudioBase
 };
 
 // ============== AudioInputAnalogStereo ====================
-class OSCAudioInputAnalogStereo : public AudioInputAnalogStereo, OSCAudioBase
+class OSCAudioInputAnalogStereo : public AudioInputAnalogStereo, public OSCAudioBase
 {
     public:
         OSCAudioInputAnalogStereo(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -921,7 +921,7 @@ class OSCAudioInputAnalogStereo : public AudioInputAnalogStereo, OSCAudioBase
 };
 
 // ============== AudioInputI2S ====================
-class OSCAudioInputI2S : public AudioInputI2S, OSCAudioBase
+class OSCAudioInputI2S : public AudioInputI2S, public OSCAudioBase
 {
     public:
         OSCAudioInputI2S(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -938,7 +938,7 @@ class OSCAudioInputI2S : public AudioInputI2S, OSCAudioBase
 };
 
 // ============== AudioInputI2S2 ====================
-class OSCAudioInputI2S2 : public AudioInputI2S2, OSCAudioBase
+class OSCAudioInputI2S2 : public AudioInputI2S2, public OSCAudioBase
 {
     public:
         OSCAudioInputI2S2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -955,7 +955,7 @@ class OSCAudioInputI2S2 : public AudioInputI2S2, OSCAudioBase
 };
 
 // ============== AudioInputI2SHex ====================
-class OSCAudioInputI2SHex : public AudioInputI2SHex, OSCAudioBase
+class OSCAudioInputI2SHex : public AudioInputI2SHex, public OSCAudioBase
 {
     public:
         OSCAudioInputI2SHex(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -972,7 +972,7 @@ class OSCAudioInputI2SHex : public AudioInputI2SHex, OSCAudioBase
 };
 
 // ============== AudioInputI2SOct ====================
-class OSCAudioInputI2SOct : public AudioInputI2SOct, OSCAudioBase
+class OSCAudioInputI2SOct : public AudioInputI2SOct, public OSCAudioBase
 {
     public:
         OSCAudioInputI2SOct(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -989,7 +989,7 @@ class OSCAudioInputI2SOct : public AudioInputI2SOct, OSCAudioBase
 };
 
 // ============== AudioInputI2SQuad ====================
-class OSCAudioInputI2SQuad : public AudioInputI2SQuad, OSCAudioBase
+class OSCAudioInputI2SQuad : public AudioInputI2SQuad, public OSCAudioBase
 {
     public:
         OSCAudioInputI2SQuad(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1006,7 +1006,7 @@ class OSCAudioInputI2SQuad : public AudioInputI2SQuad, OSCAudioBase
 };
 
 // ============== AudioInputPDM ====================
-class OSCAudioInputPDM : public AudioInputPDM, OSCAudioBase
+class OSCAudioInputPDM : public AudioInputPDM, public OSCAudioBase
 {
     public:
         OSCAudioInputPDM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1023,7 +1023,7 @@ class OSCAudioInputPDM : public AudioInputPDM, OSCAudioBase
 };
 
 // ============== AudioInputPDM2 ====================
-class OSCAudioInputPDM2 : public AudioInputPDM2, OSCAudioBase
+class OSCAudioInputPDM2 : public AudioInputPDM2, public OSCAudioBase
 {
     public:
         OSCAudioInputPDM2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1040,7 +1040,7 @@ class OSCAudioInputPDM2 : public AudioInputPDM2, OSCAudioBase
 };
 
 // ============== AudioInputSPDIF3 ====================
-class OSCAudioInputSPDIF3 : public AudioInputSPDIF3, OSCAudioBase
+class OSCAudioInputSPDIF3 : public AudioInputSPDIF3, public OSCAudioBase
 {
     public:
         OSCAudioInputSPDIF3(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1059,7 +1059,7 @@ class OSCAudioInputSPDIF3 : public AudioInputSPDIF3, OSCAudioBase
 };
 
 // ============== AudioInputTDM ====================
-class OSCAudioInputTDM : public AudioInputTDM, OSCAudioBase
+class OSCAudioInputTDM : public AudioInputTDM, public OSCAudioBase
 {
     public:
         OSCAudioInputTDM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1076,7 +1076,7 @@ class OSCAudioInputTDM : public AudioInputTDM, OSCAudioBase
 };
 
 // ============== AudioInputTDM2 ====================
-class OSCAudioInputTDM2 : public AudioInputTDM2, OSCAudioBase
+class OSCAudioInputTDM2 : public AudioInputTDM2, public OSCAudioBase
 {
     public:
         OSCAudioInputTDM2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1093,7 +1093,7 @@ class OSCAudioInputTDM2 : public AudioInputTDM2, OSCAudioBase
 };
 
 // ============== AudioMixer4 ====================
-class OSCAudioMixer4 : public AudioMixer4, OSCAudioBase
+class OSCAudioMixer4 : public AudioMixer4, public OSCAudioBase
 {
     public:
         OSCAudioMixer4(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1111,7 +1111,7 @@ class OSCAudioMixer4 : public AudioMixer4, OSCAudioBase
 };
 
 // ============== AudioOutputADAT ====================
-class OSCAudioOutputADAT : public AudioOutputADAT, OSCAudioBase
+class OSCAudioOutputADAT : public AudioOutputADAT, public OSCAudioBase
 {
     public:
         OSCAudioOutputADAT(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1129,7 +1129,7 @@ class OSCAudioOutputADAT : public AudioOutputADAT, OSCAudioBase
 };
 
 // ============== AudioOutputAnalog ====================
-class OSCAudioOutputAnalog : public AudioOutputAnalog, OSCAudioBase
+class OSCAudioOutputAnalog : public AudioOutputAnalog, public OSCAudioBase
 {
     public:
         OSCAudioOutputAnalog(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1147,7 +1147,7 @@ class OSCAudioOutputAnalog : public AudioOutputAnalog, OSCAudioBase
 };
 
 // ============== AudioOutputAnalogStereo ====================
-class OSCAudioOutputAnalogStereo : public AudioOutputAnalogStereo, OSCAudioBase
+class OSCAudioOutputAnalogStereo : public AudioOutputAnalogStereo, public OSCAudioBase
 {
     public:
         OSCAudioOutputAnalogStereo(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1165,7 +1165,7 @@ class OSCAudioOutputAnalogStereo : public AudioOutputAnalogStereo, OSCAudioBase
 };
 
 // ============== AudioOutputI2S ====================
-class OSCAudioOutputI2S : public AudioOutputI2S, OSCAudioBase
+class OSCAudioOutputI2S : public AudioOutputI2S, public OSCAudioBase
 {
     public:
         OSCAudioOutputI2S(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1182,7 +1182,7 @@ class OSCAudioOutputI2S : public AudioOutputI2S, OSCAudioBase
 };
 
 // ============== AudioOutputI2S2 ====================
-class OSCAudioOutputI2S2 : public AudioOutputI2S2, OSCAudioBase
+class OSCAudioOutputI2S2 : public AudioOutputI2S2, public OSCAudioBase
 {
     public:
         OSCAudioOutputI2S2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1199,7 +1199,7 @@ class OSCAudioOutputI2S2 : public AudioOutputI2S2, OSCAudioBase
 };
 
 // ============== AudioOutputI2SHex ====================
-class OSCAudioOutputI2SHex : public AudioOutputI2SHex, OSCAudioBase
+class OSCAudioOutputI2SHex : public AudioOutputI2SHex, public OSCAudioBase
 {
     public:
         OSCAudioOutputI2SHex(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1216,7 +1216,7 @@ class OSCAudioOutputI2SHex : public AudioOutputI2SHex, OSCAudioBase
 };
 
 // ============== AudioOutputI2SOct ====================
-class OSCAudioOutputI2SOct : public AudioOutputI2SOct, OSCAudioBase
+class OSCAudioOutputI2SOct : public AudioOutputI2SOct, public OSCAudioBase
 {
     public:
         OSCAudioOutputI2SOct(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1233,7 +1233,7 @@ class OSCAudioOutputI2SOct : public AudioOutputI2SOct, OSCAudioBase
 };
 
 // ============== AudioOutputI2SQuad ====================
-class OSCAudioOutputI2SQuad : public AudioOutputI2SQuad, OSCAudioBase
+class OSCAudioOutputI2SQuad : public AudioOutputI2SQuad, public OSCAudioBase
 {
     public:
         OSCAudioOutputI2SQuad(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1250,7 +1250,7 @@ class OSCAudioOutputI2SQuad : public AudioOutputI2SQuad, OSCAudioBase
 };
 
 // ============== AudioOutputMQS ====================
-class OSCAudioOutputMQS : public AudioOutputMQS, OSCAudioBase
+class OSCAudioOutputMQS : public AudioOutputMQS, public OSCAudioBase
 {
     public:
         OSCAudioOutputMQS(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1267,7 +1267,7 @@ class OSCAudioOutputMQS : public AudioOutputMQS, OSCAudioBase
 };
 
 // ============== AudioOutputPT8211 ====================
-class OSCAudioOutputPT8211 : public AudioOutputPT8211, OSCAudioBase
+class OSCAudioOutputPT8211 : public AudioOutputPT8211, public OSCAudioBase
 {
     public:
         OSCAudioOutputPT8211(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1284,7 +1284,7 @@ class OSCAudioOutputPT8211 : public AudioOutputPT8211, OSCAudioBase
 };
 
 // ============== AudioOutputPT8211_2 ====================
-class OSCAudioOutputPT8211_2 : public AudioOutputPT8211_2, OSCAudioBase
+class OSCAudioOutputPT8211_2 : public AudioOutputPT8211_2, public OSCAudioBase
 {
     public:
         OSCAudioOutputPT8211_2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1301,7 +1301,7 @@ class OSCAudioOutputPT8211_2 : public AudioOutputPT8211_2, OSCAudioBase
 };
 
 // ============== AudioOutputPWM ====================
-class OSCAudioOutputPWM : public AudioOutputPWM, OSCAudioBase
+class OSCAudioOutputPWM : public AudioOutputPWM, public OSCAudioBase
 {
     public:
         OSCAudioOutputPWM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1318,7 +1318,7 @@ class OSCAudioOutputPWM : public AudioOutputPWM, OSCAudioBase
 };
 
 // ============== AudioOutputSPDIF ====================
-class OSCAudioOutputSPDIF : public AudioOutputSPDIF, OSCAudioBase
+class OSCAudioOutputSPDIF : public AudioOutputSPDIF, public OSCAudioBase
 {
     public:
         OSCAudioOutputSPDIF(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1336,7 +1336,7 @@ class OSCAudioOutputSPDIF : public AudioOutputSPDIF, OSCAudioBase
 };
 
 // ============== AudioOutputSPDIF2 ====================
-class OSCAudioOutputSPDIF2 : public AudioOutputSPDIF2, OSCAudioBase
+class OSCAudioOutputSPDIF2 : public AudioOutputSPDIF2, public OSCAudioBase
 {
     public:
         OSCAudioOutputSPDIF2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1354,7 +1354,7 @@ class OSCAudioOutputSPDIF2 : public AudioOutputSPDIF2, OSCAudioBase
 };
 
 // ============== AudioOutputSPDIF3 ====================
-class OSCAudioOutputSPDIF3 : public AudioOutputSPDIF3, OSCAudioBase
+class OSCAudioOutputSPDIF3 : public AudioOutputSPDIF3, public OSCAudioBase
 {
     public:
         OSCAudioOutputSPDIF3(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1373,7 +1373,7 @@ class OSCAudioOutputSPDIF3 : public AudioOutputSPDIF3, OSCAudioBase
 };
 
 // ============== AudioOutputTDM ====================
-class OSCAudioOutputTDM : public AudioOutputTDM, OSCAudioBase
+class OSCAudioOutputTDM : public AudioOutputTDM, public OSCAudioBase
 {
     public:
         OSCAudioOutputTDM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1390,7 +1390,7 @@ class OSCAudioOutputTDM : public AudioOutputTDM, OSCAudioBase
 };
 
 // ============== AudioOutputTDM2 ====================
-class OSCAudioOutputTDM2 : public AudioOutputTDM2, OSCAudioBase
+class OSCAudioOutputTDM2 : public AudioOutputTDM2, public OSCAudioBase
 {
     public:
         OSCAudioOutputTDM2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1407,7 +1407,7 @@ class OSCAudioOutputTDM2 : public AudioOutputTDM2, OSCAudioBase
 };
 
 // ============== AudioPlayMemory ====================
-class OSCAudioPlayMemory : public AudioPlayMemory, OSCAudioBase
+class OSCAudioPlayMemory : public AudioPlayMemory, public OSCAudioBase
 {
     public:
         OSCAudioPlayMemory(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1431,7 +1431,7 @@ class OSCAudioPlayMemory : public AudioPlayMemory, OSCAudioBase
 };
 
 // ============== AudioPlayQueue ====================
-class OSCAudioPlayQueue : public AudioPlayQueue, OSCAudioBase
+class OSCAudioPlayQueue : public AudioPlayQueue, public OSCAudioBase
 {
     public:
         OSCAudioPlayQueue(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1455,7 +1455,7 @@ class OSCAudioPlayQueue : public AudioPlayQueue, OSCAudioBase
 };
 
 // ============== AudioPlaySdRaw ====================
-class OSCAudioPlaySdRaw : public AudioPlaySdRaw, OSCAudioBase
+class OSCAudioPlaySdRaw : public AudioPlaySdRaw, public OSCAudioBase
 {
     public:
         OSCAudioPlaySdRaw(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1480,7 +1480,7 @@ class OSCAudioPlaySdRaw : public AudioPlaySdRaw, OSCAudioBase
 };
 
 // ============== AudioPlaySdWav ====================
-class OSCAudioPlaySdWav : public AudioPlaySdWav, OSCAudioBase
+class OSCAudioPlaySdWav : public AudioPlaySdWav, public OSCAudioBase
 {
     public:
         OSCAudioPlaySdWav(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1508,7 +1508,7 @@ class OSCAudioPlaySdWav : public AudioPlaySdWav, OSCAudioBase
 };
 
 // ============== AudioPlaySerialflashRaw ====================
-class OSCAudioPlaySerialflashRaw : public AudioPlaySerialflashRaw, OSCAudioBase
+class OSCAudioPlaySerialflashRaw : public AudioPlaySerialflashRaw, public OSCAudioBase
 {
     public:
         OSCAudioPlaySerialflashRaw(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1533,7 +1533,7 @@ class OSCAudioPlaySerialflashRaw : public AudioPlaySerialflashRaw, OSCAudioBase
 };
 
 // ============== AudioRecordQueue ====================
-class OSCAudioRecordQueue : public AudioRecordQueue, OSCAudioBase
+class OSCAudioRecordQueue : public AudioRecordQueue, public OSCAudioBase
 {
     public:
         OSCAudioRecordQueue(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1556,7 +1556,7 @@ class OSCAudioRecordQueue : public AudioRecordQueue, OSCAudioBase
 };
 
 // ============== AudioSynthKarplusStrong ====================
-class OSCAudioSynthKarplusStrong : public AudioSynthKarplusStrong, OSCAudioBase
+class OSCAudioSynthKarplusStrong : public AudioSynthKarplusStrong, public OSCAudioBase
 {
     public:
         OSCAudioSynthKarplusStrong(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1575,7 +1575,7 @@ class OSCAudioSynthKarplusStrong : public AudioSynthKarplusStrong, OSCAudioBase
 };
 
 // ============== AudioSynthNoisePink ====================
-class OSCAudioSynthNoisePink : public AudioSynthNoisePink, OSCAudioBase
+class OSCAudioSynthNoisePink : public AudioSynthNoisePink, public OSCAudioBase
 {
     public:
         OSCAudioSynthNoisePink(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1593,7 +1593,7 @@ class OSCAudioSynthNoisePink : public AudioSynthNoisePink, OSCAudioBase
 };
 
 // ============== AudioSynthNoiseWhite ====================
-class OSCAudioSynthNoiseWhite : public AudioSynthNoiseWhite, OSCAudioBase
+class OSCAudioSynthNoiseWhite : public AudioSynthNoiseWhite, public OSCAudioBase
 {
     public:
         OSCAudioSynthNoiseWhite(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1611,7 +1611,7 @@ class OSCAudioSynthNoiseWhite : public AudioSynthNoiseWhite, OSCAudioBase
 };
 
 // ============== AudioSynthSimpleDrum ====================
-class OSCAudioSynthSimpleDrum : public AudioSynthSimpleDrum, OSCAudioBase
+class OSCAudioSynthSimpleDrum : public AudioSynthSimpleDrum, public OSCAudioBase
 {
     public:
         OSCAudioSynthSimpleDrum(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1633,7 +1633,7 @@ class OSCAudioSynthSimpleDrum : public AudioSynthSimpleDrum, OSCAudioBase
 };
 
 // ============== AudioSynthToneSweep ====================
-class OSCAudioSynthToneSweep : public AudioSynthToneSweep, OSCAudioBase
+class OSCAudioSynthToneSweep : public AudioSynthToneSweep, public OSCAudioBase
 {
     public:
         OSCAudioSynthToneSweep(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1653,7 +1653,7 @@ class OSCAudioSynthToneSweep : public AudioSynthToneSweep, OSCAudioBase
 };
 
 // ============== AudioSynthWaveform ====================
-class OSCAudioSynthWaveform : public AudioSynthWaveform, OSCAudioBase
+class OSCAudioSynthWaveform : public AudioSynthWaveform, public OSCAudioBase
 {
     public:
         OSCAudioSynthWaveform(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this), arbdata(0) {}
@@ -1682,7 +1682,7 @@ class OSCAudioSynthWaveform : public AudioSynthWaveform, OSCAudioBase
 };
 
 // ============== AudioSynthWaveformDc ====================
-class OSCAudioSynthWaveformDc : public AudioSynthWaveformDc, OSCAudioBase
+class OSCAudioSynthWaveformDc : public AudioSynthWaveformDc, public OSCAudioBase
 {
     public:
         OSCAudioSynthWaveformDc(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1702,7 +1702,7 @@ class OSCAudioSynthWaveformDc : public AudioSynthWaveformDc, OSCAudioBase
 };
 
 // ============== AudioSynthWaveformModulated ====================
-class OSCAudioSynthWaveformModulated : public AudioSynthWaveformModulated, OSCAudioBase
+class OSCAudioSynthWaveformModulated : public AudioSynthWaveformModulated, public OSCAudioBase
 {
     public:
         OSCAudioSynthWaveformModulated(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this), arbdata(0) {}
@@ -1731,7 +1731,7 @@ class OSCAudioSynthWaveformModulated : public AudioSynthWaveformModulated, OSCAu
 };
 
 // ============== AudioSynthWaveformPWM ====================
-class OSCAudioSynthWaveformPWM : public AudioSynthWaveformPWM, OSCAudioBase
+class OSCAudioSynthWaveformPWM : public AudioSynthWaveformPWM, public OSCAudioBase
 {
     public:
         OSCAudioSynthWaveformPWM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1750,7 +1750,7 @@ class OSCAudioSynthWaveformPWM : public AudioSynthWaveformPWM, OSCAudioBase
 };
 
 // ============== AudioSynthWaveformSine ====================
-class OSCAudioSynthWaveformSine : public AudioSynthWaveformSine, OSCAudioBase
+class OSCAudioSynthWaveformSine : public AudioSynthWaveformSine, public OSCAudioBase
 {
     public:
         OSCAudioSynthWaveformSine(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1770,7 +1770,7 @@ class OSCAudioSynthWaveformSine : public AudioSynthWaveformSine, OSCAudioBase
 };
 
 // ============== AudioSynthWaveformSineHires ====================
-class OSCAudioSynthWaveformSineHires : public AudioSynthWaveformSineHires, OSCAudioBase
+class OSCAudioSynthWaveformSineHires : public AudioSynthWaveformSineHires, public OSCAudioBase
 {
     public:
         OSCAudioSynthWaveformSineHires(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1790,7 +1790,7 @@ class OSCAudioSynthWaveformSineHires : public AudioSynthWaveformSineHires, OSCAu
 };
 
 // ============== AudioSynthWaveformSineModulated ====================
-class OSCAudioSynthWaveformSineModulated : public AudioSynthWaveformSineModulated, OSCAudioBase
+class OSCAudioSynthWaveformSineModulated : public AudioSynthWaveformSineModulated, public OSCAudioBase
 {
     public:
         OSCAudioSynthWaveformSineModulated(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
@@ -1810,7 +1810,7 @@ class OSCAudioSynthWaveformSineModulated : public AudioSynthWaveformSineModulate
 };
 
 // ============== AudioSynthWavetable ====================
-class OSCAudioSynthWavetable : public AudioSynthWavetable, OSCAudioBase
+class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
 {
     public:
         OSCAudioSynthWavetable(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}

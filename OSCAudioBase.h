@@ -93,6 +93,7 @@ class OSCAudioBase
 		setName(_name); 
 		linkInGroup(&first);
 		OSC_SPTF("%s base created; member of %s:\n",name,first.name);
+		listObjects();
     }
 	
     
@@ -101,7 +102,7 @@ class OSCAudioBase
     char* name;
     size_t nameLen;
 	AudioStream* sibling;
-	enum error {OK,NOT_FOUND,BLANK_NAME,DUPLICATE_NAME,NO_DYNAMIC,NO_MEMORY};
+	enum error {OK,NOT_FOUND,BLANK_NAME,DUPLICATE_NAME,NO_DYNAMIC,NO_MEMORY,AMBIGUOUS_PATH};
 	static const OSCAudioTypes_t audioTypes[];
 	static size_t countOfAudioTypes(void);
 
@@ -348,10 +349,10 @@ class OSCAudioBase
 						bool enterGroups = true);
 				
 	// count matches and return last matching object
-	static int findMatch(const char* addr,		//!< address to match
-						OSCAudioBase* ooi,		//!< where in structure to start from (default is root)
-						OSCAudioBase** found,	//!< last-found matching object
-						bool enterGroups);		//!< whether to allow matches in sub-groups
+	static int findMatch(const char* addr,			//!< address to match
+						OSCAudioBase** found,		//!< last-found matching object
+						OSCAudioBase* ooi = NULL,	//!< where in structure to start from (default is root)
+						bool enterGroups = true);	//!< whether to allow matches in sub-groups
 	 
 	/**
 	 * Return pointer to first OSC audio object
@@ -376,9 +377,11 @@ class OSCAudioBase
 	{
 		return NULL;
 	}
+	virtual OSCAudioConnection* getFirstSrc(void) {return NULL;}
+	virtual OSCAudioConnection* getFirstDst(void) {return NULL;}
 		
 		
-	static char* sanitise(const char* src, char* dst);
+	static char* sanitise(const char* src, char* dst, int offset = 0);
 	static char* trimUnderscores(const char* src, char* dst);
     static void routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 	
@@ -432,7 +435,13 @@ class OSCAudioBase
 				next_route = NULL;
 			}
 		}
+		else
+		{
+			linkOutGroup(&pParent);
+		}
+			
 	}
+	void linkOutGroup(OSCAudioGroup** ppPrnt);
 	
 	OSCAudioGroup* pParent; //!< pointer back to ultimate parent
 		
@@ -457,14 +466,30 @@ class OSCAudioBase
 #if defined(DYNAMIC_AUDIO_AVAILABLE) 
 //============================== Dynamic Audio Objects ==================================================
 // ============== AudioConnection ====================
-class OSCAudioConnection : OSCAudioBase, public AudioConnection
+class OSCAudioConnection : public OSCAudioBase, public AudioConnection
 {
   public:
-	OSCAudioConnection(const char* _name) :  OSCAudioBase(_name) {}
-	OSCAudioConnection(const char* _name, AudioStream& src, AudioStream& dst) :  OSCAudioBase(_name),AudioConnection(src,dst) {}
-	OSCAudioConnection(const char* _name, AudioStream* src, AudioStream* dst) :  OSCAudioBase(_name),AudioConnection(*src,*dst) {}
-	OSCAudioConnection(const char* _name, AudioStream& src, uint8_t srcO, AudioStream& dst, uint8_t dstI) :  OSCAudioBase(_name),AudioConnection(src,srcO,dst,dstI) {}
-	OSCAudioConnection(const char* _name, AudioStream* src, uint8_t srcO, AudioStream* dst, uint8_t dstI) :  OSCAudioBase(_name),AudioConnection(*src,srcO,*dst,dstI) {}
+	OSCAudioConnection(const char* _name) 
+		:  OSCAudioBase(_name),pDstParent(NULL),next_src(NULL),next_dst(NULL)  
+		{}
+		
+	OSCAudioConnection(const char* _name, OSCAudioBase& src, OSCAudioBase& dst) 
+		:  OSCAudioBase(_name),AudioConnection(*src.sibling,*dst.sibling),pDstParent(NULL),next_src(NULL),next_dst(NULL) 
+		{mkLinks(src,dst);}
+		
+	OSCAudioConnection(const char* _name, OSCAudioBase* src, OSCAudioBase* dst) 
+		:  OSCAudioBase(_name),AudioConnection(*src->sibling,*dst->sibling),pDstParent(NULL) ,next_src(NULL),next_dst(NULL) 
+		{mkLinks(*src,*dst);}
+		
+	OSCAudioConnection(const char* _name, OSCAudioBase& src, uint8_t srcO, OSCAudioBase& dst, uint8_t dstI) 
+		:  OSCAudioBase(_name),AudioConnection(*src.sibling,srcO,*dst.sibling,dstI),pDstParent(NULL) ,next_src(NULL),next_dst(NULL) 
+		{mkLinks(src,dst);}
+		
+	OSCAudioConnection(const char* _name, OSCAudioBase* src, uint8_t srcO, OSCAudioBase* dst, uint8_t dstI) 
+		:  OSCAudioBase(_name),AudioConnection(*src->sibling,srcO,*dst->sibling,dstI),pDstParent(NULL) ,next_src(NULL),next_dst(NULL) 
+		{mkLinks(*src,*dst);}
+		
+	~OSCAudioConnection();
 
 	void route(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 	
@@ -475,8 +500,14 @@ class OSCAudioConnection : OSCAudioBase, public AudioConnection
 	// Link in and out of the destination connection lists
 	void linkInDst(OSCAudioGroup* parent);		
 	void linkOutDst();
+	
+	OSCAudioConnection* getNextSrc(void) {return next_src;}
+	OSCAudioConnection* getNextDst(void) {return next_dst;}
 				
   private:
+	void mkLinks(OSCAudioBase& src, OSCAudioBase& dst);
+	OSCAudioGroup* pSrcParent; //!< parent group of source object
+	OSCAudioGroup* pDstParent; //!< parent group of destination object
 	void OSCconnect(OSCMessage& msg,int addressOffset,OSCBundle& reply, bool zeroToZero = false);
 	OSCAudioConnection* next_src;	//!< next in list of connections whose source is in a given group
 	OSCAudioConnection* next_dst;	//!< next in list of connections whose destination is in a given group
@@ -495,6 +526,8 @@ class OSCAudioGroup : public OSCAudioBase
 	void route(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 	void linkInGroup(OSCAudioGroup* parent);	
 	void linkOutGroup();
+	virtual OSCAudioConnection* getFirstSrc(void) {return first_src;}
+	virtual OSCAudioConnection* getFirstDst(void) {return first_dst;}
 		
   protected:
 	friend class OSCAudioConnection;
