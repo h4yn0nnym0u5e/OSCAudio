@@ -393,23 +393,40 @@ OSCAudioBase::error DynamicAudioCreateObject(char* typ,char* objName)
 /**
  *	Create a new [OSC]AudioStream object.
  */
-OSCAudioBase::error DynamicAudioCreateObject(int objIdx,		//!< index of [OSC]AudioStream object to create
-																						 const char* objName,		//!< name of object
-																						 OSCAudioBase* parent) 	//!< parent object
+OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]AudioStream object to create
+											 const char* objName,	//!< name of object
+											 OSCAudioBase* parent) 	//!< parent object
 {
 	OSCAudioBase::error retval = OSCAudioBase::OK;
 	void* pNewObj = NULL;
+	OSCAudioBase* png = parent;
+	int hits = -1;
 	
-	if (NULL == parent)
-		pNewObj = OSCAudioBase::audioTypes[objIdx].mkRoot(objName);
-	else
-		pNewObj = OSCAudioBase::audioTypes[objIdx].mkGroup(objName,*((OSCAudioGroup*) parent));
-	
-	if (NULL != pNewObj)
+	if (NULL != png) // has a parent group
 	{
-		OSC_SPTF("Created %s as a new %s at %08X\n",objName, OSCAudioBase::audioTypes[objIdx].name, (uint32_t) pNewObj);
+		png = parent->next_group;
+		if (NULL != png) // group has no members, can't have hits!
+			hits = OSCAudioBase::hitCount(objName,png,false); // count matches
 	}
+	else
+		hits = OSCAudioBase::hitCount(objName,png,false); // count from root
+		
+	OSC_SPTF("Found %d duplicates of %s from %08X\n",hits,objName,png);
 	
+	if (hits > 0)
+		retval = OSCAudioBase::DUPLICATE_NAME;
+	else
+	{
+		if (NULL == parent)
+			pNewObj = OSCAudioBase::audioTypes[objIdx].mkRoot(objName+1);
+		else
+			pNewObj = OSCAudioBase::audioTypes[objIdx].mkGroup(objName+1,*((OSCAudioGroup*) parent));
+		
+		if (NULL != pNewObj)
+		{
+			OSC_SPTF("Created %s as a new %s at %08X\n",objName, OSCAudioBase::audioTypes[objIdx].name, (uint32_t) pNewObj);
+		}
+	}
 	return retval;
 }
 #endif // defined(DISABLE_FULL_DYNAMIC)
@@ -418,24 +435,11 @@ struct crObContext_s {int objIdx; const char* name; OSCAudioBase::error retval;}
 void createObjectCB(OSCAudioBase* parent,OSCMessage& msg,int offset,void* ctxt)
 {
 	crObContext_s* context = (crObContext_s*) ctxt;
-	OSCAudioBase::error retval = OSCAudioBase::OK;
-	OSCAudioBase* png = parent;
+
+	OSCAudioBase::error rv = DynamicAudioCreateObject(context->objIdx,context->name,parent);
 	
-	if (NULL != png)
-			png = parent->next_group;
-	
-	if (0 != OSCAudioBase::hitCount(context->name,png,false))
-	{
-		retval = OSCAudioBase::DUPLICATE_NAME;
-		(void) retval;
-	}
-	else		
-	{
-		OSCAudioBase::error rv = DynamicAudioCreateObject(context->objIdx,context->name+1,parent);
-		
-		if (rv != OSCAudioBase::OK)
-			context->retval = rv;
-	}
+	if (rv != OSCAudioBase::OK)
+		context->retval = rv;
 }
 
 
@@ -465,12 +469,13 @@ void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 			OSC_DBGP(msg,addressOffset);
 			
 			if (msg.size() < 3)
-				retval = DynamicAudioCreateObject(objIdx,objName,NULL);
+				retval = DynamicAudioCreateObject(objIdx,objNameX,NULL);
 			else
 			{
 				msg.getString(2,typ,50); // re-use this buffer, not needed now
 				context = {objIdx,objNameX,OK};
 				callBack(typ,createObjectCB,&context);
+				retval = context.retval;
 			}
 		}
 		else
