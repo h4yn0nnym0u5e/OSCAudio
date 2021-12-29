@@ -724,8 +724,8 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 	{
 		if (NULL != src && NULL != dst)
 		{
-			sprintf(buf,"%s:%d -> %s:%d",srcn,srcp,dstn,dstp);
-			connect(*src,(int) srcp,*dst,(int) dstp); // make the audio connection
+			int connResult = connect(*src,(int) srcp,*dst,(int) dstp); // make the audio connection
+			sprintf(buf,"%s:%d -> %s:%d (%d)",srcn,srcp,dstn,dstp,connResult);
 			mkLinks(*srcB,*dstB); // make the OSC linkages
 		}
 		else
@@ -791,6 +791,7 @@ void OSCAudioConnection::linkOutSrc()
 {
 	if (NULL != pSrcParent)
 	{
+		OSC_SPTF("Unlink %08X from parent %08X\n",(uint32_t) this,(uint32_t) pSrcParent);
 		OSCAudioConnection** ppLink = &(pSrcParent->first_src); 			
 		while (NULL != *ppLink && this != *ppLink)
 			ppLink = &((*ppLink)->next_src);

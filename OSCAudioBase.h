@@ -470,23 +470,28 @@ class OSCAudioConnection : public OSCAudioBase, public AudioConnection
 {
   public:
 	OSCAudioConnection(const char* _name) 
-		:  OSCAudioBase(_name),pDstParent(NULL),next_src(NULL),next_dst(NULL)  
+		:  OSCAudioBase(_name),
+		pSrcParent(NULL),pDstParent(NULL),next_src(NULL),next_dst(NULL)  
 		{}
 		
 	OSCAudioConnection(const char* _name, OSCAudioBase& src, OSCAudioBase& dst) 
-		:  OSCAudioBase(_name),AudioConnection(*src.sibling,*dst.sibling),pDstParent(NULL),next_src(NULL),next_dst(NULL) 
+		:  OSCAudioBase(_name),AudioConnection(*src.sibling,*dst.sibling),
+		pSrcParent(NULL),pDstParent(NULL),next_src(NULL),next_dst(NULL) 
 		{mkLinks(src,dst);}
 		
 	OSCAudioConnection(const char* _name, OSCAudioBase* src, OSCAudioBase* dst) 
-		:  OSCAudioBase(_name),AudioConnection(*src->sibling,*dst->sibling),pDstParent(NULL) ,next_src(NULL),next_dst(NULL) 
+		:  OSCAudioBase(_name),AudioConnection(*src->sibling,*dst->sibling),
+		pSrcParent(NULL),pDstParent(NULL) ,next_src(NULL),next_dst(NULL) 
 		{mkLinks(*src,*dst);}
 		
 	OSCAudioConnection(const char* _name, OSCAudioBase& src, uint8_t srcO, OSCAudioBase& dst, uint8_t dstI) 
-		:  OSCAudioBase(_name),AudioConnection(*src.sibling,srcO,*dst.sibling,dstI),pDstParent(NULL) ,next_src(NULL),next_dst(NULL) 
+		:  OSCAudioBase(_name),AudioConnection(*src.sibling,srcO,*dst.sibling,dstI),
+		pSrcParent(NULL),pDstParent(NULL) ,next_src(NULL),next_dst(NULL) 
 		{mkLinks(src,dst);}
 		
 	OSCAudioConnection(const char* _name, OSCAudioBase* src, uint8_t srcO, OSCAudioBase* dst, uint8_t dstI) 
-		:  OSCAudioBase(_name),AudioConnection(*src->sibling,srcO,*dst->sibling,dstI),pDstParent(NULL) ,next_src(NULL),next_dst(NULL) 
+		:  OSCAudioBase(_name),AudioConnection(*src->sibling,srcO,*dst->sibling,dstI),
+		pSrcParent(NULL),pDstParent(NULL) ,next_src(NULL),next_dst(NULL) 
 		{mkLinks(*src,*dst);}
 		
 	~OSCAudioConnection();
