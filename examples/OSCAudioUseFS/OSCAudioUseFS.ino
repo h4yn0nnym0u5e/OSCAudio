@@ -143,6 +143,8 @@ void saveFS(OSCMessage& msg, int addressOffset)
   repl.add(retval);
 }
 
+
+//------------------------------------------------------------------------------------------------------------------------------
 // retrieve blob from filesystem
 // Annoyingly, CNMAT / OSC doesn't appear to be able to build a blob's content incrementally,
 // so this operation has to load the entire file in one go, then create another copy of it
@@ -189,6 +191,7 @@ void sendFS(OSCMessage& msg, int addressOffset)
 }
 
 
+//------------------------------------------------------------------------------------------------------------------------------
 // Delete file from filesystem
 void deleteFS(OSCMessage& msg, int addressOffset)
 {
@@ -211,6 +214,7 @@ void deleteFS(OSCMessage& msg, int addressOffset)
 }
 
 
+//------------------------------------------------------------------------------------------------------------------------------
 // Retrieve blob from filesystem and process it as an OSC-encoded packet
 static int loadFSdepth = 0; // do a recursion check
 void loadFS(OSCMessage& msg, int addressOffset)
@@ -279,6 +283,56 @@ void loadFS(OSCMessage& msg, int addressOffset)
   loadFSdepth--;
 }
 
+//------------------------------------------------------------------------------------------------------------------------------
+// credit for this function to manicksan:
+void listFS(OSCMessage& msg, int addressOffset)
+{
+    char fn[50];
+    OSCAudioBase::error retval = OSCAudioBase::OK;
+    OSCMessage& repl = OSCAudioBase::staticPrepareReplyResult(msg,*replyStack);
+    File dir;
+    
+    msg.getString(0,fn,50);
+    dir = SD.open(fn);
+    if (dir)
+    {
+        char *intStr = (char*)malloc(21); // to store file sizes (uint64 is 20 digits long) don't think we really need that as it's 18exabytes
+        repl.add(fn);
+        while (true)
+        {
+            File entry =  dir.openNextFile();
+            if (! entry)
+            {
+                // no more files
+                break;
+            }
+            if (entry.isDirectory())
+            {
+                repl.add("dir");
+            }
+            else
+            {
+                // files have sizes, directories do not
+                repl.add("file");
+                itoa(entry.size(),intStr,10);
+                repl.add(intStr);
+            }
+            repl.add(entry.name());
+            entry.close();
+        }
+        free(intStr);
+    }
+    else
+    {
+        repl.add(fn);
+        retval = OSCAudioBase::NOT_FOUND;
+        repl.add("failed");
+    }  
+    repl.add(retval);
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------
 // route messages to filing system:
 //   /load<s>: string s is the name of a file containing an OSC bundle which should be fed back into the OSC decoder
 //   /save<s><b>: save blob b to filename s; the blob can be anything but is likely to be either JSON or OSC
@@ -295,6 +349,8 @@ void routeFS(OSCMessage& msg, int addressOffset)
     loadFS(msg,addressOffset);
   else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/delete","s"))
     deleteFS(msg,addressOffset);
+  else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/list","s"))
+    listFS(msg,addressOffset);
 }
 
 
