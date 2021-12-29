@@ -601,8 +601,8 @@ void OSCAudioBase::createGroup(OSCMessage& msg, int addressOffset, OSCBundle& re
 	
 	OSC_SPLN("createGroup");
 	OSC_DBGP(msg,addressOffset);
-	msg.getString(0,path,50);
-	msg.getString(1,buf,50);
+	msg.getString(0,buf,50);
+	msg.getString(1,path,50);
 	*bufn = '/'; // needed for duplicate checking
 	trimUnderscores(sanitise(buf,buf),buf); // make the name valid
 	OSC_SPLN(buf);
