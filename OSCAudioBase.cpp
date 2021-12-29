@@ -35,6 +35,7 @@ OSCAudioBase* OSCAudioBase::first_route = NULL;
  * Generate an array with the names of all the available AudioStream-derived objects,
  * together with pointers to the functions to call to create instances of each.
  */
+#if defined(DYNAMIC_AUDIO_AVAILABLE)
 #define OSC_CLASS(a,o) \
 OSCAudioBase* mk1_##o(const char* nm) {return (OSCAudioBase*) new o(nm);} \
 OSCAudioBase* mk2_##o(const char* nm,OSCAudioGroup& grp) {return (OSCAudioBase*) new o(nm,grp);} 
@@ -46,6 +47,16 @@ const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
   OSC_AUDIO_CLASSES
 };
 #undef OSC_CLASS
+
+#else // no dynamic audio, just a list of class names
+	
+#define OSC_CLASS(a,o) {#a},
+const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
+  OSC_AUDIO_CLASSES
+};
+#undef OSC_CLASS
+
+#endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 
 // Return number of available audio objects
 size_t OSCAudioBase::countOfAudioTypes(void) {return COUNT_OF(audioTypes);}

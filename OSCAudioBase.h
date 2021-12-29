@@ -67,8 +67,10 @@ class OSCAudioConnection;
 
 typedef struct OSCAudioTypes_s {
   const char* name;	//!< the name of the [OSC]AudioStream type
+#if defined(DYNAMIC_AUDIO_AVAILABLE)
   OSCAudioBase* (*mkRoot)(const char*); //!< make object at root
   OSCAudioBase* (*mkGroup)(const char*,OSCAudioGroup&); //!< make object within group
+#endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 } OSCAudioTypes_t;
 
 
