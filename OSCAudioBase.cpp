@@ -60,6 +60,7 @@ const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
 
 // Return number of available audio objects
 size_t OSCAudioBase::countOfAudioTypes(void) {return COUNT_OF(audioTypes);}
+#define CONNECTION_INDEX -1 //!< special "object number" denoting AudioConnection rather than AudioStream object type
 // ********* end of magic array generator stuff ********************
 
 
@@ -329,6 +330,7 @@ void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& r
     if (isStaticTarget(msg,addressOffset,"/ren*","ss")) {renameObject(msg,addressOffset,reply);} 
 #if defined(DYNAMIC_AUDIO_AVAILABLE)
     else if (isStaticTarget(msg,addressOffset,"/crC*","s"))  	{createConnection(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/crC*","ss"))  	{createConnection(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/crO*","ss"))	{createObject(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/crO*","sss"))	{createObject(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/crG*","ss"))	{createGroup(msg,addressOffset,reply);} 
@@ -429,9 +431,20 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 	else
 	{
 		if (NULL == parent)
-			pNewObj = OSCAudioBase::audioTypes[objIdx].mkRoot(objName+1);
+		{
+			if (objIdx >= 0)
+				pNewObj = OSCAudioBase::audioTypes[objIdx].mkRoot(objName+1);
+			else
+				pNewObj = new OSCAudioConnection(objName+1);
+				
+		}
 		else
-			pNewObj = OSCAudioBase::audioTypes[objIdx].mkGroup(objName+1,*((OSCAudioGroup*) parent));
+		{
+			if (objIdx >= 0)
+				pNewObj = OSCAudioBase::audioTypes[objIdx].mkGroup(objName+1,*((OSCAudioGroup*) parent));
+			else
+				pNewObj = new OSCAudioConnection(objName+1,*((OSCAudioGroup*) parent));
+		}
 		
 		if (NULL != pNewObj)
 		{
@@ -463,7 +476,6 @@ void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 	char objNameX[50],typ[50];
 	char* objName = objNameX+1;
 	int objIdx;
-	crObContext_s context;
 	
 	msg.getString(0,typ,50);
 	objIdx = OSCAudioBase::getTypeIndex(typ); // see if we've got a valid object type
@@ -483,6 +495,8 @@ void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 				retval = DynamicAudioCreateObject(objIdx,objNameX,NULL);
 			else
 			{
+				crObContext_s context;
+				
 				msg.getString(2,typ,50); // re-use this buffer, not needed now
 				context = {objIdx,objNameX,OK};
 				callBack(typ,createObjectCB,&context);
@@ -648,17 +662,32 @@ OSCAudioConnection::~OSCAudioConnection(void)
  */
 void OSCAudioBase::createConnection(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
-	char buf[50];
+	char objNameX[50];
+	char* objName = objNameX+1;
 	error retval = OK;
 	
 	OSC_SPLN("createConnection");
 	OSC_DBGP(msg,addressOffset);
-	msg.getString(0,buf,50);
-	trimUnderscores(sanitise(buf,buf),buf); // make the name valid
-	OSC_SPLN(buf);
+	msg.getString(0,objName,50);
+	OSC_SPLN(objName);
 	
-	if (0 != strlen(buf))
+	if (strlen(objName) > 0)
 	{
+		*objNameX = '/'; // needed for duplicate checking
+		trimUnderscores(sanitise(objName,objName),objName); // make the name valid
+		if (msg.size() > 1) // then we want to put the connection in one or more groups
+		{
+			char path[50];
+			crObContext_s context;
+			
+			msg.getString(1,path,50);
+			context = {CONNECTION_INDEX,objNameX,OK}; // use special "index" to create connections
+			callBack(path,createObjectCB,&context);
+			retval = context.retval;			
+		}
+		else 
+			retval = DynamicAudioCreateObject(CONNECTION_INDEX,objNameX,NULL);	
+		/*
 		if (NULL != find(buf))
 		{
 			retval = DUPLICATE_NAME;
@@ -669,11 +698,12 @@ void OSCAudioBase::createConnection(OSCMessage& msg, int addressOffset, OSCBundl
 			(void) pNewConn;
 			OSC_SPTF("Created at: 0x%08X\n",(uint32_t) pNewConn);
 		}
+		*/
 	}
 	else
 		retval = BLANK_NAME;
 	
-	staticPrepareReplyResult(msg,reply).add(buf).add((int) retval);
+	staticPrepareReplyResult(msg,reply).add(objName).add((int) retval);
 }
 
 

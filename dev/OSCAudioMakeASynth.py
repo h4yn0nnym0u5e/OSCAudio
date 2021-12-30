@@ -103,24 +103,23 @@ if 1:
     msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioEffectEnvelope','env','/voice1/i*')]
     msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioSynthWaveform','wav2','/voice1/i*')]
     msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioSynthWaveform','wav','/voice1/i*')]
+
+    # now the connections
+    msgl += [OSCpackAuto('/teensy1/dynamic/crCo','wav_mix0','/voice1/i*')]
+    msgl += [OSCpackAuto('/teensy1/dynamic/crCo','wav2_mix1','/voice1/i*')]
+    msgl += [OSCpackAuto('/teensy1/dynamic/crCo','mix_env','/voice1/i*')]
+    msgl += [OSCpackAuto('/teensy1/dynamic/crCo','env_mix','/voice1/i*')]
     
     for i in range(0,4): # connect up the four instances of voice1:
-        # the connection objects
-        msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p%d_wav_mix0' % i)]
-        msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p%d_wav2_mix1' % i)]
-        msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p%d_mix_env' % i)]
-        msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p%d_env_mix' % i)]
-
-        # and how they link the objects together
-        msgl += [OSCpackAuto('/teensy1/audio/p%d_wav_mix0/co' % i,'/voice1/i%d/wav'%i,'/voice1/i%d/mixer'%i)]
-        msgl += [OSCpackAuto('/teensy1/audio/p%d_wav2_mix1/co' % i,'/voice1/i%d/wav2'%i,0,'/voice1/i%d/mixer'%i,1)]
-        msgl += [OSCpackAuto('/teensy1/audio/p%d_mix_env/co' % i,'/voice1/i%d/mixer'%i,'/voice1/i%d/env'%i)]
-        msgl += [OSCpackAuto('/teensy1/audio/p%d_env_mix/co' % i,'/voice1/i%d/env'%i,0,'/mixer',i)] # note, routes out of the instances!
+        msgl += [OSCpackAuto('/teensy1/audio/voice1/i%d/wav_mix0/co' % i,'/voice1/i%d/wav'%i,'/voice1/i%d/mixer'%i)]
+        msgl += [OSCpackAuto('/teensy1/audio/voice1/i%d/wav2_mix1/co' % i,'/voice1/i%d/wav2'%i,0,'/voice1/i%d/mixer'%i,1)]
+        msgl += [OSCpackAuto('/teensy1/audio/voice1/i%d/mix_env/co' % i,'/voice1/i%d/mixer'%i,'/voice1/i%d/env'%i)]
+        msgl += [OSCpackAuto('/teensy1/audio/voice1/i%d/env_mix/co' % i,'/voice1/i%d/env'%i,0,'/mixer',i)] # note, routes out of the instances!
 
     # set mixer gains to something vaguely sane   
     for i in range(0,4):
-        msgl += [OSCpackAuto('/teensy1/audio/mixer/ga',i,0.33)]
-        msgl += [OSCpackAuto('/teensy1/audio/voice1/i*/mixer/ga',i,0.33)]
+        msgl += [OSCpackAuto('/teensy1/audio/mixer/ga',i,0.25)]
+        msgl += [OSCpackAuto('/teensy1/audio/voice1/i*/mixer/ga',i,0.5)]
 
     # root-level connections   
     msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p_mix_outL')]
@@ -130,7 +129,7 @@ if 1:
 
 # enable audio system    
 msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/ena')]
-msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/vol',0.2)]
+msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/vol',0.8)]
 
 
 pkt = OSCmakeBundle(msgl)
