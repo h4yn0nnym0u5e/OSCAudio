@@ -26,7 +26,7 @@ Some additional /audio methods are used to manipulate connection objects:
 - **/d**isonnect: disconnect from source and destination (leaves the connection object in existence)
 
 
-### /dynamic
+#### /dynamic
 This allows manipulation of the audio system's topology by creating and destroying objects and connections. Methods available are:
 - **/crC**onnection,s[s]: create a connection; first parameter is the name; optional second is the group
 - **/crO**bject,ss[s]: create an audio object; first parameter is the type; second is the name; optional third is the group
@@ -35,7 +35,7 @@ This allows manipulation of the audio system's topology by creating and destroyi
 - **ren**ame,ss: rename object; first parameter is object name; second is new name [group?!]
 - **clearAll**: remove all dynamic objects
 
-For example, **/teensy1/dynamic/crOb<AudioSynthWaveform><wav>** will create a new AudioSynthWaveform object called "wav", at the root level of your design. Here's a longer example which creates and connects a waveform and an output device, and starts an audible 220Hz tone:
+For example, **/teensy1/dynamic/crOb\<AudioSynthWaveform\>\<wav\>** will create a new AudioSynthWaveform object called "wav", at the root level of your design. Here's a longer example which creates and connects a waveform and an output device, and starts an audible 220Hz tone:
 ~~~
 /teensy1/dynamic/crOb<AudioSynthWaveform><wav>
 /teensy1/dynamic/crOb<AudioOutputI2S><i2s>
@@ -45,8 +45,8 @@ For example, **/teensy1/dynamic/crOb<AudioSynthWaveform><wav>** will create a ne
 /teensy1/audio/wav_i2sL/co<wav><i2s>
 /teensy1/audio/wav_i2sR/co<wav>0<i2s><1>
 /teensy1/audio/sgtl5000/enable
-/teensy1/audio/sgtl5000/vol<0.5>
+/teensy1/audio/sgtl5000/vol*<0.5>
 /teensy1/audio/wav/begin<0.1><220.0><0>
 ~~~
-
+[the vol* seems necessary, probably a bug in the library somewhere!]
 
