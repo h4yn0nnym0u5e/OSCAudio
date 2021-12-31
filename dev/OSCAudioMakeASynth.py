@@ -129,7 +129,8 @@ if 1:
 
 # enable audio system    
 msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/ena')]
-msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/vol',0.8)]
+msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/vol*',0.5)]  # currently not working without the *
+msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/lineO*',12)] # ~3Vpk-pk
 
 
 pkt = OSCmakeBundle(msgl)
