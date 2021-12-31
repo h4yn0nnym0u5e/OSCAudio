@@ -20,6 +20,8 @@ Invoke by calling **OSCAudioBase::routeDynamic(OSCMessage& msg,int addressOffset
 
 This provides control of existing audio objects. For example, assuming you have an AudioSynthWaveform object called "wav", the message **/teensy1/audio/wav/begin<0.5><220.0><0>** will cause it to output a 220Hz sine wave at 50% amplitude. Almost every function for every audio object is available, and uses the exact parameters documented in the GUI++ help. This is important to remember when constructing your own messages, as the parameter types *must* be correct for a method to be invoked. **msg("/teensy1/audio/wav/begin").add(0.5).add(220.0f).add(0)** should work, but **msg("/teensy1/audio/wav/begin").add(0.5).add(220).add(0)** won't, because the frequency is an integer, not a float.
 
+See [here](./FunctionList.md) for a list of available methods which act on audio objects.
+
 Some additional /audio methods are used to manipulate connection objects:
 - **/c**onnect,ss: create an audio connection; first parameter is the source; second is the destination; uses port 0 in both cases
 - **/c**onnect,sisi: create an audio connection; first two parameters are the source and output port; second two are the destination and input port
@@ -49,4 +51,5 @@ For example, **/teensy1/dynamic/crOb\<AudioSynthWaveform\>\<wav\>** will create 
 /teensy1/audio/wav/begin<0.1><220.0><0>
 ~~~
 [the vol* seems necessary, probably a bug in the library somewhere!]
+
 
