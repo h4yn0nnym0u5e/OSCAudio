@@ -28,7 +28,7 @@ This is a list of functions (aka OSC methods) which are available for each objec
 | averageTogether | void | ave* | i | uint8_t n |
 | read | float | r* | ii | unsigned int binFirst, unsigned int binLast |
 | read | float | r* | i | unsigned int binNumber |
-| windowFunction | void | w* | s | const int16_t *w |
+| windowFunction | void | w* | s | string selecting one of the built-in window types, e.g. "Hanning" |
 #### AudioAnalyzeFFT256
 |function|return type|short-form|parameter pattern|parameters|
 |----|----|----|----|----|
@@ -36,7 +36,7 @@ This is a list of functions (aka OSC methods) which are available for each objec
 | averageTogether | void | ave* | i | uint8_t n |
 | read | float | r* | ii | unsigned int binFirst, unsigned int binLast |
 | read | float | r* | i | unsigned int binNumber |
-| windowFunction | void | w* | s | const int16_t *w |
+| windowFunction | void | w* | s | string selecting one of the built-in window types, e.g. "BlackmanHarris" |
 #### AudioAnalyzeNoteFrequency
 |function|return type|short-form|parameter pattern|parameters|
 |----|----|----|----|----|
@@ -144,7 +144,7 @@ This is a list of functions (aka OSC methods) which are available for each objec
 | eqBands | void | eqBands | ff | float bass, float treble |
 | eqBand | unsigned short | eqBand | if | uint8_t bandNum, float n |
 | eqFilterCount | unsigned short | eqFilterC* | i | uint8_t n |
-| eqFilter | void | eqFilter | ib | uint8_t filterNum, int *filterParameters |
+| eqFilter | void | eqFilter | ib | filter number; blob holding 7 int32 parameters |
 | eqSelect | unsigned short | eqS* | i | uint8_t n |
 | headphoneSelect | bool | h* | i | int n |
 | inputLevel | bool | inputL* | f | float n |
@@ -182,7 +182,7 @@ This is a list of functions (aka OSC methods) which are available for each objec
 | outputSelect | bool | o* | i | int n |
 | readMicDetect | int | r* | -- | void |
 | setHPFonADC | void | setH* | ;ff | bool enable, float cutoff_Hz, float fs_Hz |
-| setIIRCoeffOnADC | void | setII* | ib | int chan, uint32_t *coeff |
+| setIIRCoeffOnADC | void | setII* | ib | filter channel; blob holding 3 uint32 coefficients |
 | setInputGain_dB | bool | setIn* | f | float n |
 | setMicBias | bool | setM* | i | int n |
 | updateInputBasedOnMicDetect | bool | u* | i | int setting  |
@@ -269,7 +269,7 @@ This is a list of functions (aka OSC methods) which are available for each objec
 |----|----|----|----|----|
 | beginFreeze | void | beginF* | f | float grain_length |
 | beginPitchShift | void | beginP* | f | float grain_length |
-| begin | void | begin | bi | int16_t *sample_bank_def, int16_t max_len_def |
+| begin | void | begin | bi | blob holding 16-bit grain data; number of samples in data |
 | setSpeed | void | se* | f | float ratio |
 | stop | void | st* | -- |  |
 #### AudioEffectMidSide
@@ -288,8 +288,8 @@ This is a list of functions (aka OSC methods) which are available for each objec
 |function|return type|short-form|parameter pattern|parameters|
 |----|----|----|----|----|
 | setBandpass | void | setB* | iff | uint32_t stage, float frequency, float q  |
-| setCoefficients | void | setC* | iddddd | uint32_t stage, const double *coefficients |
-| setCoefficients | void | setC* | iiiiii | uint32_t stage, const int *coefficients |
+| setCoefficients | void | setC* | iddddd | filter stage number, followed by 5 coefficient values |
+| setCoefficients | void | setC* | iiiiii | filter stage number, followed by 5 coefficient values |
 | setHighShelf | void | setHighS* | ifff | uint32_t stage, float frequency, float gain, float slope  |
 | setHighpass | void | setHighp* | iff | uint32_t stage, float frequency, float q  |
 | setLowShelf | void | setLowS* | ifff | uint32_t stage, float frequency, float gain, float slope  |
@@ -352,7 +352,7 @@ This is a list of functions (aka OSC methods) which are available for each objec
 |----|----|----|----|----|
 | isPlaying | bool | i* | -- | void |
 | lengthMillis | uint32_t | l* | -- | void |
-| play | void | pl* | i | const unsigned int *data |
+| play | void | pl* | i | 32-bit integer pointing to valid data built in to sketch |
 | positionMillis | uint32_t | po* | -- | void |
 | stop | void | s* | -- | void |
 #### AudioPlayQueue
@@ -434,7 +434,7 @@ This is a list of functions (aka OSC methods) which are available for each objec
 |function|return type|short-form|parameter pattern|parameters|
 |----|----|----|----|----|
 | amplitude | void | am* | f | float n |
-| arbitraryWaveform | void | ar* | bf | const int16_t *data, float maxFreq |
+| arbitraryWaveform | void | ar* | bf | blob containing 256 samples; float is currently unused |
 | begin | void | b* | ffi | float t_amp, float t_freq, short t_type |
 | begin | void | b* | i | short t_type |
 | frequency | void | f* | f | float freq |
@@ -451,7 +451,7 @@ This is a list of functions (aka OSC methods) which are available for each objec
 |function|return type|short-form|parameter pattern|parameters|
 |----|----|----|----|----|
 | amplitude | void | am* | f | float n |
-| arbitraryWaveform | void | ar* | bf | const int16_t *data, float maxFreq |
+| arbitraryWaveform | void | ar* | bf | blob containing 256 samples; float is currently unused |
 | begin | void | b* | ffi | float t_amp, float t_freq, short t_type |
 | begin | void | b* | i | short t_type |
 | frequencyModulation | void | frequencyM* | f | float octaves |
