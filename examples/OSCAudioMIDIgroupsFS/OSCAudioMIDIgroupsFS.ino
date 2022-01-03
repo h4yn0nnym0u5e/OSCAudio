@@ -95,8 +95,10 @@ OSCBundle* replyStack; // where reply is currently being built
 // route messages to existing audio objects
 void routeAudio(OSCMessage& msg, int addressOffset)
 {
+  AudioNoInterrupts();
   //Serial.println("audio message!");
   OSCAudioBase::routeAll(msg,addressOffset,*replyStack);
+  AudioInterrupts();
 }
 
 
@@ -105,8 +107,10 @@ void routeAudio(OSCMessage& msg, int addressOffset)
 void routeDynamic(OSCMessage& msg, int addressOffset)
 {
 #if defined(SAFE_RELEASE)  
+  AudioNoInterrupts();
   //Serial.println("dynamic objects message!");
   OSCAudioBase::routeDynamic(msg,addressOffset,*replyStack);
+  AudioInterrupts();
 #else
   Serial.println("dynamic objects not available!");
 #endif // defined(SAFE_RELEASE)  
@@ -216,8 +220,7 @@ void updateOSC()
         msgLen = HWSERIAL.available(); // only ever returns 0 or 1, actually
         while (msgLen--)
         {
-          char c = HWSERIAL.read();
-          //Serial.print(c);
+          char c = HWSERIAL.read();            
           // figure out if it's a message or a bundle
           if (0 == firstCh)
             firstCh = c;

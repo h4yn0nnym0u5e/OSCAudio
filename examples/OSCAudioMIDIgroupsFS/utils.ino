@@ -16,7 +16,7 @@ void listObjects(OSCAudioBase* obj,int indent=0)
     OSCAudioConnection* conn = obj->getFirstSrc();
     
     prIndent(indent);
-    Serial.printf("%s is at %08X; route: %08X",obj->name,(uint32_t) obj,(uint32_t) obj->getNext()); Serial.flush();
+    Serial.printf("%s is at %08X (%08X); route: %08X",obj->name,(uint32_t) obj,(uint32_t) obj->sibling,(uint32_t) obj->getNext()); Serial.flush();
     if (NULL != grp)
     {
       Serial.printf("; group: %08X\n",(uint32_t) grp); Serial.flush();

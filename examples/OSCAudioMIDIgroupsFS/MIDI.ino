@@ -59,7 +59,8 @@ float note2freq(byte note,float* scale)
   return freq;
 }
 
-void dbgMIDI(byte ch, byte typ, byte d1, byte d2)
+void dbgMIDI(byte ch, byte typ, byte d1, byte d2){}
+void dbgMIDIx(byte ch, byte typ, byte d1, byte d2)
 {
     Serial.printf("%02X: %02X,%02X,%02X\n",
                   ch,typ,d1,d2);
@@ -76,6 +77,7 @@ void dbgMIDIget(void)
 //-----------------------------------------------------
 #define AVAIL 0xFF
 byte allocate[4];
+byte pending[4];
 // return index in allocate array of available voice,
 // or one that's already playing this note. Also
 // mark slot as "taken" by this note.
@@ -101,6 +103,7 @@ int deallocateMIDI(byte note)
     if (note == allocate[i])
     {
       allocate[i] = AVAIL;
+      pending[i] = note;
       break;
     }
 
@@ -123,9 +126,9 @@ void OSCnoteOn(byte channel, byte note, byte velocity)
   {
     char buf[50];
 
-    Serial.print("\nNote on: ");
+    //Serial.print("\nNote on: ");
     freq = note2freq(note,wellTempered);
-    Serial.println(freq);
+    //Serial.println(freq);
     dbgMIDI(channel,0x80,note,velocity);  
   
     uint32_t st = micros();
@@ -151,7 +154,59 @@ void OSCnoteOn(byte channel, byte note, byte velocity)
     reply.add("/noteOn");
     processBundle(&bndl,reply);
     st = micros() - st;
-    Serial.printf("OSC processing took %d us\n",st);
+    //Serial.printf("OSC processing took %d us\n",st);
+  }
+}
+
+
+// poll all releasing envelopes to see
+// if we can stop the associated waveforms
+// to save some CPU load
+uint32_t nextPoll;
+void pollMIDIstopWav()
+{
+  if (millis() > nextPoll) 
+  {
+    nextPoll = millis() + 10; // only poll every 10ms or so
+    
+    for (size_t i=0;i<COUNT_OF(pending);i++)  
+    {
+      if (pending[i] != AVAIL) // only poll envelopes that are pending release completion
+      {
+        OSCBundle bndl, reply;
+        char buf[50];
+        bool envActive;
+        int slot = i;
+        
+#if !defined(USE_GROUPS)    
+        sprintf(buf,"/teensy1/audio/env%c/isAc",slot+'A');
+#else      
+        sprintf(buf,"/teensy1/audio/voice1/i%c/env/isAc",slot+'0');
+#endif      
+        bndl.add(buf);
+        reply.add("/inactive");
+        processBundle(&bndl,reply);
+        
+        envActive = reply.getOSCMessage(0)->getBoolean(2);
+        if (!envActive)
+        {
+          pending[i] = AVAIL;
+          bndl.empty();
+          reply.empty();
+  
+#if !defined(USE_GROUPS)    
+          sprintf(buf,"/teensy1/audio/wav%c1/amp",slot+'A');
+          bndl.add(buf).add(0.0f);
+          sprintf(buf,"/teensy1/audio/wav%c2/amp",slot+'A');
+          bndl.add(buf).add(0.0f);
+#else    
+          sprintf(buf,"/teensy1/audio/voice1/i%c/wa*/amp",slot+'0');
+          bndl.add(buf).add(0.0f);
+#endif // !defined(USE_GROUPS)            
+          reply.add("/wavStop");
+          processBundle(&bndl,reply);      }    
+      }
+    }
   }
 }
 
@@ -162,7 +217,7 @@ void OSCnoteOff(byte channel, byte note, byte velocity)
   OSCBundle reply;
   int slot = deallocateMIDI(note);
 
-  Serial.print("\nNote off: ");
+  //Serial.print("\nNote off: ");
   dbgMIDI(channel,0x90,note,velocity);    
 
   if (slot >= 0)
@@ -171,12 +226,15 @@ void OSCnoteOff(byte channel, byte note, byte velocity)
 
 #if !defined(USE_GROUPS)    
     sprintf(buf,"/teensy1/audio/env%c/noteOff",slot+'A');
+    bndl.add(buf);
 #else    
     sprintf(buf,"/teensy1/audio/voice1/i%c/env/noteOff",slot+'0');
-#endif // !defined(USE_GROUPS)    
     bndl.add(buf);
+#endif // !defined(USE_GROUPS)    
     reply.add("/noteOff");
     processBundle(&bndl,reply);
+    
+    pending[slot] = note; // signal to poll that envelope is releasing
   }
 }
 
@@ -237,7 +295,10 @@ void initMIDI(void)
   usbMIDI.setHandleNoteOn(OSCnoteOn);
   usbMIDI.setHandleControlChange(handleCC);
   for (size_t i=0;i<COUNT_OF(allocate);i++)
+  {
     allocate[i] = AVAIL;
+    pending[i] = AVAIL;
+  }
 }
 
 
@@ -249,6 +310,7 @@ void updateMIDI(void)
     offTime = millis()+100;
     dbgMIDIget(); // mop up untrapped messages
   }
+  pollMIDIstopWav();
 
   if (millis() < offTime)
     digitalWrite(LED_BUILTIN,1);
