@@ -1109,7 +1109,7 @@ class OSCAudioMixer4 : public AudioMixer4, public OSCAudioBase
 			}
 		}
 };
-
+/*
 // ============== AudioMixerN ====================
 class OSCAudioMixerN : public AudioMixerN, public OSCAudioBase
 {
@@ -1128,7 +1128,7 @@ class OSCAudioMixerN : public AudioMixerN, public OSCAudioBase
 			}
 		}
 };
-
+*/
 // ============== AudioOutputADAT ====================
 class OSCAudioOutputADAT : public AudioOutputADAT, public OSCAudioBase
 {
