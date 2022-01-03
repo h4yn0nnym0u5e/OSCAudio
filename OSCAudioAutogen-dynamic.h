@@ -1110,6 +1110,25 @@ class OSCAudioMixer4 : public AudioMixer4, public OSCAudioBase
 		}
 };
 
+// ============== AudioMixerN ====================
+class OSCAudioMixerN : public AudioMixerN, public OSCAudioBase
+{
+    public:
+        OSCAudioMixerN(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioMixerN(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+
+        void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
+        {
+          int nameOff;
+          if ((nameOff = isMine(msg,addrOff)) > 0)
+          {
+            addrOff += nameOff;
+            if (isTarget(msg,addrOff,"/g*","f")) {gain(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void gain(float gain);
+            else if (isTarget(msg,addrOff,"/g*","if")) {gain(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void gain(unsigned int channel, float gain);
+			}
+		}
+};
+
 // ============== AudioOutputADAT ====================
 class OSCAudioOutputADAT : public AudioOutputADAT, public OSCAudioBase
 {
@@ -1445,10 +1464,11 @@ class OSCAudioPlayQueue : public AudioPlayQueue, public OSCAudioBase
             addrOff += nameOff;
             if (isTarget(msg,addrOff,"/a*",NULL)) {addReplyResult(msg,addrOff,reply,available()); } // bool available(void);
             else if (isTarget(msg,addrOff,"/g*",NULL)) {addReplyResult(msg,addrOff,reply,(uint32_t)getBuffer()); } // int16_t * getBuffer(void);
-            else if (isTarget(msg,addrOff,"/playB*",NULL)) {playBuffer(); addReplyExecuted(msg,addrOff,reply);} // void playBuffer(void);
-            // else if (isTarget(msg,addrOff,"/play","bi")) {play(msg.getBlob(0),msg.getInt(1)); addReplyExecuted(msg,addrOff,reply);} // void play(const int16_t *data, uint32_t len);
-            else if (isTarget(msg,addrOff,"/play","i")) {play(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply);} // void play(int16_t data);
-            else if (isTarget(msg,addrOff,"/se*","i")) {setMaxBuffers(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply);} // void setMaxBuffers(uint8_t);
+            else if (isTarget(msg,addrOff,"/playB*",NULL)) {addReplyResult(msg,addrOff,reply,playBuffer()); } // uint32_t playBuffer(void);
+            // else if (isTarget(msg,addrOff,"/play","bi")) {addReplyResult(msg,addrOff,reply,play(msg.getBlob(0),msg.getInt(1))); } // uint32_t play(const int16_t *data, uint32_t len);
+            else if (isTarget(msg,addrOff,"/play","i")) {addReplyResult(msg,addrOff,reply,play(msg.getInt(0))); } // uint32_t play(int16_t data);
+            else if (isTarget(msg,addrOff,"/setB*","i")) {setBehaviour((behaviour_e) msg.getInt(0)); addReplyExecuted(msg,addrOff,reply);} // void setBehaviour(behaviour_e behave) {behaviour = behave;}
+            else if (isTarget(msg,addrOff,"/setM*","i")) {setMaxBuffers(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply);} // void setMaxBuffers(uint8_t);
             // NOT DEFINED: else if (isTarget(msg,addrOff,"/st*",NULL)) {stop(); addReplyExecuted(msg,addrOff,reply);} // void stop(void);
 			}
 		}

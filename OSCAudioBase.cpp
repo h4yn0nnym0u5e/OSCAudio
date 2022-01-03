@@ -64,6 +64,7 @@ size_t OSCAudioBase::countOfAudioTypes(void) {return COUNT_OF(audioTypes);}
 // ********* end of magic array generator stuff ********************
 
 
+//-------------------------------------------------------------------------------------------------------
 static void dbgPrt(OSCMessage& msg, int addressOffset)
 {
 	char prt[50];
@@ -77,6 +78,7 @@ static void dbgPrt(OSCMessage& msg, int addressOffset)
 }
 
 
+//-------------------------------------------------------------------------------------------------------
 // Link into a grouping list
 void OSCAudioBase::linkInGroup(OSCAudioBase* p) 
 {
@@ -114,6 +116,24 @@ void OSCAudioBase::linkOutGroup(OSCAudioGroup** p)
 }
 
 
+//-------------------------------------------------------------------------------------------------------
+struct renameObject_s {char* newName; int count; int duplicates; OSCAudioBase* hit;};
+void OSCAudioBase::renameObjectCB(OSCAudioBase* ooi,OSCMessage& msg,int offset,void* ctxt) 
+{
+	renameObject_s* context = (renameObject_s*) ctxt;
+	OSCAudioBase* startFrom = ooi->pParent;
+	
+	if (0 == findMatch(context->newName,NULL,startFrom,false)) // check no clash in this group
+	{
+		ooi->setName(context->newName);
+		context->count++;
+		context->hit = ooi;
+	}
+	else
+		context->duplicates++;
+}
+
+
 /**
  *	Rename an [OSC]AudioStream or Connection object.
  *  This could be an /audio function, but that would pollute the 
@@ -124,38 +144,39 @@ void OSCAudioBase::renameObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 {
 	error retval = OK;
 	char oldName[50],newName[50],buf[150];
-	OSCAudioBase* pVictim;
-	//OSCAudioBase** thisGroupRoot = pParent;
+	char* pOldName = oldName+1;
+	renameObject_s context = {0};
 	
+	msg.getString(0,pOldName,50); // could be path, so user is responsible for this being valid
 	msg.getString(1,newName,50);
 	OSC_SPTF("new name is %s, size %d\n",newName,msg.getDataLength(1));
 	trimUnderscores(sanitise(newName,newName),newName); // make the new name valid
-	pVictim = OSCAudioBase::find(newName);
-	if (NULL == pVictim) // we're not duplicating the name of another object: good
+	
+	// this works even if supplied old name is empty:
+	if ('/' != *pOldName) 	// did user supply initial / ?
 	{
-		msg.getString(0,oldName,50);
-		trimUnderscores(sanitise(oldName,oldName),oldName); // make the old name valid
-		if (0 != strlen(newName)) // zero-length names are not allowed
-		{
-			pVictim = OSCAudioBase::find(oldName);
-			if (NULL != pVictim)
-			{
-				pVictim->setName(newName);
-			}
-			else
-				retval = NOT_FOUND; // object to rename not found			
-		}
-		else
-			retval = BLANK_NAME; // new name [sanitises to] an empty string			
+		pOldName--;		// no, use the space allowed...
+		*pOldName ='/';	// ...to prepend one
+	}
+	
+	if (0 != strlen(newName)) // zero-length names are not allowed
+	{
+		context.newName = newName;		
+		callBack(pOldName,renameObjectCB,&context);
+		if (0 == context.count)
+			retval = NOT_FOUND; // no object to rename was found
+		else if (0 != context.duplicates)
+			retval = DUPLICATE_NAME; // object(s) by requested name already exists
 	}
 	else
-		retval = DUPLICATE_NAME; // object by requested name already exists
+		retval = BLANK_NAME; // new name [sanitises to] an empty string			
 	
-	sprintf(buf,"%s -> %s",oldName,newName);
+	sprintf(buf,"%s -> %s (%d,%d)",pOldName,newName,context.count,context.duplicates);
 	staticPrepareReplyResult(msg,reply).add(buf).add(retval);
 }
 
 
+//-------------------------------------------------------------------------------------------------------
 /**
  * Sanitise a string to contain only characters valid in an OSC container or method.
  * Replaces all invalid characters <space>#*,/?[]{} with _.
@@ -217,6 +238,8 @@ char* OSCAudioBase::trimUnderscores(const char* src, //!< source string
 	return dstCopy;
 }
 
+
+//-------------------------------------------------------------------------------------------------------
 /**
  * Add to the reply bundle as a result of having executed an OSC message routed to us.
  */
@@ -315,7 +338,8 @@ int OSCAudioBase::findMatch(const char* addr,		//!< address to match
 	findMatch_s result = {0};
 	
 	callBack(addr,findMatchCB,(void*) &result,ooi,enterGroups);
-	*found = result.hit;
+	if (NULL != found)	// allow for not caring about the last-hit object
+		*found = result.hit; // will be NULL if nothing found
 	
 	return result.count;
 }
@@ -348,25 +372,43 @@ void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& r
 void OSCAudioBase::destroyObject(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
 	char buf[50];
+	char* vName = buf+1;
 	OSCAudioBase* pVictim;
-	msg.getString(0,buf,50);
-	trimUnderscores(sanitise(buf,buf),buf); // make the name valid
+	int matchCount = 0;
+	
+	msg.getString(0,vName,50); // may be a path with wildcards, user has to ensure it's valid
+	if ('/' != *vName)
+	{
+		vName--;
+		*vName = '/';
+	}
 	
 	OSC_SPRT("destroyObject: ");
-	OSC_SPLN(buf);
+	OSC_SPLN(vName);
 	OSC_DBGP(msg,addressOffset); 
-		
-	pVictim = OSCAudioBase::find(buf);
-	OSC_SPTF("Victim is at: 0x%08X\n",(uint32_t) pVictim);
-	OSC_SFSH();
-	if (NULL != pVictim)
-		delete pVictim;
-	else
+	
+	// Have to do repeated searches rther than one callBack() sweep,
+	// because removing items from a branched list while you're
+	// traversing it is bound to result in Alarm and Despondency
+	do
+	{
+		int numFound = OSCAudioBase::findMatch(vName,&pVictim);
+		if (numFound > 0)
+		{
+			matchCount++;
+			OSC_SPTF("Victim is at: 0x%08X\n",(uint32_t) pVictim);
+			OSC_SFSH();
+			if (NULL != pVictim) // shouldn't need to check, but...
+				delete pVictim;
+		}
+	} while (NULL != pVictim);
+	
+	if (0 == matchCount)
 	{
 		OSC_SPLN("not found!"); // but not really an error!
 	}
 	
-	staticPrepareReplyResult(msg,reply).add(buf).add((int) OK);
+	staticPrepareReplyResult(msg,reply).add(vName).add((int) OK);
 }
 
 /**
@@ -448,7 +490,12 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 		
 		if (NULL != pNewObj)
 		{
-			OSC_SPTF("Created %s as a new %s at %08X\n",objName, OSCAudioBase::audioTypes[objIdx].name, (uint32_t) pNewObj);
+			const char* name;
+			if (objIdx >= 0)
+				name = OSCAudioBase::audioTypes[objIdx].name;
+			else
+				name = "connection";
+			OSC_SPTF("Created %s as a new %s at %08X\n",objName, name, (uint32_t) pNewObj); (void) name;
 		}
 	}
 	return retval;
@@ -522,13 +569,13 @@ OSCAudioGroup::OSCAudioGroup(const char* _name, OSCAudioGroup* parent)
 		linkOut();
 		linkInGroup(parent);
 		OSC_SPTF("%s group re-linked:\n",name);
-		listObjects();
 	}
 }
 
 	
 OSCAudioGroup::~OSCAudioGroup()
 {
+	OSC_SPTF("dtor for %s\n",name);
 	while (NULL != next_group)
 		delete next_group;			
 	while (NULL != first_src)
@@ -610,7 +657,7 @@ void createGroupCB(OSCAudioBase* parent,OSCMessage& msg,int offset,void* context
 	{
 		OSCAudioGroup* pNewGroup = new OSCAudioGroup(buf+1,(OSCAudioGroup*) parent);
 		(void) pNewGroup;
-		OSC_SPTF("Created at: 0x%08X, parent %08X\n",(uint32_t) pNewGroup,(uint32_t) (pNewGroup->pParent));
+		OSC_SPTF("Created %s at: 0x%08X, parent %08X\n",buf,(uint32_t) pNewGroup,(uint32_t) (pNewGroup->pParent));
 	}	
 }
 
@@ -652,6 +699,7 @@ void OSCAudioBase::createGroup(OSCMessage& msg, int addressOffset, OSCBundle& re
  */
 OSCAudioConnection::~OSCAudioConnection(void)
 {
+	OSC_SPTF("dtor for %s\n",name);
 	linkOutSrc();
 	linkOutDst();
 }
@@ -687,18 +735,6 @@ void OSCAudioBase::createConnection(OSCMessage& msg, int addressOffset, OSCBundl
 		}
 		else 
 			retval = DynamicAudioCreateObject(CONNECTION_INDEX,objNameX,NULL);	
-		/*
-		if (NULL != find(buf))
-		{
-			retval = DUPLICATE_NAME;
-		}
-		else
-		{
-			OSCAudioConnection* pNewConn = new OSCAudioConnection(buf);
-			(void) pNewConn;
-			OSC_SPTF("Created at: 0x%08X\n",(uint32_t) pNewConn);
-		}
-		*/
 	}
 	else
 		retval = BLANK_NAME;
@@ -752,6 +788,7 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 		}
 	}		
 	trimUnderscores(sanitise(dstn,dstn,1),dstn); // make the destination name valid
+	OSC_SPTF("%s, %s\n",srcn,dstn);
 	
 	// Find the named OSCAudioBase objects and convert to
 	// the corresponding AudioStream: is there a better way?
@@ -781,7 +818,9 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 		}
 	}
 	else
+	{
 		sprintf(buf,"Bad path(s): %s, %s",srcn,dstn);
+	}
 	OSC_SPLN(buf);
 	
 	prepareReplyResult(msg,reply).set(1,buf).add((int) retval);
@@ -797,14 +836,12 @@ void OSCAudioConnection::mkLinks(OSCAudioBase& src, OSCAudioBase& dst)
 					);
 					
 	linkInSrc(src.pParent);
-	//listObjects();
 	OSC_SPTF(" and dest %08X (parent %08X)\n\n",
 					(uint32_t) &dst,
 					(uint32_t) dst.pParent
 					);
 					
 	linkInDst(dst.pParent);
-	//listObjects();
 }
 
 

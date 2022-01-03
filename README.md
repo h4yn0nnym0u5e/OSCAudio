@@ -11,7 +11,7 @@ A complete description of OSC is beyond the scope of this ReadMe: please refer t
  
 Routing of messages depends upon their address. This will be of the form **/path/to/destination/method**: at any point in the delivery process part of the address may have been "consumed", with the remainder forwarded to the next level until something executes the final "method" using the attached parameters. Within the examples we have used /teensy1 as the top level, thus acknowledging that future systems might have multiple Teensys, with messages broadcast via Ethernet or similar.
 
-Parameters to the methods are of types integer, float, string or blob. In the description below these will be shown as type codes i, f, s or b, or values will be shown in angle brackets, e.g. <220.0> is of type f. Optional parameters will be shown in square brackets, e.g. **/dynamic/crOb,s[s]** denotes that the dynamic createObject method may take one or two strings as its parameters.
+Parameters to the methods are of types integer, float, double, string, bool or blob. In the description below these will be shown as type codes i, f, d, s, ; or b, or values will be shown in angle brackets, e.g. <220.0> is of type f. Optional parameters will be shown in square brackets, e.g. **/dynamic/crOb,s[s]** denotes that the dynamic createObject method may take one or two strings as its parameters.
 
 ### Internal routing
 The two essential layers implemented by the OSCAudio library are named /audio and /dynamic. Whilst they could in principle be changed by the application writer, these names are built in to a separate development of the Audio System Design++ tool (https://manicken.github.io/#, henceforth called GUI++ for brevity) which provides an excellent way to make use of OSCAudio.

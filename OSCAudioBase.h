@@ -99,7 +99,7 @@ class OSCAudioBase
     }
 	
     
-    virtual ~OSCAudioBase() {OSC_SPTF("dtor %08X!\n",(uint32_t) this); OSC_SFSH(); if (NULL != name) free(name); linkOut(); }
+    virtual ~OSCAudioBase() {OSC_SPTF("dtor for %s at %08X!\n",name,(uint32_t) this); OSC_SFSH(); if (NULL != name) free(name); linkOut(); }
     virtual void route(OSCMessage& msg, int addressOffset, OSCBundle&)=0;
     char* name;
     size_t nameLen;
@@ -256,49 +256,6 @@ class OSCAudioBase
 		
 		
 	/**
-	 * Find an OSC audio object by name
-	 */
-	static OSCAudioBase* find(const char* _name)	//!< object to find
-	{
-		return find(_name,&first_route);
-	}
-	
-	/**
-	 * Find an OSC audio object by name, 
-	 * starting from a point in the connection tree
-	 */
-	static OSCAudioBase* find(const char* _name,			//!< object to find
-														OSCAudioBase** ppLink,	//!< where to start
-														bool intoGroups = true)	//!< look in groups as well
-	{
-		OSCAudioBase* result = NULL;
-		
-		while (NULL != *ppLink)
-		{
-			// first check to see if this object matches
-			if (0 == strcmp(_name,(*ppLink)->name+1))
-			{
-				result = *ppLink;
-				break;
-			}
-			
-			// if allowed, look in our group, if any
-			if (intoGroups)
-			{
-				result = find(_name,(OSCAudioBase**) &((*ppLink)->next_group));
-				if (NULL != result)
-					break;
-			}
-			
-			// not found, go on down the list
-			ppLink = &((*ppLink)->next_route);
-		}
-		
-		return result;			
-	}
-
-
-	/**
 	 * Implement a proper route and callback strategy,
 	 * with a context pointer to pass to the callback function
 	 * when we find a match
@@ -351,10 +308,10 @@ class OSCAudioBase
 						bool enterGroups = true);
 				
 	// count matches and return last matching object
-	static int findMatch(const char* addr,			//!< address to match
-						OSCAudioBase** found,		//!< last-found matching object
-						OSCAudioBase* ooi = NULL,	//!< where in structure to start from (default is root)
-						bool enterGroups = true);	//!< whether to allow matches in sub-groups
+	static int findMatch(const char* addr,				//!< address to match
+						OSCAudioBase** found = NULL,	//!< last-found matching object
+						OSCAudioBase* ooi = NULL,		//!< where in structure to start from (default is root)
+						bool enterGroups = true);		//!< whether to allow matches in sub-groups
 	 
 	/**
 	 * Return pointer to first OSC audio object
@@ -408,6 +365,7 @@ class OSCAudioBase
 	OSCAudioBase* next_group; //!< list of unrelated objects
 			
 //private:
+	static void renameObjectCB(OSCAudioBase* ooi,OSCMessage& msg,int offset,void* ctxt);
 	static void renameObject(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 	size_t nameAlloc;	//!< space allocated for name: may be shorter than current name
 	
