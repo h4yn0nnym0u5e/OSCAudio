@@ -43,8 +43,9 @@ OSC_AUDIO_CLASSES
 #undef OSC_CLASS
 
 // special cases
-OSCAudioBase* mk1_AudioMixerX(const char* nm, unsigned char ninputs) {return (OSCAudioBase*) new OSCAudioMixerX(nm,ninputs);} \
-OSCAudioBase* mk2_AudioMixerX(const char* nm, OSCAudioGroup& grp, unsigned char ninputs) {return (OSCAudioBase*) new OSCAudioMixerX(nm,grp,ninputs);} 
+const char* AudioMixerName = "AudioMixer";
+OSCAudioBase* mk1_AudioMixer(const char* nm, unsigned char ninputs) {return (OSCAudioBase*) new OSCAudioMixer(nm,ninputs);} \
+OSCAudioBase* mk2_AudioMixer(const char* nm, OSCAudioGroup& grp, unsigned char ninputs) {return (OSCAudioBase*) new OSCAudioMixer(nm,grp,ninputs);} 
 
 #define OSC_CLASS(a,o) {#a,mk1_##o,mk2_##o},
 const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
@@ -65,7 +66,7 @@ const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
 // Return number of available audio objects
 size_t OSCAudioBase::countOfAudioTypes(void) {return COUNT_OF(audioTypes);}
 #define CONNECTION_INDEX -1 //!< special "object number" denoting AudioConnection rather than AudioStream object type
-#define AUDIOMIXERX_INDEX -2 //!< special variable-width mixer
+#define AUDIOMIXER_INDEX -2 //!< special variable-width mixer
 // ********* end of magic array generator stuff ********************
 
 
@@ -489,9 +490,9 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 				pNewObj = OSCAudioBase::audioTypes[objIdx].mkRoot(objName+1);
 				break;
 					
-			  case AUDIOMIXERX_INDEX:
+			  case AUDIOMIXER_INDEX:
 				if (mixerSize > 0)
-					pNewObj = mk1_AudioMixerX(objName+1,mixerSize);
+					pNewObj = mk1_AudioMixer(objName+1,mixerSize);
 				break;
 					
 			  case CONNECTION_INDEX:
@@ -507,9 +508,9 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 				pNewObj = OSCAudioBase::audioTypes[objIdx].mkGroup(objName+1,*((OSCAudioGroup*) parent));
 				break;
 				
-			  case AUDIOMIXERX_INDEX:
+			  case AUDIOMIXER_INDEX:
 				if (mixerSize > 0)
-					pNewObj = mk2_AudioMixerX(objName+1,*((OSCAudioGroup*) parent),mixerSize);
+					pNewObj = mk2_AudioMixer(objName+1,*((OSCAudioGroup*) parent),mixerSize);
 				break;
 				
 			  case CONNECTION_INDEX:
@@ -527,8 +528,8 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 				name = OSCAudioBase::audioTypes[objIdx].name;
 				break;
 				
-			  case AUDIOMIXERX_INDEX:
-				name = "AudioMixerX";
+			  case AUDIOMIXER_INDEX:
+				name = AudioMixerName;
 				break;
 			  
 			  case CONNECTION_INDEX:
@@ -571,13 +572,13 @@ void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 	objIdx = OSCAudioBase::getTypeIndex(typ); // see if we've got a valid object type
 	if (objIdx < 0) // could be a special case: so far we only have one
 	{
-		if (msg.isInt(ml) && 0 == strcmp("AudioMixerX",typ)) // last parameter is an integer? variable width mixer?
+		if (msg.isInt(ml) && 0 == strcmp(AudioMixerName,typ)) // last parameter is an integer? variable width mixer?
 			mixerSize = msg.getInt(ml); // get mixer width
-		objIdx = AUDIOMIXERX_INDEX;
+		objIdx = AUDIOMIXER_INDEX;
 		isRoot = ml<3;
 	}
 	
-	if (objIdx >= 0 || AUDIOMIXERX_INDEX == objIdx) // valid type
+	if (objIdx >= 0 || AUDIOMIXER_INDEX == objIdx) // valid type
 	{	
 		msg.getString(1,objName,50);
 		if (strlen(objName) > 0)

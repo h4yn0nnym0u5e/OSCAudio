@@ -90,7 +90,7 @@ msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioOutputI2S','i2s')]
 
 if 1:
     # create the root-level objects
-    msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioMixerX','mixer',poly)]
+    msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioMixer','mixer',poly)]
 
     # create group and sub-groups
     msgl += [OSCpackAuto('/teensy1/dynamic/crGrp','voice1','/')]

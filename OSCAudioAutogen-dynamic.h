@@ -1095,12 +1095,12 @@ class OSCAudioInputTDM2 : public AudioInputTDM2, public OSCAudioBase
 		}
 };
 
-// ============== AudioMixer4 ====================
-class OSCAudioMixer4 : public AudioMixer4, public OSCAudioBase
+// ============== AudioMixer ====================
+class OSCAudioMixer : public AudioMixer, public OSCAudioBase
 {
     public:
-        OSCAudioMixer4(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioMixer4(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioMixer(const char* _name,unsigned char ninputs) : AudioMixer(ninputs),  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioMixer(const char* _name, OSCAudioGroup& grp,unsigned char ninputs) : AudioMixer(ninputs),  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1113,12 +1113,12 @@ class OSCAudioMixer4 : public AudioMixer4, public OSCAudioBase
 		}
 };
 
-// ============== AudioMixerX ====================
-class OSCAudioMixerX : public AudioMixerX, public OSCAudioBase
+// ============== AudioMixer4 ====================
+class OSCAudioMixer4 : public AudioMixer4, public OSCAudioBase
 {
     public:
-        OSCAudioMixerX(const char* _name,unsigned char ninputs) : AudioMixerX(ninputs),  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioMixerX(const char* _name, OSCAudioGroup& grp,unsigned char ninputs) : AudioMixerX(ninputs),  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioMixer4(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioMixer4(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {

@@ -76,8 +76,9 @@ void dbgMIDIget(void)
 
 //-----------------------------------------------------
 #define AVAIL 0xFF
-byte allocate[4];
-byte pending[4];
+#define VOICES 6
+byte allocate[VOICES];
+byte pending[VOICES];
 // return index in allocate array of available voice,
 // or one that's already playing this note. Also
 // mark slot as "taken" by this note.
@@ -98,7 +99,7 @@ int allocateMIDI(byte note)
 // was allocated, and mark as available
 int deallocateMIDI(byte note)
 {
-  size_t i;
+  int i;
   for (i=COUNT_OF(allocate)-1;i>=0;i--)
     if (note == allocate[i])
     {
