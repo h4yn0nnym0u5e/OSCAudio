@@ -1108,7 +1108,8 @@ class OSCAudioMixer : public AudioMixer, public OSCAudioBase
           if ((nameOff = isMine(msg,addrOff)) > 0)
           {
             addrOff += nameOff;
-            if (isTarget(msg,addrOff,"/g*","if")) {gain(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void gain(unsigned int channel, float gain) {
+            if (isTarget(msg,addrOff,"/ga*","if")) {gain(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void gain(unsigned int channel, float gain) {
+            else if (isTarget(msg,addrOff,"/ge*",NULL)) {addReplyResult(msg,addrOff,reply,getChannels()); } // uint8_t getChannels(void) {return num_inputs;}; // actual number, not requested
 			}
 		}
 };
