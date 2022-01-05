@@ -290,9 +290,12 @@ class OSCAudioControlCS42448 : public AudioControlCS42448, public OSCAudioBase
             addrOff += nameOff;
             if (isTarget(msg,addrOff,"/d*",NULL)) {addReplyResult(msg,addrOff,reply,disable()); } // bool disable(void) {
             else if (isTarget(msg,addrOff,"/e*",NULL)) {addReplyResult(msg,addrOff,reply,enable()); } // bool enable(void);
+            else if (isTarget(msg,addrOff,"/f*",NULL)) {addReplyResult(msg,addrOff,reply,filterFreeze()); } // bool filterFreeze(void);
             else if (isTarget(msg,addrOff,"/inputL*","f")) {addReplyResult(msg,addrOff,reply,inputLevel(msg.getFloat(0))); } // bool inputLevel(float level) {
             else if (isTarget(msg,addrOff,"/inputL*","if")) {addReplyResult(msg,addrOff,reply,inputLevel(msg.getInt(0),msg.getFloat(1))); } // bool inputLevel(int channel, float level) {
             else if (isTarget(msg,addrOff,"/inputS*","i")) {addReplyResult(msg,addrOff,reply,inputSelect(msg.getInt(0))); } // bool inputSelect(int n) {
+            else if (isTarget(msg,addrOff,"/invertA*","i")) {addReplyResult(msg,addrOff,reply,invertADC(msg.getInt(0))); } // bool invertADC(uint32_t data);
+            else if (isTarget(msg,addrOff,"/invertD*","i")) {addReplyResult(msg,addrOff,reply,invertDAC(msg.getInt(0))); } // bool invertDAC(uint32_t data);
             else if (isTarget(msg,addrOff,"/s*","i")) {setAddress(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply);} // void setAddress(uint8_t addr) {
             else if (isTarget(msg,addrOff,"/v*","f")) {addReplyResult(msg,addrOff,reply,volume(msg.getFloat(0))); } // bool volume(float level) {
             else if (isTarget(msg,addrOff,"/v*","if")) {addReplyResult(msg,addrOff,reply,volume(msg.getInt(0),msg.getFloat(1))); } // bool volume(int channel, float level) {
@@ -1109,13 +1112,13 @@ class OSCAudioMixer4 : public AudioMixer4, public OSCAudioBase
 			}
 		}
 };
-/*
-// ============== AudioMixerN ====================
-class OSCAudioMixerN : public AudioMixerN, public OSCAudioBase
+
+// ============== AudioMixerX ====================
+class OSCAudioMixerX : public AudioMixerX, public OSCAudioBase
 {
     public:
-        OSCAudioMixerN(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioMixerN(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioMixerX(const char* _name,unsigned char ninputs) : AudioMixerX(ninputs),  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioMixerX(const char* _name, OSCAudioGroup& grp,unsigned char ninputs) : AudioMixerX(ninputs),  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1123,12 +1126,11 @@ class OSCAudioMixerN : public AudioMixerN, public OSCAudioBase
           if ((nameOff = isMine(msg,addrOff)) > 0)
           {
             addrOff += nameOff;
-            if (isTarget(msg,addrOff,"/g*","f")) {gain(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void gain(float gain);
-            else if (isTarget(msg,addrOff,"/g*","if")) {gain(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void gain(unsigned int channel, float gain);
+            if (isTarget(msg,addrOff,"/g*","if")) {gain(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void gain(unsigned int channel, float gain) {
 			}
 		}
 };
-*/
+
 // ============== AudioOutputADAT ====================
 class OSCAudioOutputADAT : public AudioOutputADAT, public OSCAudioBase
 {
@@ -1853,8 +1855,8 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/setF*","f")) {setFrequency(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void setFrequency(float freq);
             // else if (isTarget(msg,addrOff,"/setI*","b")) {setInstrument(msg.getBlob(0)); addReplyExecuted(msg,addrOff,reply);} // void setInstrument(const instrument_data& instrument) {
             else if (isTarget(msg,addrOff,"/st*",NULL)) {stop(); addReplyExecuted(msg,addrOff,reply);} // void stop(void);
-          }
-        }
+			}
+		}
 };
 
 #define OSC_AUDIO_CLASSES \
