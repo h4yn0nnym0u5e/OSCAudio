@@ -44,8 +44,13 @@ OSC_AUDIO_CLASSES
 
 // special cases
 const char* AudioMixerName = "AudioMixer";
-OSCAudioBase* mk1_AudioMixer(const char* nm, unsigned char ninputs) {return (OSCAudioBase*) new OSCAudioMixer(nm,ninputs);} \
+OSCAudioBase* mk1_AudioMixer(const char* nm, unsigned char ninputs) {return (OSCAudioBase*) new OSCAudioMixer(nm,ninputs);}
 OSCAudioBase* mk2_AudioMixer(const char* nm, OSCAudioGroup& grp, unsigned char ninputs) {return (OSCAudioBase*) new OSCAudioMixer(nm,grp,ninputs);} 
+#if defined(MULTI_CENTRED) // signals we have a stereo mixer available
+const char* AudioMixerStereoName = "AudioMixerStereo";
+OSCAudioBase* mk1_AudioMixerStereo(const char* nm, unsigned char ninputs) {return (OSCAudioBase*) new OSCAudioMixerStereo(nm,ninputs);}
+OSCAudioBase* mk2_AudioMixerStereo(const char* nm, OSCAudioGroup& grp, unsigned char ninputs) {return (OSCAudioBase*) new OSCAudioMixerStereo(nm,grp,ninputs);} 
+#endif // defined(MULTI_CENTRED)
 
 #define OSC_CLASS(a,o) {#a,mk1_##o,mk2_##o},
 const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
@@ -67,6 +72,7 @@ const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
 size_t OSCAudioBase::countOfAudioTypes(void) {return COUNT_OF(audioTypes);}
 #define CONNECTION_INDEX -1 //!< special "object number" denoting AudioConnection rather than AudioStream object type
 #define AUDIOMIXER_INDEX -2 //!< special variable-width mixer
+#define AUDIOMIXERSTEREO_INDEX -3 //!< special variable-width mixer - stereo
 // ********* end of magic array generator stuff ********************
 
 
@@ -251,7 +257,7 @@ char* OSCAudioBase::trimUnderscores(const char* src, //!< source string
  */
 void OSCAudioBase::addReplyExecuted(OSCMessage& msg, int addressOffset, OSCBundle& reply) 
 {
-	prepareReplyResult(msg,reply).add(true); // add a "true" bool to the response, because we did the method
+	addReplyResult(msg,addressOffset,reply,true); // add a "true" bool to the response, because we did the method
 }
 
 
@@ -261,7 +267,7 @@ void OSCAudioBase::addReplyExecuted(OSCMessage& msg, int addressOffset, OSCBundl
  * \return reference to the OSCMessage, ready to add any extra information, dependent on the method called
  */
 OSCMessage& OSCAudioBase::staticPrepareReplyResult(OSCMessage& msg, 	//!< the received message
-														  OSCBundle& reply) //!< the bundle that will become the reply
+												   OSCBundle& reply) 	//!< the bundle that will become the reply
 {
 	int msgCount = reply.size(); // number of messages in bundle
 	OSCMessage* pLastMsg = reply.getOSCMessage(msgCount-1); // point to last message in reply bundle
@@ -299,12 +305,12 @@ OSCMessage& OSCAudioBase::prepareReplyResult(OSCMessage& msg, 	//!< the received
 
 
 // Despatch function overloaded with the various reply types we might append to the standard information
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, bool v) { prepareReplyResult(msg, reply).add(v); OSC_SPLN(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, float v) { prepareReplyResult(msg, reply).add(v); OSC_SPLN(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, int32_t v) { prepareReplyResult(msg, reply).add(v); OSC_SPLN(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint32_t v) { prepareReplyResult(msg, reply).add((unsigned int)v); OSC_SPLN(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint8_t v) { prepareReplyResult(msg, reply).add(v); OSC_SPLN(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint16_t v) { prepareReplyResult(msg, reply).add(v); OSC_SPLN(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, bool v, error ret) { prepareReplyResult(msg, reply).add(v).add(ret); OSC_SPLN(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, float v) { prepareReplyResult(msg, reply).add(v).add(OK); OSC_SPLN(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, int32_t v) { prepareReplyResult(msg, reply).add(v).add(OK); OSC_SPLN(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint32_t v) { prepareReplyResult(msg, reply).add((unsigned int)v).add(OK); OSC_SPLN(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint8_t v) { prepareReplyResult(msg, reply).add(v).add(OK); OSC_SPLN(v); }
+void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint16_t v) { prepareReplyResult(msg, reply).add(v).add(OK); OSC_SPLN(v); }
 
 
 
@@ -495,6 +501,11 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 					pNewObj = mk1_AudioMixer(objName+1,mixerSize);
 				break;
 					
+			  case AUDIOMIXERSTEREO_INDEX:
+				if (mixerSize > 0)
+					pNewObj = mk1_AudioMixerStereo(objName+1,mixerSize);
+				break;
+					
 			  case CONNECTION_INDEX:
 				pNewObj = new OSCAudioConnection(objName+1);
 				break;
@@ -511,6 +522,11 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 			  case AUDIOMIXER_INDEX:
 				if (mixerSize > 0)
 					pNewObj = mk2_AudioMixer(objName+1,*((OSCAudioGroup*) parent),mixerSize);
+				break;
+				
+			  case AUDIOMIXERSTEREO_INDEX:
+				if (mixerSize > 0)
+					pNewObj = mk2_AudioMixerStereo(objName+1,*((OSCAudioGroup*) parent),mixerSize);
 				break;
 				
 			  case CONNECTION_INDEX:
@@ -530,6 +546,10 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 				
 			  case AUDIOMIXER_INDEX:
 				name = AudioMixerName;
+				break;
+			  
+			  case AUDIOMIXERSTEREO_INDEX:
+				name = AudioMixerStereoName;
 				break;
 			  
 			  case CONNECTION_INDEX:
@@ -573,12 +593,22 @@ void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 	if (objIdx < 0) // could be a special case: so far we only have one
 	{
 		if (msg.isInt(ml) && 0 == strcmp(AudioMixerName,typ)) // last parameter is an integer? variable width mixer?
+		{
 			mixerSize = msg.getInt(ml); // get mixer width
-		objIdx = AUDIOMIXER_INDEX;
-		isRoot = ml<3;
+			objIdx = AUDIOMIXER_INDEX;
+			isRoot = ml<3;
+		}
+		else if (msg.isInt(ml) && 0 == strcmp(AudioMixerStereoName,typ)) // last parameter is an integer? variable width mixer?
+		{
+			mixerSize = msg.getInt(ml); // get mixer width
+			objIdx = AUDIOMIXERSTEREO_INDEX;
+			isRoot = ml<3;
+		}
 	}
 	
-	if (objIdx >= 0 || AUDIOMIXER_INDEX == objIdx) // valid type
+	if (objIdx >= 0 
+		|| AUDIOMIXER_INDEX == objIdx
+		|| AUDIOMIXERSTEREO_INDEX == objIdx) // valid type
 	{	
 		msg.getString(1,objName,50);
 		if (strlen(objName) > 0)
@@ -904,7 +934,7 @@ void OSCAudioConnection::route(OSCMessage& msg, int addressOffset, OSCBundle& re
 		addressOffset += nameOff;
 		if (isTarget(msg,addressOffset,"/c*","ss")) {OSCconnect(msg,addressOffset,reply,true);}
 		else if (isTarget(msg,addressOffset,"/c*","sisi")) {OSCconnect(msg,addressOffset,reply);} 
-		else if (isTarget(msg,addressOffset,"/d*",NULL)) {disconnect();} 
+		else if (isTarget(msg,addressOffset,"/d*",NULL)) {int r = disconnect(); addReplyResult(msg,addressOffset,reply,r==0,r?NOT_CONNECTED:OK);} 
 	}
 }
 

@@ -136,9 +136,10 @@ void processMessage(OSCMessage* msg,OSCBundle& reply)
     // to whichever engines they choose to implement. The OSCAudio library
     // implements /audio and /dynamic, but /fs is implemented within this demo
     
-    msg->route("/teensy*/audio",routeAudio);     // see if this object can use the message
-    msg->route("/teensy*/dynamic",routeDynamic); // or this one
-    msg->route("/teensy*/fs",routeFS);           // or this one
+    if (!msg->route("/teensy*/audio",routeAudio))                 // see if this object can use the message
+      if (!msg->route("/teensy*/dynamic",routeDynamic))           // or this one
+        if(!msg->route("/teensy*/fs",routeFS))                    // or this one
+          reply.getOSCMessage(0)->add(OSCAudioBase::NOT_ROUTED);  // got no takers - say so
   }
   else
     Serial.println("error in msg");
@@ -166,7 +167,7 @@ void processBundle(OSCBundle* bndl,OSCBundle& reply)
     
     for (int i=0;i<bndlSize;i++)
     {
-      OSCMessage* msg = bndl->getOSCMessage(i); 
+      OSCMessage* msg = bndl->getOSCMessage(i); (void) msg;
       //Serial.printf("error %d in message %d\n",(int) msg->getError(),i);
     }
   }  

@@ -90,7 +90,7 @@ msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioOutputI2S','i2s')]
 
 if 1:
     # create the root-level objects
-    msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioMixer','mixer',poly)]
+    msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioMixerStereo','mixer',poly)]
 
     # create group and sub-groups
     msgl += [OSCpackAuto('/teensy1/dynamic/crGrp','voice1','/')]
@@ -109,7 +109,7 @@ if 1:
     msgl += [OSCpackAuto('/teensy1/dynamic/crCo','mix_env','/voice1/i*')]
     msgl += [OSCpackAuto('/teensy1/dynamic/crCo','env_mix','/voice1/i*')]
     
-    for i in range(0,poly): # connect up the four instances of voice1:
+    for i in range(0,poly): # connect up the instances of voice1:
         msgl += [OSCpackAuto('/teensy1/audio/voice1/i%d/wav_mix0/co' % i,'/voice1/i%d/wav'%i,'/voice1/i%d/mixer'%i)]
         msgl += [OSCpackAuto('/teensy1/audio/voice1/i%d/wav2_mix1/co' % i,'/voice1/i%d/wav2'%i,0,'/voice1/i%d/mixer'%i,1)]
         msgl += [OSCpackAuto('/teensy1/audio/voice1/i%d/mix_env/co' % i,'/voice1/i%d/mixer'%i,'/voice1/i%d/env'%i)]
@@ -117,18 +117,19 @@ if 1:
 
     # set mixer gains to something vaguely sane   
     for i in range(0,poly):
-        msgl += [OSCpackAuto('/teensy1/audio/mixer/ga',i,0.25)]
+        msgl += [OSCpackAuto('/teensy1/audio/mixer/ga',i,0.16)]
+        msgl += [OSCpackAuto('/teensy1/audio/mixer/pan',i,2.0*float(i)/(poly - 1)-1.0)]
         msgl += [OSCpackAuto('/teensy1/audio/voice1/i*/mixer/ga',i,0.5)]
 
     # root-level connections   
     msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p_mix_outL')]
     msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p_mix_outR')]
     msgl += [OSCpackAuto('/teensy1/audio/p_mix_outL/co','/mixer',0,'/i2s',0)]
-    msgl += [OSCpackAuto('/teensy1/audio/p_mix_outR/co','/mixer',0,'/i2s',1)]
+    msgl += [OSCpackAuto('/teensy1/audio/p_mix_outR/co','/mixer',1,'/i2s',1)]
 
 # enable audio system    
-msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/ena')]
-msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/vol*',0.5)]  # currently not working without the *
+msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/enab')]
+msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/vo',0.5)]
 msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/lineO*',12)] # ~3Vpk-pk
 
 
@@ -139,7 +140,8 @@ print(pkt)
 #    print(SLIPser.recv_msg(),end='\n\n')
 
 SLIPser.send_msg(pkt)
-print(SLIPser.recv_msg(),end='\n\n')
+rpl = SLIPser.recv_msg()
+print(rpl,end='\n\n')
 sleep(0.5)
 
 
