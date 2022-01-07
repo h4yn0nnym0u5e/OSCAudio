@@ -179,7 +179,8 @@ void loop()
     }
   }
   
-  reply.empty(); // keep reply bundle empty - we don't use it in this sketch
+  reply.empty();       // keep reply bundle empty - we don't use it in this sketch...
+  reply.add("/reply"); // ...except OSC library will crash if we don't put something in
 
   if ('#' == firstCh)
   {
