@@ -1197,10 +1197,13 @@ class OSCAudioMixerStereo : public AudioMixerStereo, public OSCAudioBase
           if ((nameOff = isMine(msg,addrOff)) > 0)
           {
             addrOff += nameOff;
-            if (isTarget(msg,addrOff,"/ga*","f")) {gain(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void gain(float gain) {
-            else if (isTarget(msg,addrOff,"/ga*","if")) {gain(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void gain(unsigned int channel, float gain) {
+            if (isTarget(msg,addrOff,"/b*","if")) {balance(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void balance(unsigned int chLeft, float bal)
+            else if (isTarget(msg,addrOff,"/b*","iif")) {balance(msg.getInt(0),msg.getInt(1),msg.getFloat(2)); addReplyExecuted(msg,addrOff,reply);} // void balance(unsigned int chLeft, unsigned int chRight, float bal)
+            else if (isTarget(msg,addrOff,"/ga*","f")) {gain(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void gain(float gain)
+            else if (isTarget(msg,addrOff,"/ga*","if")) {gain(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void gain(unsigned int channel, float gain)
             else if (isTarget(msg,addrOff,"/ge*",NULL)) {addReplyResult(msg,addrOff,reply,getChannels()); } // uint8_t getChannels(void) {return num_inputs;}; // actual number, not requested
-            else if (isTarget(msg,addrOff,"/p*","if")) {pan(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void pan(unsigned int channel, float pan) {
+            else if (isTarget(msg,addrOff,"/p*","if")) {pan(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void pan(unsigned int channel, float pan)
+            else if (isTarget(msg,addrOff,"/s*","f")) {setPanLaw(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void setPanLaw(float law)
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
 			}
 		}

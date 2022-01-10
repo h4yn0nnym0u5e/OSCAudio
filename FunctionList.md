@@ -319,10 +319,25 @@ This is a list of functions (aka OSC methods) which are available for each objec
 |----|----|----|----|----|
 | pllLocked | static bool | p* | -- | void |
 | sampleRate | static unsigned int | s* | -- | void |
+#### AudioMixer
+|function|return type|short-form|parameter pattern|parameters|
+|----|----|----|----|----|
+| gain | void | ga* | f | float gain |
+| gain | void | ga* | if | unsigned int channel, float gain |
+| getChannels | uint8_t | ge* | -- | void |
 #### AudioMixer4
 |function|return type|short-form|parameter pattern|parameters|
 |----|----|----|----|----|
 | gain | void | g* | if | unsigned int channel, float gain |
+#### AudioMixerStereo
+|function|return type|short-form|parameter pattern|parameters|
+|----|----|----|----|----|
+| balance | void | b* | if | unsigned int chLeft, float bal |
+| balance | void | b* | iif | unsigned int chLeft, unsigned int chRight, float bal |
+| gain | void | ga* | f | float gain |
+| gain | void | ga* | if | unsigned int channel, float gain |
+| getChannels | uint8_t | ge* | -- | void |
+| pan | void | p* | if | unsigned int channel, float pan |
 #### AudioOutputADAT
 |function|return type|short-form|parameter pattern|parameters|
 |----|----|----|----|----|
@@ -362,7 +377,7 @@ This is a list of functions (aka OSC methods) which are available for each objec
 | getBuffer | int16_t * | g* | -- | void |
 | playBuffer | uint32_t | playB* | -- | void |
 | play | uint32_t | play | i | int16_t data |
-| setBehaviour | void | setB* | -- | behaviour_e behave |
+| setBehaviour | void | setB* | i | behaviour_e behave |
 | setMaxBuffers | void | setM* | i | uint8_t |
 #### AudioPlaySdRaw
 |function|return type|short-form|parameter pattern|parameters|
