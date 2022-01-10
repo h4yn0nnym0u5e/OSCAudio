@@ -35,7 +35,7 @@ OSCAudioBase* OSCAudioBase::first_route = NULL;
  * Generate an array with the names of all the available AudioStream-derived objects,
  * together with pointers to the functions to call to create instances of each.
  */
-#if defined(DYNAMIC_AUDIO_AVAILABLE)
+#if defined(DYNAMIC_AUDIO_AVAILABLE) // build create tables
 #define OSC_CLASS(a,o) \
 OSCAudioBase* mk1_##o(const char* nm) {return (OSCAudioBase*) new o(nm);} \
 OSCAudioBase* mk2_##o(const char* nm,OSCAudioGroup& grp) {return (OSCAudioBase*) new o(nm,grp);} 
@@ -364,7 +364,7 @@ int OSCAudioBase::findMatch(const char* addr,		//!< address to match
 void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
     if (isStaticTarget(msg,addressOffset,"/ren*","ss")) {renameObject(msg,addressOffset,reply);} 
-#if defined(DYNAMIC_AUDIO_AVAILABLE)
+#if defined(DYNAMIC_AUDIO_AVAILABLE) // route OSC commands to create / destroy objects
     else if (isStaticTarget(msg,addressOffset,"/crC*","s"))  	{createConnection(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/crC*","ss"))  	{createConnection(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/crO*","ss"))	{createObject(msg,addressOffset,reply);} 
@@ -379,7 +379,7 @@ void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& r
 }
 
 
-#if defined(DYNAMIC_AUDIO_AVAILABLE)
+#if defined(DYNAMIC_AUDIO_AVAILABLE) // actual creation / destruction functions
 /**
  *	Destroy an [OSC]AudioStream or Connection object.
  */
@@ -640,6 +640,7 @@ void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 	staticPrepareReplyResult(msg,reply).add(objName).add((int) retval);
 }
 
+#endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 
 //============================== OSCAudioGroup =====================================================
 OSCAudioGroup::OSCAudioGroup(const char* _name, OSCAudioGroup* parent) 
@@ -719,7 +720,7 @@ void OSCAudioGroup::linkOutGroup()
 
 
 
-
+#if defined(DYNAMIC_AUDIO_AVAILABLE) // Group creation / destruction
 void createGroupCB(OSCAudioBase* parent,OSCMessage& msg,int offset,void* context)
 {
 	char* buf = (char*) context;
@@ -772,7 +773,7 @@ void OSCAudioBase::createGroup(OSCMessage& msg, int addressOffset, OSCBundle& re
 	
 	staticPrepareReplyResult(msg,reply).add(buf).add((int) retval);
 }
-
+#endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 
 //============================== OSCAudioConnection =====================================================
 /**
@@ -785,7 +786,7 @@ OSCAudioConnection::~OSCAudioConnection(void)
 	linkOutDst();
 }
 
-
+#if defined(DYNAMIC_AUDIO_AVAILABLE) // Connection creation / destruction
 /**
  *	Create a new [OSC]AudioConnection object.
  */
@@ -906,7 +907,7 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 	
 	prepareReplyResult(msg,reply).set(1,buf).add((int) retval);
 }
-
+#endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 
 void OSCAudioConnection::mkLinks(OSCAudioBase& src, OSCAudioBase& dst)
 {
@@ -932,9 +933,11 @@ void OSCAudioConnection::route(OSCMessage& msg, int addressOffset, OSCBundle& re
 	if (nameOff > 0)
 	{ 
 		addressOffset += nameOff;
+#if defined(DYNAMIC_AUDIO_AVAILABLE) // route OSC commands to Connection
 		if (isTarget(msg,addressOffset,"/c*","ss")) {OSCconnect(msg,addressOffset,reply,true);}
 		else if (isTarget(msg,addressOffset,"/c*","sisi")) {OSCconnect(msg,addressOffset,reply);} 
 		else if (isTarget(msg,addressOffset,"/d*",NULL)) {int r = disconnect(); addReplyResult(msg,addressOffset,reply,r==0,r?NOT_CONNECTED:OK);} 
+#endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 	}
 }
 
@@ -992,7 +995,4 @@ void OSCAudioConnection::linkOutDst()
 		}
 	}
 }
-
-#endif // defined(DYNAMIC_AUDIO_AVAILABLE)
-
 

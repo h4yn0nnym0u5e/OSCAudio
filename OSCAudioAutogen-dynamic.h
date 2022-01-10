@@ -27,6 +27,7 @@
  * THE SOFTWARE.
  */
 
+#if defined(async_input_spdif3_h_)
 // ============== AsyncAudioInputSPDIF3 ====================
 class AsyncOSCAudioInputSPDIF3 : public AsyncAudioInputSPDIF3, public OSCAudioBase
 {
@@ -48,10 +49,12 @@ class AsyncOSCAudioInputSPDIF3 : public AsyncAudioInputSPDIF3, public OSCAudioBa
             else if (isTarget(msg,addrOff,"/getT*",NULL)) {addReplyResult(msg,addrOff,reply,(float)getTargetLantency()); } // double getTargetLantency() const;
             else if (isTarget(msg,addrOff,"/i*",NULL)) {addReplyResult(msg,addrOff,reply,isLocked()); } // static bool isLocked();
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(async_input_spdif3_h_)
 
+#if defined(mixer_h_)
 // ============== AudioAmplifier ====================
 class OSCAudioAmplifier : public AudioAmplifier, public OSCAudioBase
 {
@@ -68,10 +71,12 @@ class OSCAudioAmplifier : public AudioAmplifier, public OSCAudioBase
             if (isTarget(msg,addrOff,"/g*","f")) {gain(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void gain(float n)
             else if (isTarget(msg,addrOff,"/s*",";")) {slew(msg.getBoolean(0)); addReplyExecuted(msg,addrOff,reply);} // void slew(bool doSlew)
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(mixer_h_)
 
+#if defined(analyze_event_h_)
 // ============== AudioAnalyzeEvent ====================
 class OSCAudioAnalyzeEvent : public AudioAnalyzeEvent, public OSCAudioBase
 {
@@ -89,10 +94,12 @@ class OSCAudioAnalyzeEvent : public AudioAnalyzeEvent, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/getM*",NULL)) {addReplyResult(msg,addrOff,reply,getMicros()); } // uint32_t getMicros(void) {return tstamp;}
             // else if (isTarget(msg,addrOff,"/s*","b")) {setEventFn(msg.getBlob(1)); addReplyExecuted(msg,addrOff,reply);} // void setEventFn(EventResponderFunction evFn,void* context);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(analyze_event_h_)
 
+#if defined(analyze_fft1024_h_)
 // ============== AudioAnalyzeFFT1024 ====================
 class OSCAudioAnalyzeFFT1024 : public AudioAnalyzeFFT1024, public OSCAudioBase
 {
@@ -112,12 +119,14 @@ class OSCAudioAnalyzeFFT1024 : public AudioAnalyzeFFT1024, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/r*","i")) {addReplyResult(msg,addrOff,reply,read(msg.getInt(0))); } // float read(unsigned int binNumber) {
             else if (isTarget(msg,addrOff,"/w*","s")) {addReplyResult(msg,addrOff,reply,windowFunction(msg)); } // void windowFunction(const int16_t *w) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 	private:
 		bool windowFunction(OSCMessage& msg);
 };
+#endif // defined(analyze_fft1024_h_)
 
+#if defined(analyze_fft256_h_)
 // ============== AudioAnalyzeFFT256 ====================
 class OSCAudioAnalyzeFFT256 : public AudioAnalyzeFFT256, public OSCAudioBase
 {
@@ -137,12 +146,14 @@ class OSCAudioAnalyzeFFT256 : public AudioAnalyzeFFT256, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/r*","i")) {addReplyResult(msg,addrOff,reply,read(msg.getInt(0))); } // float read(unsigned int binNumber) {
             else if (isTarget(msg,addrOff,"/w*","s")) {addReplyResult(msg,addrOff,reply,windowFunction(msg)); } // void windowFunction(const int16_t *w) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 	private:
 		bool windowFunction(OSCMessage& msg);
 };
+#endif // defined(analyze_fft256_h_)
 
+#if defined(AudioAnalyzeNoteFrequency_h_)
 // ============== AudioAnalyzeNoteFrequency ====================
 class OSCAudioAnalyzeNoteFrequency : public AudioAnalyzeNoteFrequency, public OSCAudioBase
 {
@@ -162,10 +173,12 @@ class OSCAudioAnalyzeNoteFrequency : public AudioAnalyzeNoteFrequency, public OS
             else if (isTarget(msg,addrOff,"/r*",NULL)) {addReplyResult(msg,addrOff,reply,read()); } // float read( void );
             else if (isTarget(msg,addrOff,"/t*","f")) {threshold(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void threshold( float p );
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(AudioAnalyzeNoteFrequency_h_)
 
+#if defined(analyze_peakdetect_h_)
 // ============== AudioAnalyzePeak ====================
 class OSCAudioAnalyzePeak : public AudioAnalyzePeak, public OSCAudioBase
 {
@@ -183,10 +196,12 @@ class OSCAudioAnalyzePeak : public AudioAnalyzePeak, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/readP*",NULL)) {addReplyResult(msg,addrOff,reply,readPeakToPeak()); } // float readPeakToPeak(void) {
             else if (isTarget(msg,addrOff,"/read",NULL)) {addReplyResult(msg,addrOff,reply,read()); } // float read(void) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(analyze_peakdetect_h_)
 
+#if defined(analyze_print_h_)
 // ============== AudioAnalyzePrint ====================
 class OSCAudioAnalyzePrint : public AudioAnalyzePrint, public OSCAudioBase
 {
@@ -207,13 +222,15 @@ class OSCAudioAnalyzePrint : public AudioAnalyzePrint, public OSCAudioBase
             // NOT DEFINED: else if (isTarget(msg,addrOff,"/t*","fi")) {trigger(msg.getFloat(0),msg.getInt(1)); addReplyExecuted(msg,addrOff,reply);} // void trigger(float level, int edge);
             else if (isTarget(msg,addrOff,"/t*",NULL)) {trigger(); addReplyExecuted(msg,addrOff,reply);} // void trigger(void);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 	private:
 		bool name(OSCMessage& msg);
 		char* namePtr;
 };
+#endif // defined(analyze_print_h_)
 
+#if defined(analyze_rms_h_)
 // ============== AudioAnalyzeRMS ====================
 class OSCAudioAnalyzeRMS : public AudioAnalyzeRMS, public OSCAudioBase
 {
@@ -230,10 +247,12 @@ class OSCAudioAnalyzeRMS : public AudioAnalyzeRMS, public OSCAudioBase
             if (isTarget(msg,addrOff,"/a*",NULL)) {addReplyResult(msg,addrOff,reply,available()); } // bool available(void) {
             else if (isTarget(msg,addrOff,"/r*",NULL)) {addReplyResult(msg,addrOff,reply,read()); } // float read(void);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(analyze_rms_h_)
 
+#if defined(analyze_tonedetect_h_)
 // ============== AudioAnalyzeToneDetect ====================
 class OSCAudioAnalyzeToneDetect : public AudioAnalyzeToneDetect, public OSCAudioBase
 {
@@ -253,9 +272,10 @@ class OSCAudioAnalyzeToneDetect : public AudioAnalyzeToneDetect, public OSCAudio
             else if (isTarget(msg,addrOff,"/s*","iii")) {set_params(msg.getInt(0),msg.getInt(1),msg.getInt(2)); addReplyExecuted(msg,addrOff,reply);} // void set_params(int32_t coef, uint16_t cycles, uint16_t len);
             else if (isTarget(msg,addrOff,"/t*","f")) {threshold(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void threshold(float level) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(analyze_tonedetect_h_)
 
 // ============== AudioControlAK4558 ====================
 class OSCAudioControlAK4558 : public AudioControlAK4558, public OSCAudioBase
@@ -282,10 +302,11 @@ class OSCAudioControlAK4558 : public AudioControlAK4558, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/volumeR*","f")) {addReplyResult(msg,addrOff,reply,volumeRight(msg.getFloat(0))); } // bool volumeRight(float n);	//sets ROUT volume to n (range 0.0 - 1.0)
             else if (isTarget(msg,addrOff,"/volume","f")) {addReplyResult(msg,addrOff,reply,volume(msg.getFloat(0))); } // bool volume(float n);	//sets LOUT/ROUT volume to n (range 0.0 - 1.0)
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
 
+#if defined(control_cs42448_h_)
 // ============== AudioControlCS42448 ====================
 class OSCAudioControlCS42448 : public AudioControlCS42448, public OSCAudioBase
 {
@@ -311,9 +332,10 @@ class OSCAudioControlCS42448 : public AudioControlCS42448, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/v*","f")) {addReplyResult(msg,addrOff,reply,volume(msg.getFloat(0))); } // bool volume(float level) {
             else if (isTarget(msg,addrOff,"/v*","if")) {addReplyResult(msg,addrOff,reply,volume(msg.getInt(0),msg.getFloat(1))); } // bool volume(int channel, float level) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(control_cs42448_h_)
 
 // ============== AudioControlCS4272 ====================
 class OSCAudioControlCS4272 : public AudioControlCS4272, public OSCAudioBase
@@ -343,10 +365,11 @@ class OSCAudioControlCS4272 : public AudioControlCS4272, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/v*","ff")) {addReplyResult(msg,addrOff,reply,volume(msg.getFloat(0),msg.getFloat(1))); } // bool volume(float left, float right);
             else if (isTarget(msg,addrOff,"/v*","f")) {addReplyResult(msg,addrOff,reply,volume(msg.getFloat(0))); } // bool volume(float n) { return volumeInteger(n * 127 + 0.499f); }
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
 
+#if defined(control_sgtl5000_h_)
 // ============== AudioControlSGTL5000 ====================
 class OSCAudioControlSGTL5000 : public AudioControlSGTL5000, public OSCAudioBase
 {
@@ -408,12 +431,14 @@ class OSCAudioControlSGTL5000 : public AudioControlSGTL5000, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/v*","ff")) {addReplyResult(msg,addrOff,reply,volume(msg.getFloat(0),msg.getFloat(1))); } // bool volume(float left, float right);
             else if (isTarget(msg,addrOff,"/v*","f")) {addReplyResult(msg,addrOff,reply,volume(msg.getFloat(0))); } // bool volume(float n) { return volumeInteger(n * 129 + 0.499f); }
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 	private:
 		void eqFilter(OSCMessage& msg);
 };
+#endif // defined(control_sgtl5000_h_)
 
+#if defined(control_tlv320aic3206_h_)
 // ============== AudioControlTLV320AIC3206 ====================
 class OSCAudioControlTLV320AIC3206 : public AudioControlTLV320AIC3206, public OSCAudioBase
 {
@@ -447,11 +472,12 @@ class OSCAudioControlTLV320AIC3206 : public AudioControlTLV320AIC3206, public OS
             else if (isTarget(msg,addrOff,"/volume_*","f")) {addReplyResult(msg,addrOff,reply,volume_dB(msg.getFloat(0))); } // bool volume_dB(float n);
             else if (isTarget(msg,addrOff,"/volume","f")) {addReplyResult(msg,addrOff,reply,volume(msg.getFloat(0))); } // bool volume(float n);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 	private:
 		void setIIRCoeffOnADC(OSCMessage& msg);
 };
+#endif // defined(control_tlv320aic3206_h_)
 
 // ============== AudioControlWM8731 ====================
 class OSCAudioControlWM8731 : public AudioControlWM8731, public OSCAudioBase
@@ -472,7 +498,7 @@ class OSCAudioControlWM8731 : public AudioControlWM8731, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/inputS*","i")) {addReplyResult(msg,addrOff,reply,inputSelect(msg.getInt(0))); } // bool inputSelect(int n);
             else if (isTarget(msg,addrOff,"/v*","f")) {addReplyResult(msg,addrOff,reply,volume(msg.getFloat(0))); } // bool volume(float n) { return volumeInteger(n * 80.0f + 47.499f); }
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
 
@@ -491,10 +517,11 @@ class OSCAudioControlWM8731master : public AudioControlWM8731master, public OSCA
             addrOff += nameOff;
             if (isTarget(msg,addrOff,"/e*",NULL)) {addReplyResult(msg,addrOff,reply,enable()); } // bool enable(void);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
 
+#if defined(effect_bitcrusher_h_)
 // ============== AudioEffectBitcrusher ====================
 class OSCAudioEffectBitcrusher : public AudioEffectBitcrusher, public OSCAudioBase
 {
@@ -511,10 +538,12 @@ class OSCAudioEffectBitcrusher : public AudioEffectBitcrusher, public OSCAudioBa
             if (isTarget(msg,addrOff,"/b*","i")) {bits(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply);} // void bits(uint8_t b) {
             else if (isTarget(msg,addrOff,"/s*","f")) {sampleRate(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void sampleRate(float hz) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(effect_bitcrusher_h_)
 
+#if defined(effect_delay_h_)
 // ============== AudioEffectDelay ====================
 class OSCAudioEffectDelay : public AudioEffectDelay, public OSCAudioBase
 {
@@ -531,10 +560,12 @@ class OSCAudioEffectDelay : public AudioEffectDelay, public OSCAudioBase
             if (isTarget(msg,addrOff,"/de*","if")) {delay(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void delay(uint8_t channel, float milliseconds) {
             else if (isTarget(msg,addrOff,"/di*","i")) {disable(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply);} // void disable(uint8_t channel) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(effect_delay_h_)
 
+#if defined(effect_delay_ext_h_)
 // ============== AudioEffectDelayExternal ====================
 class OSCAudioEffectDelayExternal : public AudioEffectDelayExternal, public OSCAudioBase
 {
@@ -551,10 +582,12 @@ class OSCAudioEffectDelayExternal : public AudioEffectDelayExternal, public OSCA
             if (isTarget(msg,addrOff,"/de*","if")) {delay(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void delay(uint8_t channel, float milliseconds) {
             else if (isTarget(msg,addrOff,"/di*","i")) {disable(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply);} // void disable(uint8_t channel) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(effect_delay_ext_h_)
 
+#if defined(effect_digital_combine_h_)
 // ============== AudioEffectDigitalCombine ====================
 class OSCAudioEffectDigitalCombine : public AudioEffectDigitalCombine, public OSCAudioBase
 {
@@ -570,10 +603,12 @@ class OSCAudioEffectDigitalCombine : public AudioEffectDigitalCombine, public OS
             addrOff += nameOff;
             if (isTarget(msg,addrOff,"/s*","i")) {setCombineMode(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply);} // void setCombineMode(int mode_in) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(effect_digital_combine_h_)
 
+#if defined(effect_envelope_h_)
 // ============== AudioEffectEnvelope ====================
 class OSCAudioEffectEnvelope : public AudioEffectEnvelope, public OSCAudioBase
 {
@@ -599,10 +634,12 @@ class OSCAudioEffectEnvelope : public AudioEffectEnvelope, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/release","f")) {release(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void release(float milliseconds) {
             else if (isTarget(msg,addrOff,"/s*","f")) {sustain(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void sustain(float level) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(effect_envelope_h_)
 
+#if defined(effect_expenvelope_h_)
 // ============== AudioEffectExpEnvelope ====================
 class OSCAudioEffectExpEnvelope : public AudioEffectExpEnvelope, public OSCAudioBase
 {
@@ -630,10 +667,12 @@ class OSCAudioEffectExpEnvelope : public AudioEffectExpEnvelope, public OSCAudio
             else if (isTarget(msg,addrOff,"/r*","ff")) {release(msg.getFloat(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void release(float milliseconds, float target_factor = TF)
             else if (isTarget(msg,addrOff,"/s*","f")) {sustain(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void sustain(float level)
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(effect_expenvelope_h_)
 
+#if defined(effect_fade_h_)
 // ============== AudioEffectFade ====================
 class OSCAudioEffectFade : public AudioEffectFade, public OSCAudioBase
 {
@@ -650,10 +689,12 @@ class OSCAudioEffectFade : public AudioEffectFade, public OSCAudioBase
             if (isTarget(msg,addrOff,"/fadeI*","i")) {fadeIn(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply);} // void fadeIn(uint32_t milliseconds) {
             else if (isTarget(msg,addrOff,"/fadeO*","i")) {fadeOut(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply);} // void fadeOut(uint32_t milliseconds) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(effect_fade_h_)
 
+#if defined(effect_freeverb_h_)
 // ============== AudioEffectFreeverb ====================
 class OSCAudioEffectFreeverb : public AudioEffectFreeverb, public OSCAudioBase
 {
@@ -670,10 +711,12 @@ class OSCAudioEffectFreeverb : public AudioEffectFreeverb, public OSCAudioBase
             if (isTarget(msg,addrOff,"/d*","f")) {damping(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void damping(float n) {
             else if (isTarget(msg,addrOff,"/r*","f")) {roomsize(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void roomsize(float n) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(effect_freeverb_h_)
 
+#if defined(effect_freeverb_h_)
 // ============== AudioEffectFreeverbStereo ====================
 class OSCAudioEffectFreeverbStereo : public AudioEffectFreeverbStereo, public OSCAudioBase
 {
@@ -690,9 +733,10 @@ class OSCAudioEffectFreeverbStereo : public AudioEffectFreeverbStereo, public OS
             if (isTarget(msg,addrOff,"/d*","f")) {damping(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void damping(float n) {
             else if (isTarget(msg,addrOff,"/r*","f")) {roomsize(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void roomsize(float n) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(effect_freeverb_h_)
 
 // ============== AudioEffectGranular ====================
 class OSCAudioEffectGranular : public AudioEffectGranular, public OSCAudioBase
@@ -714,13 +758,14 @@ class OSCAudioEffectGranular : public AudioEffectGranular, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/se*","f")) {setSpeed(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void setSpeed(float ratio) {
             else if (isTarget(msg,addrOff,"/st*",NULL)) {stop(); addReplyExecuted(msg,addrOff,reply);} // void stop();
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 	private:
 		void begin(OSCMessage& msg);
 		int16_t* sample_bank;
 };
 
+#if defined(effect_midside_decode_h_)
 // ============== AudioEffectMidSide ====================
 class OSCAudioEffectMidSide : public AudioEffectMidSide, public OSCAudioBase
 {
@@ -737,10 +782,12 @@ class OSCAudioEffectMidSide : public AudioEffectMidSide, public OSCAudioBase
             if (isTarget(msg,addrOff,"/d*",NULL)) {decode(); addReplyExecuted(msg,addrOff,reply);} // void decode() { encoding = false; }
             else if (isTarget(msg,addrOff,"/e*",NULL)) {encode(); addReplyExecuted(msg,addrOff,reply);} // void encode() { encoding = true; }
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(effect_midside_decode_h_)
 
+#if defined(effect_multiply_h_)
 // ============== AudioEffectMultiply ====================
 class OSCAudioEffectMultiply : public AudioEffectMultiply, public OSCAudioBase
 {
@@ -755,10 +802,12 @@ class OSCAudioEffectMultiply : public AudioEffectMultiply, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(effect_multiply_h_)
 
+#if defined(effect_rectifier_h_)
 // ============== AudioEffectRectifier ====================
 class OSCAudioEffectRectifier : public AudioEffectRectifier, public OSCAudioBase
 {
@@ -773,10 +822,12 @@ class OSCAudioEffectRectifier : public AudioEffectRectifier, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(effect_rectifier_h_)
 
+#if defined(effect_reverb_)
 // ============== AudioEffectReverb ====================
 class OSCAudioEffectReverb : public AudioEffectReverb, public OSCAudioBase
 {
@@ -792,10 +843,12 @@ class OSCAudioEffectReverb : public AudioEffectReverb, public OSCAudioBase
             addrOff += nameOff;
             if (isTarget(msg,addrOff,"/r*","f")) {reverbTime(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void reverbTime(float);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(effect_reverb_)
 
+#if defined(effect_wavefolder_h_)
 // ============== AudioEffectWaveFolder ====================
 class OSCAudioEffectWaveFolder : public AudioEffectWaveFolder, public OSCAudioBase
 {
@@ -810,10 +863,12 @@ class OSCAudioEffectWaveFolder : public AudioEffectWaveFolder, public OSCAudioBa
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(effect_wavefolder_h_)
 
+#if defined(effect_waveshaper_h_)
 // ============== AudioEffectWaveshaper ====================
 class OSCAudioEffectWaveshaper : public AudioEffectWaveshaper, public OSCAudioBase
 {
@@ -829,10 +884,12 @@ class OSCAudioEffectWaveshaper : public AudioEffectWaveshaper, public OSCAudioBa
             addrOff += nameOff;
             // if (isTarget(msg,addrOff,"/s*","bi")) {shape(msg.getBlob(0),msg.getInt(1)); addReplyExecuted(msg,addrOff,reply);} // void shape(float* waveshape, int length);
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(effect_waveshaper_h_)
 
+#if defined(filter_biquad_h_)
 // ============== AudioFilterBiquad ====================
 class OSCAudioFilterBiquad : public AudioFilterBiquad, public OSCAudioBase
 {
@@ -855,12 +912,14 @@ class OSCAudioFilterBiquad : public AudioFilterBiquad, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/setLowp*","iff")) {setLowpass(msg.getInt(0),msg.getFloat(1),msg.getFloat(2)); addReplyExecuted(msg,addrOff,reply);} // void setLowpass(uint32_t stage, float frequency, float q = 0.7071f) {
             else if (isTarget(msg,addrOff,"/setN*","iff")) {setNotch(msg.getInt(0),msg.getFloat(1),msg.getFloat(2)); addReplyExecuted(msg,addrOff,reply);} // void setNotch(uint32_t stage, float frequency, float q = 1.0) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 	private:
 		void setCoefficients(OSCMessage& msg);
 };
+#endif // defined(filter_biquad_h_)
 
+#if defined(filter_fir_h_)
 // ============== AudioFilterFIR ====================
 class OSCAudioFilterFIR : public AudioFilterFIR, public OSCAudioBase
 {
@@ -877,10 +936,12 @@ class OSCAudioFilterFIR : public AudioFilterFIR, public OSCAudioBase
             // if (isTarget(msg,addrOff,"/b*","bi")) {begin(msg.getBlob(0),msg.getInt(1)); addReplyExecuted(msg,addrOff,reply);} // void begin(const short *cp, int n_coeffs) {
             if (isTarget(msg,addrOff,"/e*",NULL)) {end(); addReplyExecuted(msg,addrOff,reply);} // void end(void) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(filter_fir_h_)
 
+#if defined(filter_ladder_h_)
 // ============== AudioFilterLadder ====================
 class OSCAudioFilterLadder : public AudioFilterLadder, public OSCAudioBase
 {
@@ -901,10 +962,12 @@ class OSCAudioFilterLadder : public AudioFilterLadder, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/p*","f")) {passbandGain(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void passbandGain(float passbandgain);
             else if (isTarget(msg,addrOff,"/r*","f")) {resonance(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void resonance(float reson);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(filter_ladder_h_)
 
+#if defined(filter_variable_h_)
 // ============== AudioFilterStateVariable ====================
 class OSCAudioFilterStateVariable : public AudioFilterStateVariable, public OSCAudioBase
 {
@@ -922,10 +985,12 @@ class OSCAudioFilterStateVariable : public AudioFilterStateVariable, public OSCA
             else if (isTarget(msg,addrOff,"/o*","f")) {octaveControl(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void octaveControl(float n) {
             else if (isTarget(msg,addrOff,"/r*","f")) {resonance(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void resonance(float q) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(filter_variable_h_)
 
+#if defined(input_adc_h_)
 // ============== AudioInputAnalog ====================
 class OSCAudioInputAnalog : public AudioInputAnalog, public OSCAudioBase
 {
@@ -940,10 +1005,12 @@ class OSCAudioInputAnalog : public AudioInputAnalog, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(input_adc_h_)
 
+#if defined(input_adcs_h_)
 // ============== AudioInputAnalogStereo ====================
 class OSCAudioInputAnalogStereo : public AudioInputAnalogStereo, public OSCAudioBase
 {
@@ -958,10 +1025,12 @@ class OSCAudioInputAnalogStereo : public AudioInputAnalogStereo, public OSCAudio
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(input_adcs_h_)
 
+#if defined(_input_i2s_h_)
 // ============== AudioInputI2S ====================
 class OSCAudioInputI2S : public AudioInputI2S, public OSCAudioBase
 {
@@ -976,10 +1045,12 @@ class OSCAudioInputI2S : public AudioInputI2S, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(_input_i2s_h_)
 
+#if defined(_input_i2s2_h_)
 // ============== AudioInputI2S2 ====================
 class OSCAudioInputI2S2 : public AudioInputI2S2, public OSCAudioBase
 {
@@ -994,10 +1065,12 @@ class OSCAudioInputI2S2 : public AudioInputI2S2, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(_input_i2s2_h_)
 
+#if defined(_input_i2s_hex_h_)
 // ============== AudioInputI2SHex ====================
 class OSCAudioInputI2SHex : public AudioInputI2SHex, public OSCAudioBase
 {
@@ -1012,10 +1085,12 @@ class OSCAudioInputI2SHex : public AudioInputI2SHex, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(_input_i2s_hex_h_)
 
+#if defined(_input_i2s_oct_h_)
 // ============== AudioInputI2SOct ====================
 class OSCAudioInputI2SOct : public AudioInputI2SOct, public OSCAudioBase
 {
@@ -1030,10 +1105,12 @@ class OSCAudioInputI2SOct : public AudioInputI2SOct, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(_input_i2s_oct_h_)
 
+#if defined(_input_i2s_quad_h_)
 // ============== AudioInputI2SQuad ====================
 class OSCAudioInputI2SQuad : public AudioInputI2SQuad, public OSCAudioBase
 {
@@ -1048,10 +1125,12 @@ class OSCAudioInputI2SQuad : public AudioInputI2SQuad, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(_input_i2s_quad_h_)
 
+#if defined(_input_pdm_h_)
 // ============== AudioInputPDM ====================
 class OSCAudioInputPDM : public AudioInputPDM, public OSCAudioBase
 {
@@ -1066,10 +1145,12 @@ class OSCAudioInputPDM : public AudioInputPDM, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(_input_pdm_h_)
 
+#if defined(_input_pdm_i2s2_h_)
 // ============== AudioInputPDM2 ====================
 class OSCAudioInputPDM2 : public AudioInputPDM2, public OSCAudioBase
 {
@@ -1084,10 +1165,12 @@ class OSCAudioInputPDM2 : public AudioInputPDM2, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(_input_pdm_i2s2_h_)
 
+#if defined(_input_spdif3_h_)
 // ============== AudioInputSPDIF3 ====================
 class OSCAudioInputSPDIF3 : public AudioInputSPDIF3, public OSCAudioBase
 {
@@ -1104,10 +1187,12 @@ class OSCAudioInputSPDIF3 : public AudioInputSPDIF3, public OSCAudioBase
             if (isTarget(msg,addrOff,"/p*",NULL)) {addReplyResult(msg,addrOff,reply,pllLocked()); } // static bool pllLocked(void);
             else if (isTarget(msg,addrOff,"/s*",NULL)) {addReplyResult(msg,addrOff,reply,(uint32_t)sampleRate()); } // static unsigned int sampleRate(void);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(_input_spdif3_h_)
 
+#if defined(_input_tdm_h_)
 // ============== AudioInputTDM ====================
 class OSCAudioInputTDM : public AudioInputTDM, public OSCAudioBase
 {
@@ -1122,10 +1207,12 @@ class OSCAudioInputTDM : public AudioInputTDM, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(_input_tdm_h_)
 
+#if defined(_input_tdm2_h_)
 // ============== AudioInputTDM2 ====================
 class OSCAudioInputTDM2 : public AudioInputTDM2, public OSCAudioBase
 {
@@ -1140,10 +1227,12 @@ class OSCAudioInputTDM2 : public AudioInputTDM2, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(_input_tdm2_h_)
 
+#if defined(DYNMIXER_H_)
 // ============== AudioMixer ====================
 class OSCAudioMixer : public AudioMixer, public OSCAudioBase
 {
@@ -1161,10 +1250,12 @@ class OSCAudioMixer : public AudioMixer, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/ga*","if")) {gain(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void gain(unsigned int channel, float gain) {
             else if (isTarget(msg,addrOff,"/ge*",NULL)) {addReplyResult(msg,addrOff,reply,getChannels()); } // uint8_t getChannels(void) {return num_inputs;}; // actual number, not requested
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(DYNMIXER_H_)
 
+#if defined(mixer_h_)
 // ============== AudioMixer4 ====================
 class OSCAudioMixer4 : public AudioMixer4, public OSCAudioBase
 {
@@ -1180,10 +1271,12 @@ class OSCAudioMixer4 : public AudioMixer4, public OSCAudioBase
             addrOff += nameOff;
             if (isTarget(msg,addrOff,"/g*","if")) {gain(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void gain(unsigned int channel, float gain) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(mixer_h_)
 
+#if defined(DYNMIXER_H_)
 // ============== AudioMixerStereo ====================
 class OSCAudioMixerStereo : public AudioMixerStereo, public OSCAudioBase
 {
@@ -1205,10 +1298,12 @@ class OSCAudioMixerStereo : public AudioMixerStereo, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/p*","if")) {pan(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void pan(unsigned int channel, float pan)
             else if (isTarget(msg,addrOff,"/s*","f")) {setPanLaw(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void setPanLaw(float law)
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(DYNMIXER_H_)
 
+#if defined(output_ADAT_h_)
 // ============== AudioOutputADAT ====================
 class OSCAudioOutputADAT : public AudioOutputADAT, public OSCAudioBase
 {
@@ -1224,10 +1319,12 @@ class OSCAudioOutputADAT : public AudioOutputADAT, public OSCAudioBase
             addrOff += nameOff;
             if (isTarget(msg,addrOff,"/m*",";")) {mute_PCM(msg.getBoolean(0)); addReplyExecuted(msg,addrOff,reply);} // static void mute_PCM(const bool mute);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_ADAT_h_)
 
+#if defined(output_dac_h_)
 // ============== AudioOutputAnalog ====================
 class OSCAudioOutputAnalog : public AudioOutputAnalog, public OSCAudioBase
 {
@@ -1243,10 +1340,12 @@ class OSCAudioOutputAnalog : public AudioOutputAnalog, public OSCAudioBase
             addrOff += nameOff;
             if (isTarget(msg,addrOff,"/a*","i")) {analogReference(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply);} // void analogReference(int ref);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_dac_h_)
 
+#if defined(output_dacs_h_)
 // ============== AudioOutputAnalogStereo ====================
 class OSCAudioOutputAnalogStereo : public AudioOutputAnalogStereo, public OSCAudioBase
 {
@@ -1262,10 +1361,12 @@ class OSCAudioOutputAnalogStereo : public AudioOutputAnalogStereo, public OSCAud
             addrOff += nameOff;
             if (isTarget(msg,addrOff,"/a*","i")) {analogReference(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply);} // void analogReference(int ref);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_dacs_h_)
 
+#if defined(output_i2s_h_)
 // ============== AudioOutputI2S ====================
 class OSCAudioOutputI2S : public AudioOutputI2S, public OSCAudioBase
 {
@@ -1280,10 +1381,12 @@ class OSCAudioOutputI2S : public AudioOutputI2S, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_i2s_h_)
 
+#if defined(output_i2s2_h_)
 // ============== AudioOutputI2S2 ====================
 class OSCAudioOutputI2S2 : public AudioOutputI2S2, public OSCAudioBase
 {
@@ -1298,10 +1401,12 @@ class OSCAudioOutputI2S2 : public AudioOutputI2S2, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_i2s2_h_)
 
+#if defined(output_i2s_hex_h_)
 // ============== AudioOutputI2SHex ====================
 class OSCAudioOutputI2SHex : public AudioOutputI2SHex, public OSCAudioBase
 {
@@ -1316,10 +1421,12 @@ class OSCAudioOutputI2SHex : public AudioOutputI2SHex, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_i2s_hex_h_)
 
+#if defined(output_i2s_oct_h_)
 // ============== AudioOutputI2SOct ====================
 class OSCAudioOutputI2SOct : public AudioOutputI2SOct, public OSCAudioBase
 {
@@ -1334,10 +1441,12 @@ class OSCAudioOutputI2SOct : public AudioOutputI2SOct, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_i2s_oct_h_)
 
+#if defined(output_i2s_quad_h_)
 // ============== AudioOutputI2SQuad ====================
 class OSCAudioOutputI2SQuad : public AudioOutputI2SQuad, public OSCAudioBase
 {
@@ -1352,10 +1461,12 @@ class OSCAudioOutputI2SQuad : public AudioOutputI2SQuad, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_i2s_quad_h_)
 
+#if defined(output_mqs_h_)
 // ============== AudioOutputMQS ====================
 class OSCAudioOutputMQS : public AudioOutputMQS, public OSCAudioBase
 {
@@ -1370,10 +1481,12 @@ class OSCAudioOutputMQS : public AudioOutputMQS, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_mqs_h_)
 
+#if defined(output_pt8211_h_)
 // ============== AudioOutputPT8211 ====================
 class OSCAudioOutputPT8211 : public AudioOutputPT8211, public OSCAudioBase
 {
@@ -1388,10 +1501,12 @@ class OSCAudioOutputPT8211 : public AudioOutputPT8211, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_pt8211_h_)
 
+#if defined(output_pt8211_2_h_)
 // ============== AudioOutputPT8211_2 ====================
 class OSCAudioOutputPT8211_2 : public AudioOutputPT8211_2, public OSCAudioBase
 {
@@ -1406,10 +1521,12 @@ class OSCAudioOutputPT8211_2 : public AudioOutputPT8211_2, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_pt8211_2_h_)
 
+#if defined(output_pwm_h_)
 // ============== AudioOutputPWM ====================
 class OSCAudioOutputPWM : public AudioOutputPWM, public OSCAudioBase
 {
@@ -1424,10 +1541,12 @@ class OSCAudioOutputPWM : public AudioOutputPWM, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_pwm_h_)
 
+#if defined(output_SPDIF_h_)
 // ============== AudioOutputSPDIF ====================
 class OSCAudioOutputSPDIF : public AudioOutputSPDIF, public OSCAudioBase
 {
@@ -1443,10 +1562,12 @@ class OSCAudioOutputSPDIF : public AudioOutputSPDIF, public OSCAudioBase
             addrOff += nameOff;
             if (isTarget(msg,addrOff,"/m*",";")) {mute_PCM(msg.getBoolean(0)); addReplyExecuted(msg,addrOff,reply);} // static void mute_PCM(const bool mute);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_SPDIF_h_)
 
+#if defined(output_SPDIF2_h_)
 // ============== AudioOutputSPDIF2 ====================
 class OSCAudioOutputSPDIF2 : public AudioOutputSPDIF2, public OSCAudioBase
 {
@@ -1462,10 +1583,12 @@ class OSCAudioOutputSPDIF2 : public AudioOutputSPDIF2, public OSCAudioBase
             addrOff += nameOff;
             if (isTarget(msg,addrOff,"/m*",";")) {mute_PCM(msg.getBoolean(0)); addReplyExecuted(msg,addrOff,reply);} // static void mute_PCM(const bool mute);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_SPDIF2_h_)
 
+#if defined(output_SPDIF3_h_)
 // ============== AudioOutputSPDIF3 ====================
 class OSCAudioOutputSPDIF3 : public AudioOutputSPDIF3, public OSCAudioBase
 {
@@ -1482,10 +1605,12 @@ class OSCAudioOutputSPDIF3 : public AudioOutputSPDIF3, public OSCAudioBase
             if (isTarget(msg,addrOff,"/m*",";")) {mute_PCM(msg.getBoolean(0)); addReplyExecuted(msg,addrOff,reply);} // static void mute_PCM(const bool mute);
             // NOT DEFINED: else if (isTarget(msg,addrOff,"/p*",NULL)) {addReplyResult(msg,addrOff,reply,pll_locked()); } // static bool pll_locked(void);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_SPDIF3_h_)
 
+#if defined(output_tdm_h_)
 // ============== AudioOutputTDM ====================
 class OSCAudioOutputTDM : public AudioOutputTDM, public OSCAudioBase
 {
@@ -1500,10 +1625,12 @@ class OSCAudioOutputTDM : public AudioOutputTDM, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_tdm_h_)
 
+#if defined(output_tdm2_h_)
 // ============== AudioOutputTDM2 ====================
 class OSCAudioOutputTDM2 : public AudioOutputTDM2, public OSCAudioBase
 {
@@ -1518,10 +1645,12 @@ class OSCAudioOutputTDM2 : public AudioOutputTDM2, public OSCAudioBase
           {
             addrOff += nameOff;
             addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(output_tdm2_h_)
 
+#if defined(play_memory_h_)
 // ============== AudioPlayMemory ====================
 class OSCAudioPlayMemory : public AudioPlayMemory, public OSCAudioBase
 {
@@ -1541,12 +1670,14 @@ class OSCAudioPlayMemory : public AudioPlayMemory, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/po*",NULL)) {addReplyResult(msg,addrOff,reply,positionMillis()); } // uint32_t positionMillis(void);
             else if (isTarget(msg,addrOff,"/s*",NULL)) {stop(); addReplyExecuted(msg,addrOff,reply);} // void stop(void);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 	private:
 		void play(OSCMessage& msg);
 };
+#endif // defined(play_memory_h_)
 
+#if defined(play_queue_h_)
 // ============== AudioPlayQueue ====================
 class OSCAudioPlayQueue : public AudioPlayQueue, public OSCAudioBase
 {
@@ -1569,10 +1700,12 @@ class OSCAudioPlayQueue : public AudioPlayQueue, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/setM*","i")) {setMaxBuffers(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply);} // void setMaxBuffers(uint8_t);
             // NOT DEFINED: else if (isTarget(msg,addrOff,"/st*",NULL)) {stop(); addReplyExecuted(msg,addrOff,reply);} // void stop(void);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(play_queue_h_)
 
+#if defined(play_sd_raw_h_)
 // ============== AudioPlaySdRaw ====================
 class OSCAudioPlaySdRaw : public AudioPlaySdRaw, public OSCAudioBase
 {
@@ -1593,12 +1726,14 @@ class OSCAudioPlaySdRaw : public AudioPlaySdRaw, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/po*",NULL)) {addReplyResult(msg,addrOff,reply,positionMillis()); } // uint32_t positionMillis(void);
             else if (isTarget(msg,addrOff,"/s*",NULL)) {stop(); addReplyExecuted(msg,addrOff,reply);} // void stop(void);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 	private:
 		void play(OSCMessage& msg);
 };
+#endif // defined(play_sd_raw_h_)
 
+#if defined(play_sd_wav_h_)
 // ============== AudioPlaySdWav ====================
 class OSCAudioPlaySdWav : public AudioPlaySdWav, public OSCAudioBase
 {
@@ -1622,12 +1757,14 @@ class OSCAudioPlaySdWav : public AudioPlaySdWav, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/s*",NULL)) {stop(); addReplyExecuted(msg,addrOff,reply);} // void stop(void);
             else if (isTarget(msg,addrOff,"/t*",NULL)) {togglePlayPause(); addReplyExecuted(msg,addrOff,reply);} // void togglePlayPause(void);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 	private:
 		void play(OSCMessage& msg);
 };
+#endif // defined(play_sd_wav_h_)
 
+#if defined(play_serial_raw_h_)
 // ============== AudioPlaySerialflashRaw ====================
 class OSCAudioPlaySerialflashRaw : public AudioPlaySerialflashRaw, public OSCAudioBase
 {
@@ -1648,12 +1785,14 @@ class OSCAudioPlaySerialflashRaw : public AudioPlaySerialflashRaw, public OSCAud
             else if (isTarget(msg,addrOff,"/po*",NULL)) {addReplyResult(msg,addrOff,reply,positionMillis()); } // uint32_t positionMillis(void);
             else if (isTarget(msg,addrOff,"/s*",NULL)) {stop(); addReplyExecuted(msg,addrOff,reply);} // void stop(void);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 	private:
 		void play(OSCMessage& msg);
 };
+#endif // defined(play_serial_raw_h_)
 
+#if defined(record_queue_h_)
 // ============== AudioRecordQueue ====================
 class OSCAudioRecordQueue : public AudioRecordQueue, public OSCAudioBase
 {
@@ -1674,10 +1813,12 @@ class OSCAudioRecordQueue : public AudioRecordQueue, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/f*",NULL)) {freeBuffer(); addReplyExecuted(msg,addrOff,reply);} // void freeBuffer(void);
             else if (isTarget(msg,addrOff,"/r*",NULL)) {addReplyResult(msg,addrOff,reply,(uint32_t)readBuffer()); } // int16_t * readBuffer(void);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(record_queue_h_)
 
+#if defined(synth_karplusstrong_h_)
 // ============== AudioSynthKarplusStrong ====================
 class OSCAudioSynthKarplusStrong : public AudioSynthKarplusStrong, public OSCAudioBase
 {
@@ -1694,10 +1835,12 @@ class OSCAudioSynthKarplusStrong : public AudioSynthKarplusStrong, public OSCAud
             if (isTarget(msg,addrOff,"/noteOf*","f")) {noteOff(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void noteOff(float velocity) {
             else if (isTarget(msg,addrOff,"/noteOn","ff")) {noteOn(msg.getFloat(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void noteOn(float frequency, float velocity) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(synth_karplusstrong_h_)
 
+#if defined(synth_pinknoise_h_)
 // ============== AudioSynthNoisePink ====================
 class OSCAudioSynthNoisePink : public AudioSynthNoisePink, public OSCAudioBase
 {
@@ -1713,10 +1856,12 @@ class OSCAudioSynthNoisePink : public AudioSynthNoisePink, public OSCAudioBase
             addrOff += nameOff;
             if (isTarget(msg,addrOff,"/a*","f")) {amplitude(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void amplitude(float n) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(synth_pinknoise_h_)
 
+#if defined(synth_whitenoise_h_)
 // ============== AudioSynthNoiseWhite ====================
 class OSCAudioSynthNoiseWhite : public AudioSynthNoiseWhite, public OSCAudioBase
 {
@@ -1732,10 +1877,12 @@ class OSCAudioSynthNoiseWhite : public AudioSynthNoiseWhite, public OSCAudioBase
             addrOff += nameOff;
             if (isTarget(msg,addrOff,"/a*","f")) {amplitude(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void amplitude(float n) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(synth_whitenoise_h_)
 
+#if defined(_SYNTH_SIMPLE_DRUM_H_)
 // ============== AudioSynthSimpleDrum ====================
 class OSCAudioSynthSimpleDrum : public AudioSynthSimpleDrum, public OSCAudioBase
 {
@@ -1755,10 +1902,12 @@ class OSCAudioSynthSimpleDrum : public AudioSynthSimpleDrum, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/p*","f")) {pitchMod(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void pitchMod(float depth);
             else if (isTarget(msg,addrOff,"/s*","f")) {secondMix(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void secondMix(float level);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(_SYNTH_SIMPLE_DRUM_H_)
 
+#if defined(synth_tonesweep_h_)
 // ============== AudioSynthToneSweep ====================
 class OSCAudioSynthToneSweep : public AudioSynthToneSweep, public OSCAudioBase
 {
@@ -1776,10 +1925,12 @@ class OSCAudioSynthToneSweep : public AudioSynthToneSweep, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/p*","fiif")) {addReplyResult(msg,addrOff,reply,(bool)play(msg.getFloat(0),msg.getInt(1),msg.getInt(2),msg.getFloat(3))); } // boolean play(float t_amp,int t_lo,int t_hi,float t_time);
             else if (isTarget(msg,addrOff,"/r*",NULL)) {addReplyResult(msg,addrOff,reply,read()); } // float read(void) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(synth_tonesweep_h_)
 
+#if defined(synth_waveform_h_)
 // ============== AudioSynthWaveform ====================
 class OSCAudioSynthWaveform : public AudioSynthWaveform, public OSCAudioBase
 {
@@ -1803,13 +1954,15 @@ class OSCAudioSynthWaveform : public AudioSynthWaveform, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/ph*","f")) {phase(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void phase(float angle) {
             else if (isTarget(msg,addrOff,"/pu*","f")) {pulseWidth(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void pulseWidth(float n) {	// 0.0 to 1.0
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 	private:
 		bool arbitraryWaveform(OSCMessage& msg);
 		int16_t* arbdata;
 };
+#endif // defined(synth_waveform_h_)
 
+#if defined(synth_dc_h_)
 // ============== AudioSynthWaveformDc ====================
 class OSCAudioSynthWaveformDc : public AudioSynthWaveformDc, public OSCAudioBase
 {
@@ -1827,10 +1980,12 @@ class OSCAudioSynthWaveformDc : public AudioSynthWaveformDc, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/a*","ff")) {amplitude(msg.getFloat(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply);} // void amplitude(float n, float milliseconds) {
             else if (isTarget(msg,addrOff,"/r*",NULL)) {addReplyResult(msg,addrOff,reply,read()); } // float read(void) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(synth_dc_h_)
 
+#if defined(synth_waveform_h_)
 // ============== AudioSynthWaveformModulated ====================
 class OSCAudioSynthWaveformModulated : public AudioSynthWaveformModulated, public OSCAudioBase
 {
@@ -1854,13 +2009,15 @@ class OSCAudioSynthWaveformModulated : public AudioSynthWaveformModulated, publi
             else if (isTarget(msg,addrOff,"/o*","f")) {offset(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void offset(float n) {
             else if (isTarget(msg,addrOff,"/p*","f")) {phaseModulation(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void phaseModulation(float degrees) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 	private:
 		bool arbitraryWaveform(OSCMessage& msg);
 		int16_t* arbdata;
 };
+#endif // defined(synth_waveform_h_)
 
+#if defined(synth_pwm_h_)
 // ============== AudioSynthWaveformPWM ====================
 class OSCAudioSynthWaveformPWM : public AudioSynthWaveformPWM, public OSCAudioBase
 {
@@ -1877,10 +2034,12 @@ class OSCAudioSynthWaveformPWM : public AudioSynthWaveformPWM, public OSCAudioBa
             if (isTarget(msg,addrOff,"/a*","f")) {amplitude(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void amplitude(float n) {
             else if (isTarget(msg,addrOff,"/f*","f")) {frequency(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void frequency(float freq) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(synth_pwm_h_)
 
+#if defined(synth_sine_h_)
 // ============== AudioSynthWaveformSine ====================
 class OSCAudioSynthWaveformSine : public AudioSynthWaveformSine, public OSCAudioBase
 {
@@ -1898,10 +2057,12 @@ class OSCAudioSynthWaveformSine : public AudioSynthWaveformSine, public OSCAudio
             else if (isTarget(msg,addrOff,"/f*","f")) {frequency(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void frequency(float freq) {
             else if (isTarget(msg,addrOff,"/p*","f")) {phase(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void phase(float angle) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(synth_sine_h_)
 
+#if defined(synth_sine_h_)
 // ============== AudioSynthWaveformSineHires ====================
 class OSCAudioSynthWaveformSineHires : public AudioSynthWaveformSineHires, public OSCAudioBase
 {
@@ -1919,10 +2080,12 @@ class OSCAudioSynthWaveformSineHires : public AudioSynthWaveformSineHires, publi
             else if (isTarget(msg,addrOff,"/f*","f")) {frequency(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void frequency(float freq) {
             else if (isTarget(msg,addrOff,"/p*","f")) {phase(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void phase(float angle) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(synth_sine_h_)
 
+#if defined(synth_sine_h_)
 // ============== AudioSynthWaveformSineModulated ====================
 class OSCAudioSynthWaveformSineModulated : public AudioSynthWaveformSineModulated, public OSCAudioBase
 {
@@ -1940,9 +2103,10 @@ class OSCAudioSynthWaveformSineModulated : public AudioSynthWaveformSineModulate
             else if (isTarget(msg,addrOff,"/f*","f")) {frequency(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void frequency(float freq) {
             else if (isTarget(msg,addrOff,"/p*","f")) {phase(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void phase(float angle) {
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
+#endif // defined(synth_sine_h_)
 
 // ============== AudioSynthWavetable ====================
 class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
@@ -1969,7 +2133,7 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
             // else if (isTarget(msg,addrOff,"/setI*","b")) {setInstrument(msg.getBlob(0)); addReplyExecuted(msg,addrOff,reply);} // void setInstrument(const instrument_data& instrument) {
             else if (isTarget(msg,addrOff,"/st*",NULL)) {stop(); addReplyExecuted(msg,addrOff,reply);} // void stop(void);
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
-			}
+          }
 		}
 };
 

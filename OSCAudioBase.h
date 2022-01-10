@@ -424,21 +424,23 @@ class OSCAudioBase
 };
 
 
-#if defined(DYNAMIC_AUDIO_AVAILABLE) 
+
 //============================== Dynamic Audio Objects ==================================================
 // ============== AudioConnection ====================
 class OSCAudioConnection : public OSCAudioBase, public AudioConnection
 {
   public:
+#if defined(DYNAMIC_AUDIO_AVAILABLE) // AudioConnection::AudioConnection(void) not in static library - omit these
 	OSCAudioConnection(const char* _name) 
 		:  OSCAudioBase(_name),
 		pSrcParent(NULL),pDstParent(NULL),next_src(NULL),next_dst(NULL)  
 		{}
-		
+	
 	OSCAudioConnection(const char* _name,OSCAudioBase& first) 
 		:  OSCAudioBase(_name, first),
 		pSrcParent(NULL),pDstParent(NULL),next_src(NULL),next_dst(NULL)  
 		{}
+#endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 		
 	OSCAudioConnection(const char* _name, OSCAudioBase& src, uint8_t srcO, OSCAudioBase& dst, uint8_t dstI) 
 		:  OSCAudioBase(_name),AudioConnection(*src.sibling,srcO,*dst.sibling,dstI),
@@ -478,7 +480,6 @@ class OSCAudioConnection : public OSCAudioBase, public AudioConnection
 	OSCAudioConnection* next_src;	//!< next in list of connections whose source is in a given group
 	OSCAudioConnection* next_dst;	//!< next in list of connections whose destination is in a given group
 };
-#endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 
 
 //============================== Audio Object Groups ==================================================
