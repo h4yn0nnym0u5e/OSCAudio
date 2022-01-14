@@ -52,6 +52,9 @@ class AsyncOSCAudioInputSPDIF3 : public AsyncAudioInputSPDIF3, public OSCAudioBa
           }
 		}
 };
+#define OSC_CLASS_async_input_spdif3_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_async_input_spdif3_h_(c,o) 
 #endif // defined(async_input_spdif3_h_)
 
 #if defined(mixer_h_)
@@ -74,6 +77,9 @@ class OSCAudioAmplifier : public AudioAmplifier, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_mixer_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_mixer_h_(c,o) 
 #endif // defined(mixer_h_)
 
 #if defined(analyze_event_h_)
@@ -97,6 +103,9 @@ class OSCAudioAnalyzeEvent : public AudioAnalyzeEvent, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_analyze_event_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_analyze_event_h_(c,o) 
 #endif // defined(analyze_event_h_)
 
 #if defined(analyze_fft1024_h_)
@@ -124,6 +133,9 @@ class OSCAudioAnalyzeFFT1024 : public AudioAnalyzeFFT1024, public OSCAudioBase
 	private:
 		bool windowFunction(OSCMessage& msg);
 };
+#define OSC_CLASS_analyze_fft1024_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_analyze_fft1024_h_(c,o) 
 #endif // defined(analyze_fft1024_h_)
 
 #if defined(analyze_fft256_h_)
@@ -151,6 +163,9 @@ class OSCAudioAnalyzeFFT256 : public AudioAnalyzeFFT256, public OSCAudioBase
 	private:
 		bool windowFunction(OSCMessage& msg);
 };
+#define OSC_CLASS_analyze_fft256_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_analyze_fft256_h_(c,o) 
 #endif // defined(analyze_fft256_h_)
 
 #if defined(AudioAnalyzeNoteFrequency_h_)
@@ -176,6 +191,9 @@ class OSCAudioAnalyzeNoteFrequency : public AudioAnalyzeNoteFrequency, public OS
           }
 		}
 };
+#define OSC_CLASS_AudioAnalyzeNoteFrequency_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_AudioAnalyzeNoteFrequency_h_(c,o) 
 #endif // defined(AudioAnalyzeNoteFrequency_h_)
 
 #if defined(analyze_peakdetect_h_)
@@ -199,6 +217,9 @@ class OSCAudioAnalyzePeak : public AudioAnalyzePeak, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_analyze_peakdetect_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_analyze_peakdetect_h_(c,o) 
 #endif // defined(analyze_peakdetect_h_)
 
 #if defined(analyze_print_h_)
@@ -228,6 +249,9 @@ class OSCAudioAnalyzePrint : public AudioAnalyzePrint, public OSCAudioBase
 		bool name(OSCMessage& msg);
 		char* namePtr;
 };
+#define OSC_CLASS_analyze_print_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_analyze_print_h_(c,o) 
 #endif // defined(analyze_print_h_)
 
 #if defined(analyze_rms_h_)
@@ -250,6 +274,9 @@ class OSCAudioAnalyzeRMS : public AudioAnalyzeRMS, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_analyze_rms_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_analyze_rms_h_(c,o) 
 #endif // defined(analyze_rms_h_)
 
 #if defined(analyze_tonedetect_h_)
@@ -275,8 +302,12 @@ class OSCAudioAnalyzeToneDetect : public AudioAnalyzeToneDetect, public OSCAudio
           }
 		}
 };
+#define OSC_CLASS_analyze_tonedetect_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_analyze_tonedetect_h_(c,o) 
 #endif // defined(analyze_tonedetect_h_)
 
+#if defined(control_ak4558_h_)
 // ============== AudioControlAK4558 ====================
 class OSCAudioControlAK4558 : public AudioControlAK4558, public OSCAudioBase
 {
@@ -305,6 +336,10 @@ class OSCAudioControlAK4558 : public AudioControlAK4558, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_control_ak4558_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_control_ak4558_h_(c,o) 
+#endif // defined(control_ak4558_h_)
 
 #if defined(control_cs42448_h_)
 // ============== AudioControlCS42448 ====================
@@ -335,8 +370,12 @@ class OSCAudioControlCS42448 : public AudioControlCS42448, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_control_cs42448_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_control_cs42448_h_(c,o) 
 #endif // defined(control_cs42448_h_)
 
+#if defined(control_cs4272_h_)
 // ============== AudioControlCS4272 ====================
 class OSCAudioControlCS4272 : public AudioControlCS4272, public OSCAudioBase
 {
@@ -368,6 +407,10 @@ class OSCAudioControlCS4272 : public AudioControlCS4272, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_control_cs4272_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_control_cs4272_h_(c,o) 
+#endif // defined(control_cs4272_h_)
 
 #if defined(control_sgtl5000_h_)
 // ============== AudioControlSGTL5000 ====================
@@ -436,6 +479,9 @@ class OSCAudioControlSGTL5000 : public AudioControlSGTL5000, public OSCAudioBase
 	private:
 		void eqFilter(OSCMessage& msg);
 };
+#define OSC_CLASS_control_sgtl5000_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_control_sgtl5000_h_(c,o) 
 #endif // defined(control_sgtl5000_h_)
 
 #if defined(control_tlv320aic3206_h_)
@@ -477,8 +523,12 @@ class OSCAudioControlTLV320AIC3206 : public AudioControlTLV320AIC3206, public OS
 	private:
 		void setIIRCoeffOnADC(OSCMessage& msg);
 };
+#define OSC_CLASS_control_tlv320aic3206_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_control_tlv320aic3206_h_(c,o) 
 #endif // defined(control_tlv320aic3206_h_)
 
+#if defined(control_wm8731_h_)
 // ============== AudioControlWM8731 ====================
 class OSCAudioControlWM8731 : public AudioControlWM8731, public OSCAudioBase
 {
@@ -501,7 +551,12 @@ class OSCAudioControlWM8731 : public AudioControlWM8731, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_control_wm8731_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_control_wm8731_h_(c,o) 
+#endif // defined(control_wm8731_h_)
 
+#if defined(control_wm8731_h_)
 // ============== AudioControlWM8731master ====================
 class OSCAudioControlWM8731master : public AudioControlWM8731master, public OSCAudioBase
 {
@@ -520,6 +575,10 @@ class OSCAudioControlWM8731master : public AudioControlWM8731master, public OSCA
           }
 		}
 };
+#define OSC_CLASS_control_wm8731_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_control_wm8731_h_(c,o) 
+#endif // defined(control_wm8731_h_)
 
 #if defined(effect_bitcrusher_h_)
 // ============== AudioEffectBitcrusher ====================
@@ -541,6 +600,9 @@ class OSCAudioEffectBitcrusher : public AudioEffectBitcrusher, public OSCAudioBa
           }
 		}
 };
+#define OSC_CLASS_effect_bitcrusher_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_effect_bitcrusher_h_(c,o) 
 #endif // defined(effect_bitcrusher_h_)
 
 #if defined(effect_delay_h_)
@@ -563,6 +625,9 @@ class OSCAudioEffectDelay : public AudioEffectDelay, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_effect_delay_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_effect_delay_h_(c,o) 
 #endif // defined(effect_delay_h_)
 
 #if defined(effect_delay_ext_h_)
@@ -585,6 +650,9 @@ class OSCAudioEffectDelayExternal : public AudioEffectDelayExternal, public OSCA
           }
 		}
 };
+#define OSC_CLASS_effect_delay_ext_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_effect_delay_ext_h_(c,o) 
 #endif // defined(effect_delay_ext_h_)
 
 #if defined(effect_digital_combine_h_)
@@ -606,6 +674,9 @@ class OSCAudioEffectDigitalCombine : public AudioEffectDigitalCombine, public OS
           }
 		}
 };
+#define OSC_CLASS_effect_digital_combine_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_effect_digital_combine_h_(c,o) 
 #endif // defined(effect_digital_combine_h_)
 
 #if defined(effect_envelope_h_)
@@ -637,6 +708,9 @@ class OSCAudioEffectEnvelope : public AudioEffectEnvelope, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_effect_envelope_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_effect_envelope_h_(c,o) 
 #endif // defined(effect_envelope_h_)
 
 #if defined(effect_expenvelope_h_)
@@ -670,6 +744,9 @@ class OSCAudioEffectExpEnvelope : public AudioEffectExpEnvelope, public OSCAudio
           }
 		}
 };
+#define OSC_CLASS_effect_expenvelope_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_effect_expenvelope_h_(c,o) 
 #endif // defined(effect_expenvelope_h_)
 
 #if defined(effect_fade_h_)
@@ -692,6 +769,9 @@ class OSCAudioEffectFade : public AudioEffectFade, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_effect_fade_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_effect_fade_h_(c,o) 
 #endif // defined(effect_fade_h_)
 
 #if defined(effect_freeverb_h_)
@@ -714,6 +794,9 @@ class OSCAudioEffectFreeverb : public AudioEffectFreeverb, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_effect_freeverb_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_effect_freeverb_h_(c,o) 
 #endif // defined(effect_freeverb_h_)
 
 #if defined(effect_freeverb_h_)
@@ -736,8 +819,12 @@ class OSCAudioEffectFreeverbStereo : public AudioEffectFreeverbStereo, public OS
           }
 		}
 };
+#define OSC_CLASS_effect_freeverb_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_effect_freeverb_h_(c,o) 
 #endif // defined(effect_freeverb_h_)
 
+#if defined(_effect_granular_h_)
 // ============== AudioEffectGranular ====================
 class OSCAudioEffectGranular : public AudioEffectGranular, public OSCAudioBase
 {
@@ -764,6 +851,10 @@ class OSCAudioEffectGranular : public AudioEffectGranular, public OSCAudioBase
 		void begin(OSCMessage& msg);
 		int16_t* sample_bank;
 };
+#define OSC_CLASS__effect_granular_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS__effect_granular_h_(c,o) 
+#endif // defined(_effect_granular_h_)
 
 #if defined(effect_midside_decode_h_)
 // ============== AudioEffectMidSide ====================
@@ -785,6 +876,9 @@ class OSCAudioEffectMidSide : public AudioEffectMidSide, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_effect_midside_decode_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_effect_midside_decode_h_(c,o) 
 #endif // defined(effect_midside_decode_h_)
 
 #if defined(effect_multiply_h_)
@@ -805,6 +899,9 @@ class OSCAudioEffectMultiply : public AudioEffectMultiply, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_effect_multiply_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_effect_multiply_h_(c,o) 
 #endif // defined(effect_multiply_h_)
 
 #if defined(effect_rectifier_h_)
@@ -825,6 +922,9 @@ class OSCAudioEffectRectifier : public AudioEffectRectifier, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_effect_rectifier_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_effect_rectifier_h_(c,o) 
 #endif // defined(effect_rectifier_h_)
 
 #if defined(effect_reverb_)
@@ -846,6 +946,9 @@ class OSCAudioEffectReverb : public AudioEffectReverb, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_effect_reverb_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_effect_reverb_(c,o) 
 #endif // defined(effect_reverb_)
 
 #if defined(effect_wavefolder_h_)
@@ -866,6 +969,9 @@ class OSCAudioEffectWaveFolder : public AudioEffectWaveFolder, public OSCAudioBa
           }
 		}
 };
+#define OSC_CLASS_effect_wavefolder_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_effect_wavefolder_h_(c,o) 
 #endif // defined(effect_wavefolder_h_)
 
 #if defined(effect_waveshaper_h_)
@@ -887,6 +993,9 @@ class OSCAudioEffectWaveshaper : public AudioEffectWaveshaper, public OSCAudioBa
           }
 		}
 };
+#define OSC_CLASS_effect_waveshaper_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_effect_waveshaper_h_(c,o) 
 #endif // defined(effect_waveshaper_h_)
 
 #if defined(filter_biquad_h_)
@@ -917,6 +1026,9 @@ class OSCAudioFilterBiquad : public AudioFilterBiquad, public OSCAudioBase
 	private:
 		void setCoefficients(OSCMessage& msg);
 };
+#define OSC_CLASS_filter_biquad_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_filter_biquad_h_(c,o) 
 #endif // defined(filter_biquad_h_)
 
 #if defined(filter_fir_h_)
@@ -939,6 +1051,9 @@ class OSCAudioFilterFIR : public AudioFilterFIR, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_filter_fir_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_filter_fir_h_(c,o) 
 #endif // defined(filter_fir_h_)
 
 #if defined(filter_ladder_h_)
@@ -965,6 +1080,9 @@ class OSCAudioFilterLadder : public AudioFilterLadder, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_filter_ladder_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_filter_ladder_h_(c,o) 
 #endif // defined(filter_ladder_h_)
 
 #if defined(filter_variable_h_)
@@ -988,6 +1106,9 @@ class OSCAudioFilterStateVariable : public AudioFilterStateVariable, public OSCA
           }
 		}
 };
+#define OSC_CLASS_filter_variable_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_filter_variable_h_(c,o) 
 #endif // defined(filter_variable_h_)
 
 #if defined(input_adc_h_)
@@ -1008,6 +1129,9 @@ class OSCAudioInputAnalog : public AudioInputAnalog, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_input_adc_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_input_adc_h_(c,o) 
 #endif // defined(input_adc_h_)
 
 #if defined(input_adcs_h_)
@@ -1028,6 +1152,9 @@ class OSCAudioInputAnalogStereo : public AudioInputAnalogStereo, public OSCAudio
           }
 		}
 };
+#define OSC_CLASS_input_adcs_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_input_adcs_h_(c,o) 
 #endif // defined(input_adcs_h_)
 
 #if defined(_input_i2s_h_)
@@ -1048,6 +1175,9 @@ class OSCAudioInputI2S : public AudioInputI2S, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS__input_i2s_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS__input_i2s_h_(c,o) 
 #endif // defined(_input_i2s_h_)
 
 #if defined(_input_i2s2_h_)
@@ -1068,6 +1198,9 @@ class OSCAudioInputI2S2 : public AudioInputI2S2, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS__input_i2s2_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS__input_i2s2_h_(c,o) 
 #endif // defined(_input_i2s2_h_)
 
 #if defined(_input_i2s_hex_h_)
@@ -1088,6 +1221,9 @@ class OSCAudioInputI2SHex : public AudioInputI2SHex, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS__input_i2s_hex_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS__input_i2s_hex_h_(c,o) 
 #endif // defined(_input_i2s_hex_h_)
 
 #if defined(_input_i2s_oct_h_)
@@ -1108,6 +1244,9 @@ class OSCAudioInputI2SOct : public AudioInputI2SOct, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS__input_i2s_oct_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS__input_i2s_oct_h_(c,o) 
 #endif // defined(_input_i2s_oct_h_)
 
 #if defined(_input_i2s_quad_h_)
@@ -1128,6 +1267,9 @@ class OSCAudioInputI2SQuad : public AudioInputI2SQuad, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS__input_i2s_quad_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS__input_i2s_quad_h_(c,o) 
 #endif // defined(_input_i2s_quad_h_)
 
 #if defined(_input_pdm_h_)
@@ -1148,6 +1290,9 @@ class OSCAudioInputPDM : public AudioInputPDM, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS__input_pdm_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS__input_pdm_h_(c,o) 
 #endif // defined(_input_pdm_h_)
 
 #if defined(_input_pdm_i2s2_h_)
@@ -1168,6 +1313,9 @@ class OSCAudioInputPDM2 : public AudioInputPDM2, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS__input_pdm_i2s2_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS__input_pdm_i2s2_h_(c,o) 
 #endif // defined(_input_pdm_i2s2_h_)
 
 #if defined(_input_spdif3_h_)
@@ -1190,6 +1338,9 @@ class OSCAudioInputSPDIF3 : public AudioInputSPDIF3, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS__input_spdif3_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS__input_spdif3_h_(c,o) 
 #endif // defined(_input_spdif3_h_)
 
 #if defined(_input_tdm_h_)
@@ -1210,6 +1361,9 @@ class OSCAudioInputTDM : public AudioInputTDM, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS__input_tdm_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS__input_tdm_h_(c,o) 
 #endif // defined(_input_tdm_h_)
 
 #if defined(_input_tdm2_h_)
@@ -1230,6 +1384,9 @@ class OSCAudioInputTDM2 : public AudioInputTDM2, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS__input_tdm2_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS__input_tdm2_h_(c,o) 
 #endif // defined(_input_tdm2_h_)
 
 #if defined(DYNMIXER_H_)
@@ -1253,6 +1410,9 @@ class OSCAudioMixer : public AudioMixer, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_DYNMIXER_H_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_DYNMIXER_H_(c,o) 
 #endif // defined(DYNMIXER_H_)
 
 #if defined(mixer_h_)
@@ -1274,6 +1434,9 @@ class OSCAudioMixer4 : public AudioMixer4, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_mixer_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_mixer_h_(c,o) 
 #endif // defined(mixer_h_)
 
 #if defined(DYNMIXER_H_)
@@ -1301,6 +1464,9 @@ class OSCAudioMixerStereo : public AudioMixerStereo, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_DYNMIXER_H_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_DYNMIXER_H_(c,o) 
 #endif // defined(DYNMIXER_H_)
 
 #if defined(output_ADAT_h_)
@@ -1322,6 +1488,9 @@ class OSCAudioOutputADAT : public AudioOutputADAT, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_output_ADAT_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_ADAT_h_(c,o) 
 #endif // defined(output_ADAT_h_)
 
 #if defined(output_dac_h_)
@@ -1343,6 +1512,9 @@ class OSCAudioOutputAnalog : public AudioOutputAnalog, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_output_dac_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_dac_h_(c,o) 
 #endif // defined(output_dac_h_)
 
 #if defined(output_dacs_h_)
@@ -1364,6 +1536,9 @@ class OSCAudioOutputAnalogStereo : public AudioOutputAnalogStereo, public OSCAud
           }
 		}
 };
+#define OSC_CLASS_output_dacs_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_dacs_h_(c,o) 
 #endif // defined(output_dacs_h_)
 
 #if defined(output_i2s_h_)
@@ -1384,6 +1559,9 @@ class OSCAudioOutputI2S : public AudioOutputI2S, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_output_i2s_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_i2s_h_(c,o) 
 #endif // defined(output_i2s_h_)
 
 #if defined(output_i2s2_h_)
@@ -1404,6 +1582,9 @@ class OSCAudioOutputI2S2 : public AudioOutputI2S2, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_output_i2s2_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_i2s2_h_(c,o) 
 #endif // defined(output_i2s2_h_)
 
 #if defined(output_i2s_hex_h_)
@@ -1424,6 +1605,9 @@ class OSCAudioOutputI2SHex : public AudioOutputI2SHex, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_output_i2s_hex_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_i2s_hex_h_(c,o) 
 #endif // defined(output_i2s_hex_h_)
 
 #if defined(output_i2s_oct_h_)
@@ -1444,6 +1628,9 @@ class OSCAudioOutputI2SOct : public AudioOutputI2SOct, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_output_i2s_oct_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_i2s_oct_h_(c,o) 
 #endif // defined(output_i2s_oct_h_)
 
 #if defined(output_i2s_quad_h_)
@@ -1464,6 +1651,9 @@ class OSCAudioOutputI2SQuad : public AudioOutputI2SQuad, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_output_i2s_quad_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_i2s_quad_h_(c,o) 
 #endif // defined(output_i2s_quad_h_)
 
 #if defined(output_mqs_h_)
@@ -1484,6 +1674,9 @@ class OSCAudioOutputMQS : public AudioOutputMQS, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_output_mqs_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_mqs_h_(c,o) 
 #endif // defined(output_mqs_h_)
 
 #if defined(output_pt8211_h_)
@@ -1504,6 +1697,9 @@ class OSCAudioOutputPT8211 : public AudioOutputPT8211, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_output_pt8211_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_pt8211_h_(c,o) 
 #endif // defined(output_pt8211_h_)
 
 #if defined(output_pt8211_2_h_)
@@ -1524,6 +1720,9 @@ class OSCAudioOutputPT8211_2 : public AudioOutputPT8211_2, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_output_pt8211_2_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_pt8211_2_h_(c,o) 
 #endif // defined(output_pt8211_2_h_)
 
 #if defined(output_pwm_h_)
@@ -1544,6 +1743,9 @@ class OSCAudioOutputPWM : public AudioOutputPWM, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_output_pwm_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_pwm_h_(c,o) 
 #endif // defined(output_pwm_h_)
 
 #if defined(output_SPDIF_h_)
@@ -1565,6 +1767,9 @@ class OSCAudioOutputSPDIF : public AudioOutputSPDIF, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_output_SPDIF_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_SPDIF_h_(c,o) 
 #endif // defined(output_SPDIF_h_)
 
 #if defined(output_SPDIF2_h_)
@@ -1586,6 +1791,9 @@ class OSCAudioOutputSPDIF2 : public AudioOutputSPDIF2, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_output_SPDIF2_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_SPDIF2_h_(c,o) 
 #endif // defined(output_SPDIF2_h_)
 
 #if defined(output_SPDIF3_h_)
@@ -1608,6 +1816,9 @@ class OSCAudioOutputSPDIF3 : public AudioOutputSPDIF3, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_output_SPDIF3_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_SPDIF3_h_(c,o) 
 #endif // defined(output_SPDIF3_h_)
 
 #if defined(output_tdm_h_)
@@ -1628,6 +1839,9 @@ class OSCAudioOutputTDM : public AudioOutputTDM, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_output_tdm_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_tdm_h_(c,o) 
 #endif // defined(output_tdm_h_)
 
 #if defined(output_tdm2_h_)
@@ -1648,6 +1862,9 @@ class OSCAudioOutputTDM2 : public AudioOutputTDM2, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_output_tdm2_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_output_tdm2_h_(c,o) 
 #endif // defined(output_tdm2_h_)
 
 #if defined(play_memory_h_)
@@ -1675,6 +1892,9 @@ class OSCAudioPlayMemory : public AudioPlayMemory, public OSCAudioBase
 	private:
 		void play(OSCMessage& msg);
 };
+#define OSC_CLASS_play_memory_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_play_memory_h_(c,o) 
 #endif // defined(play_memory_h_)
 
 #if defined(play_queue_h_)
@@ -1703,6 +1923,9 @@ class OSCAudioPlayQueue : public AudioPlayQueue, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_play_queue_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_play_queue_h_(c,o) 
 #endif // defined(play_queue_h_)
 
 #if defined(play_sd_raw_h_)
@@ -1731,6 +1954,9 @@ class OSCAudioPlaySdRaw : public AudioPlaySdRaw, public OSCAudioBase
 	private:
 		void play(OSCMessage& msg);
 };
+#define OSC_CLASS_play_sd_raw_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_play_sd_raw_h_(c,o) 
 #endif // defined(play_sd_raw_h_)
 
 #if defined(play_sd_wav_h_)
@@ -1762,6 +1988,9 @@ class OSCAudioPlaySdWav : public AudioPlaySdWav, public OSCAudioBase
 	private:
 		void play(OSCMessage& msg);
 };
+#define OSC_CLASS_play_sd_wav_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_play_sd_wav_h_(c,o) 
 #endif // defined(play_sd_wav_h_)
 
 #if defined(play_serial_raw_h_)
@@ -1790,6 +2019,9 @@ class OSCAudioPlaySerialflashRaw : public AudioPlaySerialflashRaw, public OSCAud
 	private:
 		void play(OSCMessage& msg);
 };
+#define OSC_CLASS_play_serial_raw_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_play_serial_raw_h_(c,o) 
 #endif // defined(play_serial_raw_h_)
 
 #if defined(record_queue_h_)
@@ -1816,6 +2048,9 @@ class OSCAudioRecordQueue : public AudioRecordQueue, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_record_queue_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_record_queue_h_(c,o) 
 #endif // defined(record_queue_h_)
 
 #if defined(synth_karplusstrong_h_)
@@ -1838,6 +2073,9 @@ class OSCAudioSynthKarplusStrong : public AudioSynthKarplusStrong, public OSCAud
           }
 		}
 };
+#define OSC_CLASS_synth_karplusstrong_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_synth_karplusstrong_h_(c,o) 
 #endif // defined(synth_karplusstrong_h_)
 
 #if defined(synth_pinknoise_h_)
@@ -1859,6 +2097,9 @@ class OSCAudioSynthNoisePink : public AudioSynthNoisePink, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_synth_pinknoise_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_synth_pinknoise_h_(c,o) 
 #endif // defined(synth_pinknoise_h_)
 
 #if defined(synth_whitenoise_h_)
@@ -1880,6 +2121,9 @@ class OSCAudioSynthNoiseWhite : public AudioSynthNoiseWhite, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_synth_whitenoise_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_synth_whitenoise_h_(c,o) 
 #endif // defined(synth_whitenoise_h_)
 
 #if defined(_SYNTH_SIMPLE_DRUM_H_)
@@ -1905,6 +2149,9 @@ class OSCAudioSynthSimpleDrum : public AudioSynthSimpleDrum, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS__SYNTH_SIMPLE_DRUM_H_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS__SYNTH_SIMPLE_DRUM_H_(c,o) 
 #endif // defined(_SYNTH_SIMPLE_DRUM_H_)
 
 #if defined(synth_tonesweep_h_)
@@ -1928,6 +2175,9 @@ class OSCAudioSynthToneSweep : public AudioSynthToneSweep, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_synth_tonesweep_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_synth_tonesweep_h_(c,o) 
 #endif // defined(synth_tonesweep_h_)
 
 #if defined(synth_waveform_h_)
@@ -1960,6 +2210,9 @@ class OSCAudioSynthWaveform : public AudioSynthWaveform, public OSCAudioBase
 		bool arbitraryWaveform(OSCMessage& msg);
 		int16_t* arbdata;
 };
+#define OSC_CLASS_synth_waveform_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_synth_waveform_h_(c,o) 
 #endif // defined(synth_waveform_h_)
 
 #if defined(synth_dc_h_)
@@ -1983,6 +2236,9 @@ class OSCAudioSynthWaveformDc : public AudioSynthWaveformDc, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS_synth_dc_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_synth_dc_h_(c,o) 
 #endif // defined(synth_dc_h_)
 
 #if defined(synth_waveform_h_)
@@ -2015,6 +2271,9 @@ class OSCAudioSynthWaveformModulated : public AudioSynthWaveformModulated, publi
 		bool arbitraryWaveform(OSCMessage& msg);
 		int16_t* arbdata;
 };
+#define OSC_CLASS_synth_waveform_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_synth_waveform_h_(c,o) 
 #endif // defined(synth_waveform_h_)
 
 #if defined(synth_pwm_h_)
@@ -2037,6 +2296,9 @@ class OSCAudioSynthWaveformPWM : public AudioSynthWaveformPWM, public OSCAudioBa
           }
 		}
 };
+#define OSC_CLASS_synth_pwm_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_synth_pwm_h_(c,o) 
 #endif // defined(synth_pwm_h_)
 
 #if defined(synth_sine_h_)
@@ -2060,6 +2322,9 @@ class OSCAudioSynthWaveformSine : public AudioSynthWaveformSine, public OSCAudio
           }
 		}
 };
+#define OSC_CLASS_synth_sine_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_synth_sine_h_(c,o) 
 #endif // defined(synth_sine_h_)
 
 #if defined(synth_sine_h_)
@@ -2083,6 +2348,9 @@ class OSCAudioSynthWaveformSineHires : public AudioSynthWaveformSineHires, publi
           }
 		}
 };
+#define OSC_CLASS_synth_sine_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_synth_sine_h_(c,o) 
 #endif // defined(synth_sine_h_)
 
 #if defined(synth_sine_h_)
@@ -2106,8 +2374,12 @@ class OSCAudioSynthWaveformSineModulated : public AudioSynthWaveformSineModulate
           }
 		}
 };
+#define OSC_CLASS_synth_sine_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS_synth_sine_h_(c,o) 
 #endif // defined(synth_sine_h_)
 
+#if defined(_synth_wavetable_h_)
 // ============== AudioSynthWavetable ====================
 class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
 {
@@ -2136,93 +2408,97 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
           }
 		}
 };
+#define OSC_CLASS__synth_wavetable_h_(c,o) OSC_CLASS(c,o)
+#else
+#define OSC_CLASS__synth_wavetable_h_(c,o) 
+#endif // defined(_synth_wavetable_h_)
 
 #define OSC_AUDIO_CLASSES \
-	OSC_CLASS(AsyncAudioInputSPDIF3,AsyncOSCAudioInputSPDIF3) \
-	OSC_CLASS(AudioAmplifier,OSCAudioAmplifier) \
-	OSC_CLASS(AudioAnalyzeEvent,OSCAudioAnalyzeEvent) \
-	OSC_CLASS(AudioAnalyzeFFT1024,OSCAudioAnalyzeFFT1024) \
-	OSC_CLASS(AudioAnalyzeFFT256,OSCAudioAnalyzeFFT256) \
-	OSC_CLASS(AudioAnalyzeNoteFrequency,OSCAudioAnalyzeNoteFrequency) \
-	OSC_CLASS(AudioAnalyzePeak,OSCAudioAnalyzePeak) \
-	OSC_CLASS(AudioAnalyzePrint,OSCAudioAnalyzePrint) \
-	OSC_CLASS(AudioAnalyzeRMS,OSCAudioAnalyzeRMS) \
-	OSC_CLASS(AudioAnalyzeToneDetect,OSCAudioAnalyzeToneDetect) \
-	OSC_CLASS(AudioControlAK4558,OSCAudioControlAK4558) \
-	OSC_CLASS(AudioControlCS42448,OSCAudioControlCS42448) \
-	OSC_CLASS(AudioControlCS4272,OSCAudioControlCS4272) \
-	OSC_CLASS(AudioControlSGTL5000,OSCAudioControlSGTL5000) \
-	OSC_CLASS(AudioControlTLV320AIC3206,OSCAudioControlTLV320AIC3206) \
-	OSC_CLASS(AudioControlWM8731,OSCAudioControlWM8731) \
-	OSC_CLASS(AudioControlWM8731master,OSCAudioControlWM8731master) \
-	OSC_CLASS(AudioEffectBitcrusher,OSCAudioEffectBitcrusher) \
-	OSC_CLASS(AudioEffectDelay,OSCAudioEffectDelay) \
-	OSC_CLASS(AudioEffectDelayExternal,OSCAudioEffectDelayExternal) \
-	OSC_CLASS(AudioEffectDigitalCombine,OSCAudioEffectDigitalCombine) \
-	OSC_CLASS(AudioEffectEnvelope,OSCAudioEffectEnvelope) \
-	OSC_CLASS(AudioEffectExpEnvelope,OSCAudioEffectExpEnvelope) \
-	OSC_CLASS(AudioEffectFade,OSCAudioEffectFade) \
-	OSC_CLASS(AudioEffectFreeverb,OSCAudioEffectFreeverb) \
-	OSC_CLASS(AudioEffectFreeverbStereo,OSCAudioEffectFreeverbStereo) \
-	OSC_CLASS(AudioEffectGranular,OSCAudioEffectGranular) \
-	OSC_CLASS(AudioEffectMidSide,OSCAudioEffectMidSide) \
-	OSC_CLASS(AudioEffectMultiply,OSCAudioEffectMultiply) \
-	OSC_CLASS(AudioEffectRectifier,OSCAudioEffectRectifier) \
-	OSC_CLASS(AudioEffectReverb,OSCAudioEffectReverb) \
-	OSC_CLASS(AudioEffectWaveFolder,OSCAudioEffectWaveFolder) \
-	OSC_CLASS(AudioEffectWaveshaper,OSCAudioEffectWaveshaper) \
-	OSC_CLASS(AudioFilterBiquad,OSCAudioFilterBiquad) \
-	OSC_CLASS(AudioFilterFIR,OSCAudioFilterFIR) \
-	OSC_CLASS(AudioFilterLadder,OSCAudioFilterLadder) \
-	OSC_CLASS(AudioFilterStateVariable,OSCAudioFilterStateVariable) \
-	OSC_CLASS(AudioInputAnalog,OSCAudioInputAnalog) \
-	OSC_CLASS(AudioInputAnalogStereo,OSCAudioInputAnalogStereo) \
-	OSC_CLASS(AudioInputI2S,OSCAudioInputI2S) \
-	OSC_CLASS(AudioInputI2S2,OSCAudioInputI2S2) \
-	OSC_CLASS(AudioInputI2SHex,OSCAudioInputI2SHex) \
-	OSC_CLASS(AudioInputI2SOct,OSCAudioInputI2SOct) \
-	OSC_CLASS(AudioInputI2SQuad,OSCAudioInputI2SQuad) \
-	OSC_CLASS(AudioInputPDM,OSCAudioInputPDM) \
-	OSC_CLASS(AudioInputPDM2,OSCAudioInputPDM2) \
-	OSC_CLASS(AudioInputSPDIF3,OSCAudioInputSPDIF3) \
-	OSC_CLASS(AudioInputTDM,OSCAudioInputTDM) \
-	OSC_CLASS(AudioInputTDM2,OSCAudioInputTDM2) \
-	OSC_CLASS(AudioMixer4,OSCAudioMixer4) \
-	OSC_CLASS(AudioOutputADAT,OSCAudioOutputADAT) \
-	OSC_CLASS(AudioOutputAnalog,OSCAudioOutputAnalog) \
-	OSC_CLASS(AudioOutputAnalogStereo,OSCAudioOutputAnalogStereo) \
-	OSC_CLASS(AudioOutputI2S,OSCAudioOutputI2S) \
-	OSC_CLASS(AudioOutputI2S2,OSCAudioOutputI2S2) \
-	OSC_CLASS(AudioOutputI2SHex,OSCAudioOutputI2SHex) \
-	OSC_CLASS(AudioOutputI2SOct,OSCAudioOutputI2SOct) \
-	OSC_CLASS(AudioOutputI2SQuad,OSCAudioOutputI2SQuad) \
-	OSC_CLASS(AudioOutputMQS,OSCAudioOutputMQS) \
-	OSC_CLASS(AudioOutputPT8211,OSCAudioOutputPT8211) \
-	OSC_CLASS(AudioOutputPT8211_2,OSCAudioOutputPT8211_2) \
-	OSC_CLASS(AudioOutputPWM,OSCAudioOutputPWM) \
-	OSC_CLASS(AudioOutputSPDIF,OSCAudioOutputSPDIF) \
-	OSC_CLASS(AudioOutputSPDIF2,OSCAudioOutputSPDIF2) \
-	OSC_CLASS(AudioOutputSPDIF3,OSCAudioOutputSPDIF3) \
-	OSC_CLASS(AudioOutputTDM,OSCAudioOutputTDM) \
-	OSC_CLASS(AudioOutputTDM2,OSCAudioOutputTDM2) \
-	OSC_CLASS(AudioPlayMemory,OSCAudioPlayMemory) \
-	OSC_CLASS(AudioPlayQueue,OSCAudioPlayQueue) \
-	OSC_CLASS(AudioPlaySdRaw,OSCAudioPlaySdRaw) \
-	OSC_CLASS(AudioPlaySdWav,OSCAudioPlaySdWav) \
-	OSC_CLASS(AudioPlaySerialflashRaw,OSCAudioPlaySerialflashRaw) \
-	OSC_CLASS(AudioRecordQueue,OSCAudioRecordQueue) \
-	OSC_CLASS(AudioSynthKarplusStrong,OSCAudioSynthKarplusStrong) \
-	OSC_CLASS(AudioSynthNoisePink,OSCAudioSynthNoisePink) \
-	OSC_CLASS(AudioSynthNoiseWhite,OSCAudioSynthNoiseWhite) \
-	OSC_CLASS(AudioSynthSimpleDrum,OSCAudioSynthSimpleDrum) \
-	OSC_CLASS(AudioSynthToneSweep,OSCAudioSynthToneSweep) \
-	OSC_CLASS(AudioSynthWaveform,OSCAudioSynthWaveform) \
-	OSC_CLASS(AudioSynthWaveformDc,OSCAudioSynthWaveformDc) \
-	OSC_CLASS(AudioSynthWaveformModulated,OSCAudioSynthWaveformModulated) \
-	OSC_CLASS(AudioSynthWaveformPWM,OSCAudioSynthWaveformPWM) \
-	OSC_CLASS(AudioSynthWaveformSine,OSCAudioSynthWaveformSine) \
-	OSC_CLASS(AudioSynthWaveformSineHires,OSCAudioSynthWaveformSineHires) \
-	OSC_CLASS(AudioSynthWaveformSineModulated,OSCAudioSynthWaveformSineModulated) \
-	OSC_CLASS(AudioSynthWavetable,OSCAudioSynthWavetable) \
+	OSC_CLASS_async_input_spdif3_h_(AsyncAudioInputSPDIF3,AsyncOSCAudioInputSPDIF3) \
+	OSC_CLASS_mixer_h_(AudioAmplifier,OSCAudioAmplifier) \
+	OSC_CLASS_analyze_event_h_(AudioAnalyzeEvent,OSCAudioAnalyzeEvent) \
+	OSC_CLASS_analyze_fft1024_h_(AudioAnalyzeFFT1024,OSCAudioAnalyzeFFT1024) \
+	OSC_CLASS_analyze_fft256_h_(AudioAnalyzeFFT256,OSCAudioAnalyzeFFT256) \
+	OSC_CLASS_AudioAnalyzeNoteFrequency_h_(AudioAnalyzeNoteFrequency,OSCAudioAnalyzeNoteFrequency) \
+	OSC_CLASS_analyze_peakdetect_h_(AudioAnalyzePeak,OSCAudioAnalyzePeak) \
+	OSC_CLASS_analyze_print_h_(AudioAnalyzePrint,OSCAudioAnalyzePrint) \
+	OSC_CLASS_analyze_rms_h_(AudioAnalyzeRMS,OSCAudioAnalyzeRMS) \
+	OSC_CLASS_analyze_tonedetect_h_(AudioAnalyzeToneDetect,OSCAudioAnalyzeToneDetect) \
+	OSC_CLASS_control_ak4558_h_(AudioControlAK4558,OSCAudioControlAK4558) \
+	OSC_CLASS_control_cs42448_h_(AudioControlCS42448,OSCAudioControlCS42448) \
+	OSC_CLASS_control_cs4272_h_(AudioControlCS4272,OSCAudioControlCS4272) \
+	OSC_CLASS_control_sgtl5000_h_(AudioControlSGTL5000,OSCAudioControlSGTL5000) \
+	OSC_CLASS_control_tlv320aic3206_h_(AudioControlTLV320AIC3206,OSCAudioControlTLV320AIC3206) \
+	OSC_CLASS_control_wm8731_h_(AudioControlWM8731,OSCAudioControlWM8731) \
+	OSC_CLASS_control_wm8731_h_(AudioControlWM8731master,OSCAudioControlWM8731master) \
+	OSC_CLASS_effect_bitcrusher_h_(AudioEffectBitcrusher,OSCAudioEffectBitcrusher) \
+	OSC_CLASS_effect_delay_h_(AudioEffectDelay,OSCAudioEffectDelay) \
+	OSC_CLASS_effect_delay_ext_h_(AudioEffectDelayExternal,OSCAudioEffectDelayExternal) \
+	OSC_CLASS_effect_digital_combine_h_(AudioEffectDigitalCombine,OSCAudioEffectDigitalCombine) \
+	OSC_CLASS_effect_envelope_h_(AudioEffectEnvelope,OSCAudioEffectEnvelope) \
+	OSC_CLASS_effect_expenvelope_h_(AudioEffectExpEnvelope,OSCAudioEffectExpEnvelope) \
+	OSC_CLASS_effect_fade_h_(AudioEffectFade,OSCAudioEffectFade) \
+	OSC_CLASS_effect_freeverb_h_(AudioEffectFreeverb,OSCAudioEffectFreeverb) \
+	OSC_CLASS_effect_freeverb_h_(AudioEffectFreeverbStereo,OSCAudioEffectFreeverbStereo) \
+	OSC_CLASS__effect_granular_h_(AudioEffectGranular,OSCAudioEffectGranular) \
+	OSC_CLASS_effect_midside_decode_h_(AudioEffectMidSide,OSCAudioEffectMidSide) \
+	OSC_CLASS_effect_multiply_h_(AudioEffectMultiply,OSCAudioEffectMultiply) \
+	OSC_CLASS_effect_rectifier_h_(AudioEffectRectifier,OSCAudioEffectRectifier) \
+	OSC_CLASS_effect_reverb_(AudioEffectReverb,OSCAudioEffectReverb) \
+	OSC_CLASS_effect_wavefolder_h_(AudioEffectWaveFolder,OSCAudioEffectWaveFolder) \
+	OSC_CLASS_effect_waveshaper_h_(AudioEffectWaveshaper,OSCAudioEffectWaveshaper) \
+	OSC_CLASS_filter_biquad_h_(AudioFilterBiquad,OSCAudioFilterBiquad) \
+	OSC_CLASS_filter_fir_h_(AudioFilterFIR,OSCAudioFilterFIR) \
+	OSC_CLASS_filter_ladder_h_(AudioFilterLadder,OSCAudioFilterLadder) \
+	OSC_CLASS_filter_variable_h_(AudioFilterStateVariable,OSCAudioFilterStateVariable) \
+	OSC_CLASS_input_adc_h_(AudioInputAnalog,OSCAudioInputAnalog) \
+	OSC_CLASS_input_adcs_h_(AudioInputAnalogStereo,OSCAudioInputAnalogStereo) \
+	OSC_CLASS__input_i2s_h_(AudioInputI2S,OSCAudioInputI2S) \
+	OSC_CLASS__input_i2s2_h_(AudioInputI2S2,OSCAudioInputI2S2) \
+	OSC_CLASS__input_i2s_hex_h_(AudioInputI2SHex,OSCAudioInputI2SHex) \
+	OSC_CLASS__input_i2s_oct_h_(AudioInputI2SOct,OSCAudioInputI2SOct) \
+	OSC_CLASS__input_i2s_quad_h_(AudioInputI2SQuad,OSCAudioInputI2SQuad) \
+	OSC_CLASS__input_pdm_h_(AudioInputPDM,OSCAudioInputPDM) \
+	OSC_CLASS__input_pdm_i2s2_h_(AudioInputPDM2,OSCAudioInputPDM2) \
+	OSC_CLASS__input_spdif3_h_(AudioInputSPDIF3,OSCAudioInputSPDIF3) \
+	OSC_CLASS__input_tdm_h_(AudioInputTDM,OSCAudioInputTDM) \
+	OSC_CLASS__input_tdm2_h_(AudioInputTDM2,OSCAudioInputTDM2) \
+	OSC_CLASS_mixer_h_(AudioMixer4,OSCAudioMixer4) \
+	OSC_CLASS_output_ADAT_h_(AudioOutputADAT,OSCAudioOutputADAT) \
+	OSC_CLASS_output_dac_h_(AudioOutputAnalog,OSCAudioOutputAnalog) \
+	OSC_CLASS_output_dacs_h_(AudioOutputAnalogStereo,OSCAudioOutputAnalogStereo) \
+	OSC_CLASS_output_i2s_h_(AudioOutputI2S,OSCAudioOutputI2S) \
+	OSC_CLASS_output_i2s2_h_(AudioOutputI2S2,OSCAudioOutputI2S2) \
+	OSC_CLASS_output_i2s_hex_h_(AudioOutputI2SHex,OSCAudioOutputI2SHex) \
+	OSC_CLASS_output_i2s_oct_h_(AudioOutputI2SOct,OSCAudioOutputI2SOct) \
+	OSC_CLASS_output_i2s_quad_h_(AudioOutputI2SQuad,OSCAudioOutputI2SQuad) \
+	OSC_CLASS_output_mqs_h_(AudioOutputMQS,OSCAudioOutputMQS) \
+	OSC_CLASS_output_pt8211_h_(AudioOutputPT8211,OSCAudioOutputPT8211) \
+	OSC_CLASS_output_pt8211_2_h_(AudioOutputPT8211_2,OSCAudioOutputPT8211_2) \
+	OSC_CLASS_output_pwm_h_(AudioOutputPWM,OSCAudioOutputPWM) \
+	OSC_CLASS_output_SPDIF_h_(AudioOutputSPDIF,OSCAudioOutputSPDIF) \
+	OSC_CLASS_output_SPDIF2_h_(AudioOutputSPDIF2,OSCAudioOutputSPDIF2) \
+	OSC_CLASS_output_SPDIF3_h_(AudioOutputSPDIF3,OSCAudioOutputSPDIF3) \
+	OSC_CLASS_output_tdm_h_(AudioOutputTDM,OSCAudioOutputTDM) \
+	OSC_CLASS_output_tdm2_h_(AudioOutputTDM2,OSCAudioOutputTDM2) \
+	OSC_CLASS_play_memory_h_(AudioPlayMemory,OSCAudioPlayMemory) \
+	OSC_CLASS_play_queue_h_(AudioPlayQueue,OSCAudioPlayQueue) \
+	OSC_CLASS_play_sd_raw_h_(AudioPlaySdRaw,OSCAudioPlaySdRaw) \
+	OSC_CLASS_play_sd_wav_h_(AudioPlaySdWav,OSCAudioPlaySdWav) \
+	OSC_CLASS_play_serial_raw_h_(AudioPlaySerialflashRaw,OSCAudioPlaySerialflashRaw) \
+	OSC_CLASS_record_queue_h_(AudioRecordQueue,OSCAudioRecordQueue) \
+	OSC_CLASS_synth_karplusstrong_h_(AudioSynthKarplusStrong,OSCAudioSynthKarplusStrong) \
+	OSC_CLASS_synth_pinknoise_h_(AudioSynthNoisePink,OSCAudioSynthNoisePink) \
+	OSC_CLASS_synth_whitenoise_h_(AudioSynthNoiseWhite,OSCAudioSynthNoiseWhite) \
+	OSC_CLASS__SYNTH_SIMPLE_DRUM_H_(AudioSynthSimpleDrum,OSCAudioSynthSimpleDrum) \
+	OSC_CLASS_synth_tonesweep_h_(AudioSynthToneSweep,OSCAudioSynthToneSweep) \
+	OSC_CLASS_synth_waveform_h_(AudioSynthWaveform,OSCAudioSynthWaveform) \
+	OSC_CLASS_synth_dc_h_(AudioSynthWaveformDc,OSCAudioSynthWaveformDc) \
+	OSC_CLASS_synth_waveform_h_(AudioSynthWaveformModulated,OSCAudioSynthWaveformModulated) \
+	OSC_CLASS_synth_pwm_h_(AudioSynthWaveformPWM,OSCAudioSynthWaveformPWM) \
+	OSC_CLASS_synth_sine_h_(AudioSynthWaveformSine,OSCAudioSynthWaveformSine) \
+	OSC_CLASS_synth_sine_h_(AudioSynthWaveformSineHires,OSCAudioSynthWaveformSineHires) \
+	OSC_CLASS_synth_sine_h_(AudioSynthWaveformSineModulated,OSCAudioSynthWaveformSineModulated) \
+	OSC_CLASS__synth_wavetable_h_(AudioSynthWavetable,OSCAudioSynthWavetable) \
 
 
