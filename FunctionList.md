@@ -281,9 +281,6 @@ This is a list of functions (aka OSC methods) which are available for each objec
 |function|return type|short-form|parameter pattern|parameters|
 |----|----|----|----|----|
 | reverbTime | void | r* | f | float |
-#### AudioEffectWaveshaper
-|function|return type|short-form|parameter pattern|parameters|
-|----|----|----|----|----|
 #### AudioFilterBiquad
 |function|return type|short-form|parameter pattern|parameters|
 |----|----|----|----|----|
@@ -338,6 +335,7 @@ This is a list of functions (aka OSC methods) which are available for each objec
 | gain | void | ga* | if | unsigned int channel, float gain |
 | getChannels | uint8_t | ge* | -- | void |
 | pan | void | p* | if | unsigned int channel, float pan |
+| setPanLaw | void | s* | f | float law |
 #### AudioOutputADAT
 |function|return type|short-form|parameter pattern|parameters|
 |----|----|----|----|----|
