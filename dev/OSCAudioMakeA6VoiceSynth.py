@@ -79,14 +79,19 @@ SLIPser = sliplib.SlipStream(ser,chunk_size=1)
 #########################################################################
 # Requires AudioMixerX aka DynMixer
 poly = 6
+i2s = False
+dac = True
 # Create a bundle that we could get actioned immediately
 msgl = []
 # start with a blank slate
 msgl += [OSCpackAuto('/teensy1/dynamic/clearAll')]
 
 # adjust this to suit your audio system
-msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioControlSGTL5000','sgtl5000')]
-msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioOutputI2S','i2s')]
+if i2s:
+    msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioControlSGTL5000','sgtl5000')]
+    msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioOutputI2S','i2s')]
+if dac:
+    msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioOutputAnalogStereo','dac')]
 
 if 1:
     # create the root-level objects
@@ -117,20 +122,28 @@ if 1:
 
     # set mixer gains to something vaguely sane   
     for i in range(0,poly):
-        msgl += [OSCpackAuto('/teensy1/audio/mixer/ga',i,0.16)]
+        msgl += [OSCpackAuto('/teensy1/audio/mixer/gain',i,0.16)]
         msgl += [OSCpackAuto('/teensy1/audio/mixer/pan',i,2.0*float(i)/(poly - 1)-1.0)]
         msgl += [OSCpackAuto('/teensy1/audio/voice1/i*/mixer/ga',i,0.5)]
 
-    # root-level connections   
-    msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p_mix_outL')]
-    msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p_mix_outR')]
-    msgl += [OSCpackAuto('/teensy1/audio/p_mix_outL/co','/mixer',0,'/i2s',0)]
-    msgl += [OSCpackAuto('/teensy1/audio/p_mix_outR/co','/mixer',1,'/i2s',1)]
+    # root-level connections
+    if i2s:
+        msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p_mix_outL')]
+        msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p_mix_outR')]
+        msgl += [OSCpackAuto('/teensy1/audio/p_mix_outL/co','/mixer',0,'/i2s',0)]
+        msgl += [OSCpackAuto('/teensy1/audio/p_mix_outR/co','/mixer',1,'/i2s',1)]
 
-# enable audio system    
-msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/enab')]
-msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/vo',0.5)]
-msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/lineO*',12)] # ~3Vpk-pk
+    if dac:
+        msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p_mix_dacL')]
+        msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p_mix_dacR')]
+        msgl += [OSCpackAuto('/teensy1/audio/p_mix_dacL/co','/mixer',0,'/dac',0)]
+        msgl += [OSCpackAuto('/teensy1/audio/p_mix_dacR/co','/mixer',1,'/dac',1)]
+
+# enable audio system
+if i2s:
+    msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/enab')]
+    msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/vo',0.5)]
+    msgl += [OSCpackAuto('/teensy1/audio/sgtl5000/lineO*',12)] # ~3Vpk-pk
 
 
 pkt = OSCmakeBundle(msgl)

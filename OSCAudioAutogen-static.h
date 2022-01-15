@@ -70,6 +70,7 @@ class OSCAudioAmplifier : public AudioAmplifier, public OSCAudioBase
           {
             addrOff += nameOff;
             if (isTarget(msg,addrOff,"/g*","f")) {gain(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply);} // void gain(float n) {
+            // NOT DEFINED: else if (isTarget(msg,addrOff,"/s*",";")) {slew(msg.getBoolean(0)); addReplyExecuted(msg,addrOff,reply);} // void slew(bool doSlew)
             else addReplyResult(msg,addrOff,reply,false,INVALID_METHOD);
           }
 		}
@@ -662,8 +663,6 @@ class OSCAudioEffectEnvelope : public AudioEffectEnvelope, public OSCAudioBase
 #define OSC_CLASS_effect_envelope_h_(c,o) OSC_CLASS(c,o)
 #else
 #define OSC_CLASS_effect_envelope_h_(c,o) 
-#endif // defined(effect_envelope_h_)
-
 #endif // defined(effect_envelope_h_)
 
 #if defined(effect_fade_h_)
@@ -2211,7 +2210,6 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
 #define OSC_AUDIO_CLASSES \
 	OSC_CLASS_async_input_spdif3_h_(AsyncAudioInputSPDIF3,AsyncOSCAudioInputSPDIF3) \
 	OSC_CLASS_mixer_h_(AudioAmplifier,OSCAudioAmplifier) \
-	OSC_CLASS_analyze_event_h_(AudioAnalyzeEvent,OSCAudioAnalyzeEvent) \
 	OSC_CLASS_analyze_fft1024_h_(AudioAnalyzeFFT1024,OSCAudioAnalyzeFFT1024) \
 	OSC_CLASS_analyze_fft256_h_(AudioAnalyzeFFT256,OSCAudioAnalyzeFFT256) \
 	OSC_CLASS_AudioAnalyzeNoteFrequency_h_(AudioAnalyzeNoteFrequency,OSCAudioAnalyzeNoteFrequency) \
@@ -2231,7 +2229,6 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
 	OSC_CLASS_effect_delay_ext_h_(AudioEffectDelayExternal,OSCAudioEffectDelayExternal) \
 	OSC_CLASS_effect_digital_combine_h_(AudioEffectDigitalCombine,OSCAudioEffectDigitalCombine) \
 	OSC_CLASS_effect_envelope_h_(AudioEffectEnvelope,OSCAudioEffectEnvelope) \
-	OSC_CLASS_effect_expenvelope_h_(AudioEffectExpEnvelope,OSCAudioEffectExpEnvelope) \
 	OSC_CLASS_effect_fade_h_(AudioEffectFade,OSCAudioEffectFade) \
 	OSC_CLASS_effect_freeverb_h_(AudioEffectFreeverb,OSCAudioEffectFreeverb) \
 	OSC_CLASS_effect_freeverb_h_(AudioEffectFreeverbStereo,OSCAudioEffectFreeverbStereo) \
