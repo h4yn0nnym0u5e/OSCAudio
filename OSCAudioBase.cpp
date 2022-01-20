@@ -640,10 +640,12 @@ void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 			else
 			{
 				crObContext_s context;
+				char* path = typ+1; // re-use this buffer, not needed now
 				
-				msg.getString(2,typ,50); // re-use this buffer, not needed now
+				msg.getString(2,path,49); 
+				if ('/' != *path) *--path = '/'; // allow client to forget initial '/'
 				context = {objIdx,objNameX,OK,mixerSize};
-				callBack(typ,createObjectCB,&context);
+				callBack(path,createObjectCB,&context);
 				retval = context.retval;
 			}
 		}
@@ -765,24 +767,28 @@ void createGroupCB(OSCAudioBase* parent,OSCMessage& msg,int offset,void* context
  */
 void OSCAudioBase::createGroup(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
-	char path[50], bufn[50];
+	char pathn[50], bufn[50];
 	error retval = OK;
-	char* buf = bufn+1;
+	char* buf  = bufn+1;
+	char* path = pathn+1;
 	
 	OSC_SPLN("createGroup");
 	OSC_DBGP(msg,addressOffset);
 	msg.getString(0,buf,50);
 	msg.getString(1,path,50);
-	*bufn = '/'; // needed for duplicate checking
-	trimUnderscores(sanitise(buf,buf),buf); // make the name valid
+	*bufn  = '/'; // needed for duplicate checking
+	*pathn = '/'; 
+	if ('/' != *buf)  buf--;
+	if ('/' != *path) path--;
+	trimUnderscores(sanitise(buf,buf,1),buf); // make the name valid
 	OSC_SPLN(buf);
 	
 	if (0 != strlen(buf))
 	{
-		if ('/' == *path && 1 == strlen(path)) // create directly at root
-			createGroupCB(NULL,msg,0,bufn);
+		if (0 == *path || ('/' == *path && 1 == strlen(path))) // create directly at root
+			createGroupCB(NULL,msg,0,buf);
 		else	// sub-group of existing group
-			callBack(path,createGroupCB,bufn);
+			callBack(path,createGroupCB,buf);
 	}
 	else
 		retval = BLANK_NAME;
