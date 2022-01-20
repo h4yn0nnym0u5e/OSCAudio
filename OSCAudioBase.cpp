@@ -363,18 +363,34 @@ int OSCAudioBase::findMatch(const char* addr,		//!< address to match
  */
 void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
-    if (isStaticTarget(msg,addressOffset,"/ren*","ss")) {renameObject(msg,addressOffset,reply);} 
+    if (isStaticTarget(msg,addressOffset,"/renameObject","ss")) {renameObject(msg,addressOffset,reply);} 
 #if defined(DYNAMIC_AUDIO_AVAILABLE) // route OSC commands to create / destroy objects
-    else if (isStaticTarget(msg,addressOffset,"/crC*","s"))  	{createConnection(msg,addressOffset,reply);} 
-    else if (isStaticTarget(msg,addressOffset,"/crC*","ss"))  	{createConnection(msg,addressOffset,reply);} 
-    else if (isStaticTarget(msg,addressOffset,"/crO*","ss"))	{createObject(msg,addressOffset,reply);} 
-    else if (isStaticTarget(msg,addressOffset,"/crO*","sss"))	{createObject(msg,addressOffset,reply);} 
-    else if (isStaticTarget(msg,addressOffset,"/crO*","ssi"))	{createObject(msg,addressOffset,reply);} 
-    else if (isStaticTarget(msg,addressOffset,"/crO*","sssi"))	{createObject(msg,addressOffset,reply);} 
-    else if (isStaticTarget(msg,addressOffset,"/crG*","ss"))	{createGroup(msg,addressOffset,reply);} 
-    else if (isStaticTarget(msg,addressOffset,"/d*","s"))		{destroyObject(msg,addressOffset,reply);} 
-    else if (isStaticTarget(msg,addressOffset,"/clearAl*",NULL)) {clearAllObjects(msg,addressOffset,reply);} 
-		else OSC_SPTF("No match\n");
+    else if (isStaticTarget(msg,addressOffset,"/crCo","s"))  {createConnection(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/crCo","ss")) {createConnection(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/crOb","ss"))	 {createObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/crOb","sss"))	 {createObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/crOb","ssi"))	 {createObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/crOb","sssi"))	 {createObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/crGr","ss"))	 {createGroup(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/crGrp","ss"))	 {createGroup(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/deOb","s"))	 {destroyObject(msg,addressOffset,reply);} 
+    //else if (isStaticTarget(msg,addressOffset,"/clearAll",NULL)) 		 {clearAllObjects(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/createConnection","s"))  {createConnection(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/createConnection","ss")) {createConnection(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/createObject","ss"))	 {createObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/createObject","sss"))	 {createObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/createObject","ssi"))	 {createObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/createObject","sssi"))	 {createObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/createGroup","ss"))	 {createGroup(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/destroyObject","s"))	 {destroyObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/clearAll",NULL)) 		 {clearAllObjects(msg,addressOffset,reply);} 
+	else
+	{		
+		char buf[50];
+		msg.getAddress(buf,addressOffset);
+		OSC_SPTF("No match\n");
+		staticPrepareReplyResult(msg,reply).add(buf).add((int) NOT_ROUTED);
+	}
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 }
 
@@ -880,10 +896,10 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 		if (1 == (count = findMatch(dstn,&dstB))) // and one destination!
 			dst = dstB->sibling;			
 		else
-			retval = AMBIGUOUS_PATH;
+			retval = (0 == count)?NOT_FOUND:AMBIGUOUS_PATH;
 	}
 	else
-		retval = AMBIGUOUS_PATH;
+		retval = (0 == count)?NOT_FOUND:AMBIGUOUS_PATH;
 	
 	if (OK == retval)
 	{

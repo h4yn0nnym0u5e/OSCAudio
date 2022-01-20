@@ -269,10 +269,14 @@ class OSCAudioBase
 						 void* context,
 						 bool enterGroups)
 	{
+#if	defined(OSC_DEBUG_PRINT)
+		char addr[50]; 
+		msg.getAddress(addr,offset);
+#endif
 		while (NULL != ooi)
 		{
-			OSC_SPTF("%08X ...",(uint32_t) ooi);
 			int o2 = msg.match(ooi->name,offset);
+			OSC_SPTF("%08X (%s vs %s) ...",(uint32_t) ooi,addr,ooi->name);
 			if (o2 > 0) // matched at least some
 			{
 				if (offset+o2 >= hitAtOffset) // should be == at target 
