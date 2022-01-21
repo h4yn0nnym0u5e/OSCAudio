@@ -129,6 +129,67 @@ void OSCAudioBase::linkOutGroup(OSCAudioGroup** p)
 
 
 //-------------------------------------------------------------------------------------------------------
+/*
+ * Copy message string parameter into pre-allocated memory buffer.
+ * The buffer pointer MUST have enough space for the string, but may be NULL (e.g. if the 
+ * allocation failed) in which case the string is not copied.
+ * If slashPad is true then we prepend the string with a / if there isn't already one there.
+ * \return pointer to buffer, cast to char*
+ */
+char* OSCAudioBase::getMessageString(OSCMessage& msg, 	//!< message to extract string from
+									 int position, 		//!< position in parameter list we expect to find it
+									 void* vbuf,		//!< big enough buffer, or NULL
+									 bool slashPad)		//!< flag to say string should have / prepended if it's not supplied
+{
+	char* buf = (char*) vbuf;
+	
+	if (NULL != buf)
+	{
+		// length must be OK, no further check needed
+		if (slashPad) // see if we want to prepend / if one doesn't exist
+			msg.getString(position,buf,1,0,1); // get first character: beware, NO NULL terminator!
+		else
+			*buf = '/'; // we don't, pretend it's already got one!
+		
+		if ('/' == * buf)
+			msg.getString(position,buf);
+		else
+		{
+			msg.getString(position,buf+1);
+			*buf = '/';
+		}
+		OSC_SPTF("Message string: %s\n",buf);
+	}
+	
+	return buf;
+}
+
+
+/*
+ * Copy message Address Pattern into pre-allocated memory buffer.
+ * The buffer pointer MUST have enough space for the pattern, but may be NULL (e.g. if the 
+ * allocation failed) in which case the pattern is not copied. Note that OSCMessage::getAddress()
+ * does not do the NULL check so is unsafe to use. And the length-protected version is undocumented.
+ * \return pointer to buffer, cast to char*
+ */
+char* OSCAudioBase::getMessageAddress(OSCMessage& msg, 	//!< message to extract string from
+									 void* vbuf,		//!< big enough buffer, or NULL
+									 int len,			//!< length of buffer
+									 int offset)		//!< offset into address pattern  (default 0)
+{
+	char* buf = (char*) vbuf;
+	
+	if (NULL != buf) // length must be OK, no further check needed
+	{
+		msg.getAddress(buf,offset,len); // just get first character
+		OSC_SPTF("Address pattern: %s\n",buf);
+	}
+	
+	return buf;
+}
+
+
+//-------------------------------------------------------------------------------------------------------
 struct renameObject_s {char* newName; int count; int duplicates; OSCAudioBase* hit;};
 void OSCAudioBase::renameObjectCB(OSCAudioBase* ooi,OSCMessage& msg,int offset,void* ctxt) 
 {
@@ -155,36 +216,38 @@ void OSCAudioBase::renameObjectCB(OSCAudioBase* ooi,OSCMessage& msg,int offset,v
 void OSCAudioBase::renameObject(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
 	error retval = OK;
-	char oldName[50],newName[50],buf[150];
-	char* pOldName = oldName+1;
+	char* oldName,*newName,*buf;
 	renameObject_s context = {0};
 	
-	msg.getString(0,pOldName,50); // could be path, so user is responsible for this being valid
-	msg.getString(1,newName,50);
-	OSC_SPTF("new name is %s, size %d\n",newName,msg.getDataLength(1));
-	trimUnderscores(sanitise(newName,newName),newName); // make the new name valid
+	oldName = getMessageString(msg,0,alloca(msg.getDataLength(0)+1),true); // could be path, so user is responsible for this being valid
+	newName = getMessageString(msg,1,alloca(msg.getDataLength(1)));
 	
-	// this works even if supplied old name is empty:
-	if ('/' != *pOldName) 	// did user supply initial / ?
+	if (NULL != oldName && NULL != newName)
 	{
-		pOldName--;		// no, use the space allowed...
-		*pOldName ='/';	// ...to prepend one
+		buf = (char*) alloca(strlen(oldName) + strlen(newName) + 8 + 2*15); // [plenty of] space for reply string
+		if (NULL != buf)
+		{
+			OSC_SPTF("new name is %s, size %d\n",newName,strlen(newName));
+			trimUnderscores(sanitise(newName,newName),newName); // make the new name valid
+
+			if (0 != strlen(newName)) // zero-length names are not allowed
+			{
+				context.newName = newName;		
+				callBack(oldName,renameObjectCB,&context);
+				if (0 == context.count)
+					retval = NOT_FOUND; // no object to rename was found
+				else if (0 != context.duplicates)
+					retval = DUPLICATE_NAME; // object(s) by requested name already exists
+			}
+			else
+				retval = BLANK_NAME; // new name [sanitises to] an empty string			
+			
+			if (NULL != buf)
+			sprintf(buf,"%s -> %s (%d,%d)",oldName,newName,context.count,context.duplicates);
+			staticPrepareReplyResult(msg,reply).add(buf).add(retval);
+		}
 	}
-	
-	if (0 != strlen(newName)) // zero-length names are not allowed
-	{
-		context.newName = newName;		
-		callBack(pOldName,renameObjectCB,&context);
-		if (0 == context.count)
-			retval = NOT_FOUND; // no object to rename was found
-		else if (0 != context.duplicates)
-			retval = DUPLICATE_NAME; // object(s) by requested name already exists
-	}
-	else
-		retval = BLANK_NAME; // new name [sanitises to] an empty string			
-	
-	sprintf(buf,"%s -> %s (%d,%d)",pOldName,newName,context.count,context.duplicates);
-	staticPrepareReplyResult(msg,reply).add(buf).add(retval);
+	// alloca() allocates on function stack, so no need to free
 }
 
 
@@ -201,15 +264,18 @@ char* OSCAudioBase::sanitise(const char* src, //!< source string
 	char* dstCopy = dst;
 	const char* toChange = "/ #*,?[]{}";
 	
-	while (0 != *src)
+	if (NULL != src && NULL != dst)
 	{
-		if (NULL == strchr(toChange+offset,*src))
-			*dst++ = *src;
-		else
-			*dst++ = '_';
-		src++;
+		while (0 != *src)
+		{
+			if (NULL == strchr(toChange+offset,*src))
+				*dst++ = *src;
+			else
+				*dst++ = '_';
+			src++;
+		}
+		*dst = 0;
 	}
-	*dst = 0;
 	
 	return dstCopy;
 }
@@ -226,26 +292,29 @@ char* OSCAudioBase::trimUnderscores(const char* src, //!< source string
 	char* dstCopy = dst;
 	bool inBody = false,lastWas_ = false;
 
-	while (0 != *src)
+	if (NULL != src && NULL != dst)
 	{
-		if ('_' == *src)
+		while (0 != *src)
 		{
-			if (inBody && !lastWas_)
+			if ('_' == *src)
+			{
+				if (inBody && !lastWas_)
+					*dst++ = *src;
+				lastWas_ = true;
+			}
+			else
+			{
 				*dst++ = *src;
-			lastWas_ = true;
+				inBody = true;
+				lastWas_ = false;
+			}
+			src++;
 		}
-		else
-		{
-			*dst++ = *src;
-			inBody = true;
-			lastWas_ = false;
-		}
-		src++;
+		
+		if (lastWas_ && dst != dstCopy) // trailing underscore in non-empty result...
+			dst--;	  					// ...overwrite it
+		*dst = 0; // terminate result
 	}
-	
-	if (lastWas_ && dst != dstCopy) // trailing underscore in non-empty result...
-		dst--;	  					// ...overwrite it
-	*dst = 0; // terminate result
 	
 	return dstCopy;
 }
@@ -272,11 +341,8 @@ OSCMessage& OSCAudioBase::staticPrepareReplyResult(OSCMessage& msg, 	//!< the re
 	int msgCount = reply.size(); // number of messages in bundle
 	OSCMessage* pLastMsg = reply.getOSCMessage(msgCount-1); // point to last message in reply bundle
 	int dataCount = pLastMsg->size(); // how many pieces of data are in that?
-	char replyAddress[50];
-	pLastMsg->getAddress(replyAddress);
-	
-	char buf[50];
-	msg.getAddress(buf);
+	char* replyAddress = getMessageAddress(*pLastMsg,alloca(50),50);	
+	char* buf = getMessageAddress(msg,alloca(50),50);
 	
 	if (0 != dataCount) // message already in use...
 		pLastMsg = &reply.add(replyAddress); // ... make ourselves a new one
@@ -296,9 +362,10 @@ OSCMessage& OSCAudioBase::staticPrepareReplyResult(OSCMessage& msg, 	//!< the re
 OSCMessage& OSCAudioBase::prepareReplyResult(OSCMessage& msg, 	//!< the received message
 											 OSCBundle& reply) 	//!< the bundle that will become the reply
 {
-	char buf[50];
-	msg.getAddress(buf);
+#if defined(OSC_DEBUG_PRINT)	
+	char* buf = getMessageAddress(msg,alloca(50),50);
 	OSC_SPTF("%s executed %s; result was ",name+1,buf);
+#endif // defined(OSC_DEBUG_PRINT)	
 	
 	return staticPrepareReplyResult(msg,reply).add(name+1); // add which element caught the routed message
 }
@@ -386,8 +453,7 @@ void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& r
     else if (isStaticTarget(msg,addressOffset,"/clearAll",NULL)) 		 {clearAllObjects(msg,addressOffset,reply);} 
 	else
 	{		
-		char buf[50];
-		msg.getAddress(buf,addressOffset);
+		char* buf= getMessageAddress(msg,alloca(50),50,addressOffset);
 		OSC_SPTF("No match\n");
 		staticPrepareReplyResult(msg,reply).add(buf).add((int) NOT_ROUTED);
 	}
@@ -401,44 +467,41 @@ void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& r
  */
 void OSCAudioBase::destroyObject(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
-	char buf[50];
-	char* vName = buf+1;
+	char* vName;
 	OSCAudioBase* pVictim;
 	int matchCount = 0;
 	
-	msg.getString(0,vName,50); // may be a path with wildcards, user has to ensure it's valid
-	if ('/' != *vName)
-	{
-		vName--;
-		*vName = '/';
-	}
+	vName = getMessageString(msg,0,alloca(msg.getDataLength(0)+1),true); // may be a path with wildcards, user has to ensure it's valid
 	
-	OSC_SPRT("destroyObject: ");
-	OSC_SPLN(vName);
-	OSC_DBGP(msg,addressOffset); 
-	
-	// Have to do repeated searches rther than one callBack() sweep,
-	// because removing items from a branched list while you're
-	// traversing it is bound to result in Alarm and Despondency
-	do
+	if (NULL != vName)
 	{
-		int numFound = OSCAudioBase::findMatch(vName,&pVictim);
-		if (numFound > 0)
+		OSC_SPRT("destroyObject: ");
+		OSC_SPLN(vName);
+		OSC_DBGP(msg,addressOffset); 
+		
+		// Have to do repeated searches rther than one callBack() sweep,
+		// because removing items from a branched list while you're
+		// traversing it is bound to result in Alarm and Despondency
+		do
 		{
-			matchCount++;
-			OSC_SPTF("Victim is at: 0x%08X\n",(uint32_t) pVictim);
-			OSC_SFSH();
-			if (NULL != pVictim) // shouldn't need to check, but...
-				delete pVictim;
+			int numFound = OSCAudioBase::findMatch(vName,&pVictim);
+			if (numFound > 0)
+			{
+				matchCount++;
+				OSC_SPTF("Victim is at: 0x%08X\n",(uint32_t) pVictim);
+				OSC_SFSH();
+				if (NULL != pVictim) // shouldn't need to check, but...
+					delete pVictim;
+			}
+		} while (NULL != pVictim);
+		
+		if (0 == matchCount)
+		{
+			OSC_SPLN("not found!"); // but not really an error!
 		}
-	} while (NULL != pVictim);
-	
-	if (0 == matchCount)
-	{
-		OSC_SPLN("not found!"); // but not really an error!
+		
+		staticPrepareReplyResult(msg,reply).add(vName).add((int) OK);
 	}
-	
-	staticPrepareReplyResult(msg,reply).add(vName).add((int) OK);
 }
 
 /**
@@ -597,65 +660,69 @@ void createObjectCB(OSCAudioBase* parent,OSCMessage& msg,int offset,void* ctxt)
 void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
 	error retval = OK;
-	char objNameX[50],typ[50];
-	char* objName = objNameX+1;
+	char* objName,*typ;
 	int objIdx;
 	int mixerSize = -1;
 	int ml = msg.size() - 1;
 	bool isRoot = ml<2;
 	
-	msg.getString(0,typ,50);
-	objIdx = OSCAudioBase::getTypeIndex(typ); // see if we've got a valid object type
-	if (objIdx < 0) // could be a special case: so far we only have one
-	{
-		if (msg.isInt(ml) && 0 == strcmp(AudioMixerName,typ)) // last parameter is an integer? variable width mixer?
-		{
-			mixerSize = msg.getInt(ml); // get mixer width
-			objIdx = AUDIOMIXER_INDEX;
-			isRoot = ml<3;
-		}
-		else if (msg.isInt(ml) && 0 == strcmp(AudioMixerStereoName,typ)) // last parameter is an integer? variable width mixer?
-		{
-			mixerSize = msg.getInt(ml); // get mixer width
-			objIdx = AUDIOMIXERSTEREO_INDEX;
-			isRoot = ml<3;
-		}
-	}
+	typ = getMessageString(msg,0,alloca(msg.getDataLength(0)));
+	objName = getMessageString(msg,1,alloca(msg.getDataLength(1)+1),true);
 	
-	if (objIdx >= 0 
-		|| AUDIOMIXER_INDEX == objIdx
-		|| AUDIOMIXERSTEREO_INDEX == objIdx) // valid type
-	{	
-		msg.getString(1,objName,50);
-		if (strlen(objName) > 0)
+	if (NULL != typ && NULL != objName)
+	{
+		objIdx = OSCAudioBase::getTypeIndex(typ); // see if we've got a valid object type
+		if (objIdx < 0) // could be a special case: so far we only have one
 		{
-			*objNameX = '/'; // needed for duplicate checking
-			trimUnderscores(sanitise(objName,objName),objName); // make the name valid
-			
-			OSC_SPTF("createObject(%s,%s)\n",typ,objName);
-			OSC_DBGP(msg,addressOffset);
-			
-			if (isRoot) // create in root, not group
-				retval = DynamicAudioCreateObject(objIdx,objNameX,NULL,mixerSize);
-			else
+			if (msg.isInt(ml) && 0 == strcmp(AudioMixerName,typ)) // last parameter is an integer? variable width mixer?
 			{
-				crObContext_s context;
-				char* path = typ+1; // re-use this buffer, not needed now
-				
-				msg.getString(2,path,49); 
-				if ('/' != *path) *--path = '/'; // allow client to forget initial '/'
-				context = {objIdx,objNameX,OK,mixerSize};
-				callBack(path,createObjectCB,&context);
-				retval = context.retval;
+				mixerSize = msg.getInt(ml); // get mixer width
+				objIdx = AUDIOMIXER_INDEX;
+				isRoot = ml<3;
+			}
+			else if (msg.isInt(ml) && 0 == strcmp(AudioMixerStereoName,typ)) // last parameter is an integer? variable width mixer?
+			{
+				mixerSize = msg.getInt(ml); // get mixer width
+				objIdx = AUDIOMIXERSTEREO_INDEX;
+				isRoot = ml<3;
 			}
 		}
-		else
-			retval = BLANK_NAME;
-	}
-	else 
-		retval = NOT_FOUND;
 		
-	staticPrepareReplyResult(msg,reply).add(objName).add((int) retval);
+		if (objIdx >= 0 
+			|| AUDIOMIXER_INDEX == objIdx
+			|| AUDIOMIXERSTEREO_INDEX == objIdx) // valid type
+		{	
+			
+			if (strlen(objName+1) > 0) // initial / doesn't count as part of the name!
+			{
+				trimUnderscores(sanitise(objName,objName,1),objName); // make the name valid
+				
+				OSC_SPTF("createObject(%s,%s)\n",typ,objName);
+				OSC_DBGP(msg,addressOffset);
+				
+				if (isRoot) // create in root, not group
+					retval = DynamicAudioCreateObject(objIdx,objName,NULL,mixerSize);
+				else
+				{
+					crObContext_s context;
+					char* path = getMessageString(msg,2,alloca(msg.getDataLength(2)+1),true);
+					
+					if (NULL != path)
+					{
+						context = {objIdx,objName,OK,mixerSize};
+						callBack(path,createObjectCB,&context);
+						retval = context.retval;
+					}
+				}
+			}
+			else
+				retval = BLANK_NAME;
+		}
+		else 
+			retval = NOT_FOUND;
+			
+		staticPrepareReplyResult(msg,reply).add(objName).add((int) retval);
+	}
 }
 
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
@@ -767,25 +834,19 @@ void createGroupCB(OSCAudioBase* parent,OSCMessage& msg,int offset,void* context
  */
 void OSCAudioBase::createGroup(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
-	char pathn[50], bufn[50];
 	error retval = OK;
-	char* buf  = bufn+1;
-	char* path = pathn+1;
+	char* buf, *path;
 	
 	OSC_SPLN("createGroup");
 	OSC_DBGP(msg,addressOffset);
-	msg.getString(0,buf,50);
-	msg.getString(1,path,50);
-	*bufn  = '/'; // needed for duplicate checking
-	*pathn = '/'; 
-	if ('/' != *buf)  buf--;
-	if ('/' != *path) path--;
+	buf  = getMessageString(msg,0,alloca(msg.getDataLength(0)+1),true);
+	path = getMessageString(msg,1,alloca(msg.getDataLength(1)+1),true);
 	trimUnderscores(sanitise(buf,buf,1),buf); // make the name valid
-	OSC_SPLN(buf);
+	OSC_SPTF("%s%s\n",path,buf);
 	
-	if (0 != strlen(buf))
+	if (NULL != buf && NULL != path)
 	{
-		if (0 == *path || ('/' == *path && 1 == strlen(path))) // create directly at root
+		if (1 == strlen(path)) // just a / : create directly at root
 			createGroupCB(NULL,msg,0,buf);
 		else	// sub-group of existing group
 			callBack(path,createGroupCB,buf);
@@ -814,36 +875,37 @@ OSCAudioConnection::~OSCAudioConnection(void)
  */
 void OSCAudioBase::createConnection(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
-	char objNameX[50];
-	char* objName = objNameX+1;
+	char* objName;
 	error retval = OK;
 	
 	OSC_SPLN("createConnection");
 	OSC_DBGP(msg,addressOffset);
-	msg.getString(0,objName,50);
-	OSC_SPLN(objName);
+	objName = getMessageString(msg,0,alloca(msg.getDataLength(0)+1),true);
 	
-	if (strlen(objName) > 0)
+	if (NULL != objName)
 	{
-		*objNameX = '/'; // needed for duplicate checking
-		trimUnderscores(sanitise(objName,objName),objName); // make the name valid
-		if (msg.size() > 1) // then we want to put the connection in one or more groups
+		OSC_SPLN(objName);
+		
+		if (strlen(objName) > 0)
 		{
-			char path[50];
-			crObContext_s context;
-			
-			msg.getString(1,path,50);
-			context = {CONNECTION_INDEX,objNameX,OK,-1}; // use special "index" to create connections
-			callBack(path,createObjectCB,&context);
-			retval = context.retval;			
+			trimUnderscores(sanitise(objName,objName,1),objName); // make the name valid
+			if (msg.size() > 1) // then we want to put the connection in one or more groups
+			{
+				crObContext_s context;
+				char* path = getMessageString(msg,1,alloca(msg.getDataLength(1)+1),true);
+				
+				context = {CONNECTION_INDEX,objName,OK,-1}; // use special "index" to create connections
+				callBack(path,createObjectCB,&context); // NULL path is safe, no check needed
+				retval = context.retval;			
+			}
+			else 
+				retval = DynamicAudioCreateObject(CONNECTION_INDEX,objName,NULL,-1);	
 		}
-		else 
-			retval = DynamicAudioCreateObject(CONNECTION_INDEX,objNameX,NULL,-1);	
+		else
+			retval = BLANK_NAME;
+		
+		staticPrepareReplyResult(msg,reply).add(objName).add((int) retval);
 	}
-	else
-		retval = BLANK_NAME;
-	
-	staticPrepareReplyResult(msg,reply).add(objName).add((int) retval);
 }
 
 
@@ -855,7 +917,7 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 								 OSCBundle& reply, 
 								 bool zeroToZero)  	//!< true to use port 0 on both, otherwise they're in the message
 {
-	char srcn[50],dstn[50],buf[150];
+	char* srcn,*dstn,*buf;
 	AudioStream* src = NULL,*dst = NULL;
 	int srcp=0,dstp=0,count;
 	OSCAudioBase* srcB,*dstB;
@@ -864,70 +926,60 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 	OSC_SPLN("makeConnection");
 	OSC_DBGP(msg,addressOffset);
 	
-	msg.getString(0,srcn,50);
-	if ('/' != *srcn) // sleazy hack for the time being...
-	{
-		msg.getString(0,srcn+1,49);
-		srcn[0] = '/';
-	}
+	srcn = getMessageString(msg,0,alloca(msg.getDataLength(0)+1),true);
 	trimUnderscores(sanitise(srcn,srcn,1),srcn); // make the source name valid
 	if (!zeroToZero)
 	{
 		srcp = msg.getInt(1);
-		msg.getString(2,dstn,50);
-		if ('/' != *dstn)
-		{
-			msg.getString(2,dstn+1,49);
-			dstn[0] = '/';
-		}
+		dstn = getMessageString(msg,2,alloca(msg.getDataLength(2)+1),true);
 		dstp = msg.getInt(3);
 	}
 	else
 	{
-		msg.getString(1,dstn,50);
-		if ('/' != *dstn)
-		{
-			msg.getString(1,dstn+1,49);
-			dstn[0] = '/';
-		}
+		dstn = getMessageString(msg,1,alloca(msg.getDataLength(1)+1),true);
 	}		
 	trimUnderscores(sanitise(dstn,dstn,1),dstn); // make the destination name valid
-	OSC_SPTF("%s, %s\n",srcn,dstn);
+	buf = alloca(strlen(srcn) + strlen(dstn) + 9 +15*3);
 	
-	// Find the named OSCAudioBase objects and convert to
-	// the corresponding AudioStream: is there a better way?
-	if (1 == (count = findMatch(srcn,&srcB))) // just one source, please
+	if (NULL != srcn && NULL != dstn && NULL != buf)
 	{
-		src = srcB->sibling;
-		if (1 == (count = findMatch(dstn,&dstB))) // and one destination!
-			dst = dstB->sibling;			
+		OSC_SPTF("%s, %s\n",srcn,dstn);
+		
+		// Find the named OSCAudioBase objects and convert to
+		// the corresponding AudioStream: is there a better way?
+		if (1 == (count = findMatch(srcn,&srcB))) // just one source, please
+		{
+			src = srcB->sibling;
+			if (1 == (count = findMatch(dstn,&dstB))) // and one destination!
+				dst = dstB->sibling;			
+			else
+				retval = (0 == count)?NOT_FOUND:AMBIGUOUS_PATH;
+		}
 		else
 			retval = (0 == count)?NOT_FOUND:AMBIGUOUS_PATH;
-	}
-	else
-		retval = (0 == count)?NOT_FOUND:AMBIGUOUS_PATH;
-	
-	if (OK == retval)
-	{
-		if (NULL != src && NULL != dst)
+		
+		if (OK == retval)
 		{
-			int connResult = connect(*src,(int) srcp,*dst,(int) dstp); // make the audio connection
-			sprintf(buf,"%s:%d -> %s:%d (%d)",srcn,srcp,dstn,dstp,connResult);
-			mkLinks(*srcB,*dstB); // make the OSC linkages
+			if (NULL != src && NULL != dst)
+			{
+				int connResult = connect(*src,(int) srcp,*dst,(int) dstp); // make the audio connection
+				sprintf(buf,"%s:%d -> %s:%d (%d)",srcn,srcp,dstn,dstp,connResult);
+				mkLinks(*srcB,*dstB); // make the OSC linkages
+			}
+			else
+			{
+				sprintf(buf,"Nothing!");
+				retval = NOT_FOUND;
+			}
 		}
 		else
 		{
-			sprintf(buf,"Nothing!");
-			retval = NOT_FOUND;
+			sprintf(buf,"Bad path(s): %s, %s",srcn,dstn);
 		}
+		OSC_SPLN(buf);
+		
+		prepareReplyResult(msg,reply).set(1,buf).add((int) retval);
 	}
-	else
-	{
-		sprintf(buf,"Bad path(s): %s, %s",srcn,dstn);
-	}
-	OSC_SPLN(buf);
-	
-	prepareReplyResult(msg,reply).set(1,buf).add((int) retval);
 }
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 

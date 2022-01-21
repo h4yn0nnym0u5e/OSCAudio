@@ -77,6 +77,9 @@ typedef struct OSCAudioTypes_s {
 class OSCAudioBase
 {
   public:
+	friend class OSCAudioConnection;
+	friend class OSCAudioGroup;
+	
     OSCAudioBase(const char* _name,AudioStream* _sibling = NULL) : 
 				name(NULL), sibling(_sibling), next_group(NULL), pParent(NULL)
     {
@@ -293,18 +296,21 @@ class OSCAudioBase
 	}
 
 
-	static void callBack(const char* addr,
-						 void (*cbk)(OSCAudioBase*,OSCMessage&,int,void*),
-						 void* context = NULL,
-						 OSCAudioBase* ooi = NULL,
+	static void callBack(const char* addr,	//!< OSC message Address Pattern to match: NULL is safe, does nothing
+						 void (*cbk)(OSCAudioBase*,OSCMessage&,int,void*), //!< function to call on match
+						 void* context = NULL, //!< pointer to "context" to pass to callback function
+						 OSCAudioBase* ooi = NULL, //!< Object Of Interest to start from (e.g. group)
 						 bool enterGroups = true)
 	{
-		OSCMessage msg(addr);
-		int hitAtOffset = strlen(addr);
-		if (NULL == ooi)
-			ooi = first_route;
-		
-		callBack(msg,0,hitAtOffset,ooi,cbk,context,enterGroups);
+		if (NULL != addr)
+		{
+			OSCMessage msg(addr);
+			int hitAtOffset = strlen(addr);
+			if (NULL == ooi)
+				ooi = first_route;
+			
+			callBack(msg,0,hitAtOffset,ooi,cbk,context,enterGroups);
+		}
 	}
 	
 	// count matches to pattern
@@ -362,7 +368,6 @@ class OSCAudioBase
 	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint16_t v);
 
 //protected:
-	friend class OSCAudioGroup;
 	// existing objects: message passing and linking in/out
 	static OSCAudioBase* first_route; //!< linked list to route OSC messages to all derived instances
 	//OSCAudioBase** pFirst; 		//!< pointer back to list head
@@ -409,7 +414,10 @@ class OSCAudioBase
 	void linkOutGroup(OSCAudioGroup** ppPrnt);
 	
 	OSCAudioGroup* pParent; //!< pointer back to ultimate parent
-		
+
+  protected:		
+	static char* getMessageString(OSCMessage& msg, int position, void* buf, bool slashPad = false); //!< read message string into memory assigned by alloca() (probably)
+	static char* getMessageAddress(OSCMessage& msg, void* buf, int len, int offset = 0); //!< read message address into memory assigned by alloca() (probably)
 
 		
 	
