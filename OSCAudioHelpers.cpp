@@ -58,7 +58,10 @@ typedef struct {
     const char* name;
     const int16_t* windowData;
     } FFTwindows_t;
-    
+
+
+#if defined(analyze_fft256_h_)
+
 const FFTwindows_t FFT256windows[] = {
 	"Hanning",AudioWindowHanning256,
 	"Bartlett",AudioWindowBartlett256,
@@ -72,21 +75,6 @@ const FFTwindows_t FFT256windows[] = {
 	"Cosine",AudioWindowCosine256,
 	"Tukey",AudioWindowTukey256,
 };
-
-const FFTwindows_t FFT1024windows[] = {
-	"Hanning",AudioWindowHanning1024,
-	"Bartlett",AudioWindowBartlett1024,
-	"Blackman",AudioWindowBlackman1024,
-	"Flattop",AudioWindowFlattop1024,
-	"BlackmanHarris",AudioWindowBlackmanHarris1024,
-	"Nuttall",AudioWindowNuttall1024,
-	"BlackmanNuttall",AudioWindowBlackmanNuttall1024,
-	"Welch",AudioWindowWelch1024,
-	"Hamming",AudioWindowHamming1024,
-	"Cosine",AudioWindowCosine1024,
-	"Tukey",AudioWindowTukey1024,
-};
-
 
 // Set FFT window function by name, e.g. "Hanning"
 bool OSCAudioAnalyzeFFT256::windowFunction(OSCMessage& msg)
@@ -104,7 +92,25 @@ bool OSCAudioAnalyzeFFT256::windowFunction(OSCMessage& msg)
 		}
 	return result;
 }
+#endif // defined(analyze_fft256_h_)
 
+
+
+#if defined(analyze_fft1024_h_)
+
+const FFTwindows_t FFT1024windows[] = {
+	"Hanning",AudioWindowHanning1024,
+	"Bartlett",AudioWindowBartlett1024,
+	"Blackman",AudioWindowBlackman1024,
+	"Flattop",AudioWindowFlattop1024,
+	"BlackmanHarris",AudioWindowBlackmanHarris1024,
+	"Nuttall",AudioWindowNuttall1024,
+	"BlackmanNuttall",AudioWindowBlackmanNuttall1024,
+	"Welch",AudioWindowWelch1024,
+	"Hamming",AudioWindowHamming1024,
+	"Cosine",AudioWindowCosine1024,
+	"Tukey",AudioWindowTukey1024,
+};
 
 // Set FFT window function by name, e.g. "Hanning"
 bool OSCAudioAnalyzeFFT1024::windowFunction(OSCMessage& msg)
@@ -123,8 +129,10 @@ bool OSCAudioAnalyzeFFT1024::windowFunction(OSCMessage& msg)
 		}
 	return result;
 }
+#endif // defined(analyze_fft1024_h_)
 
 
+#if defined(analyze_print_h_)
 // Name analyse print channel. Creates heap storage
 // for name string, which is freed on destruction.
 bool OSCAudioAnalyzePrint::name(OSCMessage& msg)
@@ -144,8 +152,10 @@ bool OSCAudioAnalyzePrint::name(OSCMessage& msg)
 	
 	return result;
 }
+#endif // defined(analyze_print_h_)
 
 
+#if defined(control_sgtl5000_h_)
 // Set filter parameters from a 7-element blob
 void OSCAudioControlSGTL5000::eqFilter(OSCMessage& msg)
 {
@@ -155,8 +165,10 @@ void OSCAudioControlSGTL5000::eqFilter(OSCMessage& msg)
 	msg.getBlob(1,(uint8_t*) filterParameters, sizeof filterParameters);
 	AudioControlSGTL5000::eqFilter(filterNum,filterParameters);
 }
+#endif // defined(control_sgtl5000_h_)
 
 
+#if defined(tlv320aic3206_h_)
 // Set filter parameters from a 3-coefficient blob
 void OSCAudioControlTLV320AIC3206::setIIRCoeffOnADC(OSCMessage& msg)
 {
@@ -166,8 +178,11 @@ void OSCAudioControlTLV320AIC3206::setIIRCoeffOnADC(OSCMessage& msg)
 	msg.getBlob(1,(uint8_t*) coeff, sizeof coeff);
 	AudioControlTLV320AIC3206::setIIRCoeffOnADC(chan,coeff);
 }
+#endif // defined(tlv320aic3206_h_)
 
 
+
+#if defined(_effect_granular_h_)
 // Set sample bank from blob
 void OSCAudioEffectGranular::begin(OSCMessage& msg)
 {
@@ -181,8 +196,10 @@ void OSCAudioEffectGranular::begin(OSCMessage& msg)
 		AudioEffectGranular::begin(sample_bank,max_len_def);
 	}
 }
+#endif // defined(_effect_granular_h_)
 
 
+#if defined(filter_biquad_h_)
 // Rather than an array / blob, message has 5 filter 
 // parameters, either double or int. 
 void OSCAudioFilterBiquad::setCoefficients(OSCMessage& msg)
@@ -204,8 +221,10 @@ void OSCAudioFilterBiquad::setCoefficients(OSCMessage& msg)
 		AudioFilterBiquad::setCoefficients(stage,coeffsD);
 	}
 }
+#endif // defined(filter_biquad_h_)
 
 
+#if defined(play_memory_h_)
 // DANGER Will Robinson! We'll accept an integer pointer, but you
 // better be sure it's valid. Really NOT a good candidate for 
 // passing in a blob, here...
@@ -214,8 +233,10 @@ void OSCAudioPlayMemory::play(OSCMessage& msg)
 	unsigned int* data = (unsigned int*) msg.getInt(0);
 	AudioPlayMemory::play(data);
 }
+#endif // defined(play_memory_h_)
 
 
+#if defined(play_sd_raw_h_)
 // Play from named file
 void OSCAudioPlaySdRaw::play(OSCMessage& msg)
 {
@@ -223,8 +244,10 @@ void OSCAudioPlaySdRaw::play(OSCMessage& msg)
 	msg.getString(0,buf,50);
 	AudioPlaySdRaw::play(buf);
 }
+#endif // defined(play_sd_raw_h_)
 
 
+#if defined(play_sd_wav_h_)
 // Play from named file
 void OSCAudioPlaySdWav::play(OSCMessage& msg)
 {
@@ -232,8 +255,10 @@ void OSCAudioPlaySdWav::play(OSCMessage& msg)
 	msg.getString(0,buf,50);
 	AudioPlaySdWav::play(buf);
 }
+#endif // defined(play_sd_wav_h_)
 
 
+#if defined(play_serial_raw_h_)
 // Play from named file
 void OSCAudioPlaySerialflashRaw::play(OSCMessage& msg)
 {
@@ -241,8 +266,10 @@ void OSCAudioPlaySerialflashRaw::play(OSCMessage& msg)
 	msg.getString(0,buf,50);
 	AudioPlaySerialflashRaw::play(buf);
 }
+#endif // defined(play_serial_raw_h_)
 
 
+#if defined(synth_waveform_h_)
 // Set arbitrary waveform from 256-sample (512-byte) blob
 bool OSCAudioSynthWaveform::arbitraryWaveform(OSCMessage& msg)
 {
@@ -263,8 +290,10 @@ bool OSCAudioSynthWaveform::arbitraryWaveform(OSCMessage& msg)
 	
 	return result;
 }
+#endif // defined(synth_waveform_h_)
 
 
+#if defined(synth_waveform_h_)
 // Set arbitrary waveform from 256-sample (512-byte) blob
 bool OSCAudioSynthWaveformModulated::arbitraryWaveform(OSCMessage& msg)
 {
@@ -285,3 +314,4 @@ bool OSCAudioSynthWaveformModulated::arbitraryWaveform(OSCMessage& msg)
 	
 	return result;
 }
+#endif // defined(synth_waveform_h_)
