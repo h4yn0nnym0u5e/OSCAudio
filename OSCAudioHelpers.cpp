@@ -168,7 +168,7 @@ void OSCAudioControlSGTL5000::eqFilter(OSCMessage& msg)
 #endif // defined(control_sgtl5000_h_)
 
 
-#if defined(tlv320aic3206_h_)
+#if defined(control_tlv320aic3206_h_)
 // Set filter parameters from a 3-coefficient blob
 void OSCAudioControlTLV320AIC3206::setIIRCoeffOnADC(OSCMessage& msg)
 {
@@ -178,7 +178,7 @@ void OSCAudioControlTLV320AIC3206::setIIRCoeffOnADC(OSCMessage& msg)
 	msg.getBlob(1,(uint8_t*) coeff, sizeof coeff);
 	AudioControlTLV320AIC3206::setIIRCoeffOnADC(chan,coeff);
 }
-#endif // defined(tlv320aic3206_h_)
+#endif // defined(control_tlv320aic3206_h_)
 
 
 
