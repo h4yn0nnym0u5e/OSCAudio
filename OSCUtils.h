@@ -109,11 +109,11 @@ class OSCUtils
 	}
 
 	// Reply mechanisms:
-	void addReplyExecuted(OSCMessage& msg, int addressOffset, OSCBundle& reply);
+	void addReplyExecuted(OSCMessage& msg, int addressOffset, OSCBundle& reply, char* name = NULL);
 	
 	static OSCMessage& staticPrepareReplyResult(OSCMessage& msg, OSCBundle& reply);
 	OSCMessage& prepareReplyResult(OSCMessage& msg, OSCBundle& reply, char* name = NULL);
-	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, bool v, error ret = OK, char* name = NULL);
+	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, bool v, char* name = NULL, error ret = OK);
 	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, float v, char* name = NULL);
 	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, int32_t v, char* name = NULL);
 	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint32_t v, char* name = NULL);

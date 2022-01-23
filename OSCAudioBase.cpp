@@ -928,7 +928,7 @@ void OSCAudioConnection::route(OSCMessage& msg, int addressOffset, OSCBundle& re
 #if defined(DYNAMIC_AUDIO_AVAILABLE) // route OSC commands to Connection
 		if (isTarget(msg,addressOffset,"/c*","ss")) {OSCconnect(msg,addressOffset,reply,true);}
 		else if (isTarget(msg,addressOffset,"/c*","sisi")) {OSCconnect(msg,addressOffset,reply);} 
-		else if (isTarget(msg,addressOffset,"/d*",NULL)) {int r = disconnect(); addReplyResult(msg,addressOffset,reply,r==0,r?NOT_CONNECTED:OK,name);} 
+		else if (isTarget(msg,addressOffset,"/d*",NULL)) {int r = disconnect(); addReplyResult(msg,addressOffset,reply,r==0,name,r?NOT_CONNECTED:OK);} 
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 	}
 }
