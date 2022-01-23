@@ -264,6 +264,38 @@ class OSCAudioBase : public OSCUtils
 		}
 	}
 	
+	/**
+	 * Get total path name length to and including given object
+	 */
+	static int getPathNameLength(OSCAudioBase* ooi)
+	{
+		int result = 1;
+		
+		if (NULL != ooi)
+			result = ooi->nameLen+1 + getPathNameLength((OSCAudioBase*) (ooi->pParent));
+		
+		return result;
+	}
+	
+	/**
+	 * Get total path name to and including given object. 
+	 */
+	static int getPathNameTo(OSCAudioBase* ooi,char* buf)
+	{
+		int result = 1;
+		
+		if (NULL != ooi)
+		{
+			result = getPathNameTo((OSCAudioBase*) (ooi->pParent),buf);
+			strcpy(buf+result,ooi->name);
+			result += ooi->nameLen+1;
+		}
+		else
+			*buf = '/';
+		
+		return result;
+	}
+	
 	// count matches to pattern
 	static int hitCount(const char* addr,
 						OSCAudioBase* ooi = NULL,
