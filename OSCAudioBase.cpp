@@ -500,7 +500,7 @@ void OSCAudioBase::destroyObject(OSCMessage& msg, int addressOffset, OSCBundle& 
 			OSC_SPLN("not found!"); // but not really an error!
 		}
 		
-		staticPrepareReplyResult(msg,reply).add(vName).add((int) OK);
+		staticPrepareReplyResult(msg,reply).add(vName).add(matchCount).add((int) OK);
 	}
 }
 

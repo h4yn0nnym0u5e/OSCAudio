@@ -175,18 +175,19 @@ class OSCAudioBase
 	/**
 	 * Check to see if message's parameter types match those expected for the 
 	 * candidate function to be called.
+	 * 
+	 * If the types string has a '*' then we say the match is OK; allows for optional parameters.
 	 */
 	static bool validParams(OSCMessage& msg,	//!< OSC message to check
-						const char* types)	//!< expected parameter types: NULL imples none expected
+						const char* types)		//!< expected parameter types: NULL imples none expected
 	{
 		size_t sl = 0;
-		bool result;
+		bool result = true;
 	
 		if (NULL != types)
-		sl = strlen(types);
-		result= (size_t) msg.size() == sl;
+			sl = strlen(types);
 	
-		for (size_t i=0;i<sl && result;i++)
+		for (size_t i=0;i<sl && result && '*' != types[i];i++)
 		{
 			char type = msg.getType(i);
 			
