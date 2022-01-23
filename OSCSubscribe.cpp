@@ -1,3 +1,32 @@
+/* Open Sound Control subscription library for Teensy 3.x, 4.x
+ * Copyright (c) 2021, Jonathan Oakley, teensy-osc@0akley.co.uk
+ *
+ * Development of this library was enabled by PJRC.COM, LLC by sales of
+ * Teensy and Audio Adaptor boards, implementing libraries, and maintaining
+ * the forum at https://forum.pjrc.com/ 
+ *
+ * Please support PJRC's efforts to develop open source software by 
+ * purchasing Teensy or other PJRC products.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice, development funding notice, and this permission
+ * notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+ 
 #include "OSCSubscribe.h"
 
 //=====================================================================================
@@ -174,6 +203,44 @@ int OSCSubscriptionList::unsubscribe(OSCMessage& msg)
 
 
 /**
+ * Renew an existing subscription.
+ * The message is similar to a subscription message, except that only the 
+ * lifetime and subscription address need to be supplied. Ensures that
+ * a subscription can continue for longer while remaining in sync with its
+ * original period.
+ */
+int OSCSubscriptionList::renew(OSCMessage& msg)
+{ 
+  int count = 0;
+  char* msgAddr;
+  OSCSubscribe** pp = &pSubs;
+  OSCSubscribe*  p;
+
+  // get the address pattern of the subscription we want to rejuvenate
+  msgAddr = (char*) alloca(msg.getDataLength(1)+1);
+  if (NULL != msgAddr)
+  {
+	subTimer_t newLifeTime = msg.getInt(0) + OSCSUB_NOW;
+    msg.getString(1,msgAddr);
+      
+    while (NULL != *pp)
+    {
+      p = *pp;
+      if (p->sub.fullMatch(msgAddr)) // does a strcmp() first, so should work
+      {
+        p->lifeTime = newLifeTime;
+        count++;
+      }
+	  pp = &(p->next);
+    }
+  }
+
+  return count;
+}
+
+
+
+/**
  * See if any subscriptions are ready to run, and execute them if so.
  * Results will be added to the supplied bundle, which must contain at least one OSCMessage
  * with its address set. If any subscriptions run, they will fill data into this message,
@@ -216,5 +283,6 @@ int OSCSubscriptionList::update(OSCBundle& bndl)
 void OSCSubscriptionList::route(OSCMessage& msg, int addrOff, OSCBundle& reply)
 {
        if (isStaticTarget(msg,addrOff,"/addSub","iis*")) {bool ok = subscribe(msg); staticPrepareReplyResult(msg,reply).add((int)(ok?OK:NO_MEMORY));}
-  else if (isStaticTarget(msg,addrOff,"/unSub", "s"))     {int cnt = unsubscribe(msg); staticPrepareReplyResult(msg,reply).add(cnt).add((int) OK);}
+  else if (isStaticTarget(msg,addrOff,"/unSub", "s"))    {int cnt = unsubscribe(msg); staticPrepareReplyResult(msg,reply).add(cnt).add((int) OK);}
+  else if (isStaticTarget(msg,addrOff,"/renew", "is"))   {int cnt = renew(msg); staticPrepareReplyResult(msg,reply).add(cnt).add((int) OK);}
 }
