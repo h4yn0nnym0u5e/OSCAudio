@@ -30,7 +30,7 @@
 #if !defined(_OSCAUDIOBASE_H_)
 #define _OSCAUDIOBASE_H_
 
-#include <OSCBundle.h>
+#include <OSCUtils.h>
 #include <Audio.h>
 
 #if defined(SAFE_RELEASE)  // only defined in Dynamic Audio Objects library
@@ -74,7 +74,7 @@ typedef struct OSCAudioTypes_s {
 } OSCAudioTypes_t;
 
 
-class OSCAudioBase
+class OSCAudioBase : public OSCUtils
 {
   public:
 	friend class OSCAudioConnection;
@@ -103,12 +103,9 @@ class OSCAudioBase
 	
     
     virtual ~OSCAudioBase() {OSC_SPTF("dtor for %s at %08X!\n",name,(uint32_t) this); OSC_SFSH(); if (NULL != name) free(name); linkOut(); }
-    virtual void route(OSCMessage& msg, int addressOffset, OSCBundle&)=0;
     char* name;
     size_t nameLen;
 	AudioStream* sibling;
-	enum error {OK,NOT_FOUND,BLANK_NAME,DUPLICATE_NAME,NO_DYNAMIC,NO_MEMORY, // 0-5
-				AMBIGUOUS_PATH,NOT_ROUTED,INVALID_METHOD,NOT_CONNECTED}; // 6-9
 	static const OSCAudioTypes_t audioTypes[];
 	static size_t countOfAudioTypes(void);
 
@@ -170,53 +167,6 @@ class OSCAudioBase
 	 * addressOffset, as appropriate.
 	 */
 	int isMine(OSCMessage& msg, int addressOffset) {return msg.match(name,addressOffset);}
-	
-			
-	/**
-	 * Check to see if message's parameter types match those expected for the 
-	 * candidate function to be called.
-	 * 
-	 * If the types string has a '*' then we say the match is OK; allows for optional parameters.
-	 */
-	static bool validParams(OSCMessage& msg,	//!< OSC message to check
-						const char* types)		//!< expected parameter types: NULL imples none expected
-	{
-		size_t sl = 0;
-		bool result = true;
-	
-		if (NULL != types)
-			sl = strlen(types);
-	
-		for (size_t i=0;i<sl && result && '*' != types[i];i++)
-		{
-			char type = msg.getType(i);
-			
-			result = types[i] == type;
-			if (!result && ';' == types[i]) // boolean: encoded directly in type
-				result = type == 'T' || type == 'F';
-		}
-		
-		return result;
-	}
-
-
-	/**
-	 * Check to see if message matches expected target pattern and parameter types
-	 */
-	bool isTarget(OSCMessage& msg,int addressOffset,const char* pattern,const char* types)
-	{
-		bool result = msg.fullMatch(pattern,addressOffset) && validParams(msg,types);
-		
-		return result;
-	}
-	
-	/**
-	 * Check to see if message matches expected target pattern and parameter types
-	 */
-	static bool isStaticTarget(OSCMessage& msg,int addressOffset,const char* pattern,const char* types)
-	{
-		return msg.fullMatch(pattern,addressOffset) && validParams(msg,types);
-	}
 	
 	
     void debugPrint(OSCMessage& msg, int addressOffset)
@@ -356,18 +306,7 @@ class OSCAudioBase
 	static char* trimUnderscores(const char* src, char* dst);
     static void routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 	
-	// Reply mechanisms:
-	void addReplyExecuted(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 	
-	static OSCMessage& staticPrepareReplyResult(OSCMessage& msg, OSCBundle& reply);
-	OSCMessage& prepareReplyResult(OSCMessage& msg, OSCBundle& reply);
-	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, bool v, error ret = OK);
-	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, float v);
-	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, int32_t v);
-	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint32_t v);
-	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint8_t v);
-	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint16_t v);
-
 //protected:
 	// existing objects: message passing and linking in/out
 	static OSCAudioBase* first_route; //!< linked list to route OSC messages to all derived instances
@@ -418,8 +357,6 @@ class OSCAudioBase
 
   protected:		
 	static char* getMessageString(OSCMessage& msg, int position, void* buf, bool slashPad = false); //!< read message string into memory assigned by alloca() (probably)
-	static char* getMessageAddress(OSCMessage& msg, void* buf, int len, int offset = 0); //!< read message address into memory assigned by alloca() (probably)
-
 		
 	
 #if defined(DYNAMIC_AUDIO_AVAILABLE)

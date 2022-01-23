@@ -165,30 +165,6 @@ char* OSCAudioBase::getMessageString(OSCMessage& msg, 	//!< message to extract s
 }
 
 
-/*
- * Copy message Address Pattern into pre-allocated memory buffer.
- * The buffer pointer MUST have enough space for the pattern, but may be NULL (e.g. if the 
- * allocation failed) in which case the pattern is not copied. Note that OSCMessage::getAddress()
- * does not do the NULL check so is unsafe to use. And the length-protected version is undocumented.
- * \return pointer to buffer, cast to char*
- */
-char* OSCAudioBase::getMessageAddress(OSCMessage& msg, 	//!< message to extract string from
-									 void* vbuf,		//!< big enough buffer, or NULL
-									 int len,			//!< length of buffer
-									 int offset)		//!< offset into address pattern  (default 0)
-{
-	char* buf = (char*) vbuf;
-	
-	if (NULL != buf) // length must be OK, no further check needed
-	{
-		msg.getAddress(buf,offset,len); // just get first character
-		OSC_SPTF("Address pattern: %s\n",buf);
-	}
-	
-	return buf;
-}
-
-
 //-------------------------------------------------------------------------------------------------------
 struct renameObject_s {char* newName; int count; int duplicates; OSCAudioBase* hit;};
 void OSCAudioBase::renameObjectCB(OSCAudioBase* ooi,OSCMessage& msg,int offset,void* ctxt) 
@@ -321,64 +297,6 @@ char* OSCAudioBase::trimUnderscores(const char* src, //!< source string
 
 
 //-------------------------------------------------------------------------------------------------------
-/**
- * Add to the reply bundle as a result of having executed an OSC message routed to us.
- */
-void OSCAudioBase::addReplyExecuted(OSCMessage& msg, int addressOffset, OSCBundle& reply) 
-{
-	addReplyResult(msg,addressOffset,reply,true); // add a "true" bool to the response, because we did the method
-}
-
-
-/**
- * Prepare the initial part of a reply to a message routed to us.
- * Fills in the standard information generated for any successful routing.
- * \return reference to the OSCMessage, ready to add any extra information, dependent on the method called
- */
-OSCMessage& OSCAudioBase::staticPrepareReplyResult(OSCMessage& msg, 	//!< the received message
-												   OSCBundle& reply) 	//!< the bundle that will become the reply
-{
-	int msgCount = reply.size(); // number of messages in bundle
-	OSCMessage* pLastMsg = reply.getOSCMessage(msgCount-1); // point to last message in reply bundle
-	int dataCount = pLastMsg->size(); // how many pieces of data are in that?
-	char* replyAddress = getMessageAddress(*pLastMsg,alloca(50),50);	
-	char* buf = getMessageAddress(msg,alloca(50),50);
-	
-	if (0 != dataCount) // message already in use...
-		pLastMsg = &reply.add(replyAddress); // ... make ourselves a new one
-		
-	// start composing our reply:
-	pLastMsg->add(buf);				// which address the routed message was destined for
-	
-	return *pLastMsg;
-}
-
-
-/**
- * Prepare the initial part of a reply to a message routed to us.
- * Fills in the standard information generated for any successful routing.
- * \return reference to the OSCMessage, ready to add any extra information, dependent on the method called
- */
-OSCMessage& OSCAudioBase::prepareReplyResult(OSCMessage& msg, 	//!< the received message
-											 OSCBundle& reply) 	//!< the bundle that will become the reply
-{
-#if defined(OSC_DEBUG_PRINT)	
-	char* buf = getMessageAddress(msg,alloca(50),50);
-	OSC_SPTF("%s executed %s; result was ",name+1,buf);
-#endif // defined(OSC_DEBUG_PRINT)	
-	
-	return staticPrepareReplyResult(msg,reply).add(name+1); // add which element caught the routed message
-}
-
-
-// Despatch function overloaded with the various reply types we might append to the standard information
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, bool v, error ret) { prepareReplyResult(msg, reply).add(v).add(ret); OSC_SPLN(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, float v) { prepareReplyResult(msg, reply).add(v).add(OK); OSC_SPLN(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, int32_t v) { prepareReplyResult(msg, reply).add(v).add(OK); OSC_SPLN(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint32_t v) { prepareReplyResult(msg, reply).add((unsigned int)v).add(OK); OSC_SPLN(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint8_t v) { prepareReplyResult(msg, reply).add(v).add(OK); OSC_SPLN(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint16_t v) { prepareReplyResult(msg, reply).add(v).add(OK); OSC_SPLN(v); }
-
 
 
 //=======================================================================================================
@@ -978,7 +896,7 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 		}
 		OSC_SPLN(buf);
 		
-		prepareReplyResult(msg,reply).set(1,buf).add((int) retval);
+		prepareReplyResult(msg,reply,name).set(1,buf).add((int) retval);
 	}
 }
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
@@ -1010,7 +928,7 @@ void OSCAudioConnection::route(OSCMessage& msg, int addressOffset, OSCBundle& re
 #if defined(DYNAMIC_AUDIO_AVAILABLE) // route OSC commands to Connection
 		if (isTarget(msg,addressOffset,"/c*","ss")) {OSCconnect(msg,addressOffset,reply,true);}
 		else if (isTarget(msg,addressOffset,"/c*","sisi")) {OSCconnect(msg,addressOffset,reply);} 
-		else if (isTarget(msg,addressOffset,"/d*",NULL)) {int r = disconnect(); addReplyResult(msg,addressOffset,reply,r==0,r?NOT_CONNECTED:OK);} 
+		else if (isTarget(msg,addressOffset,"/d*",NULL)) {int r = disconnect(); addReplyResult(msg,addressOffset,reply,r==0,r?NOT_CONNECTED:OK,name);} 
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 	}
 }
