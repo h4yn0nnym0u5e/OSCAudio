@@ -120,6 +120,8 @@ class OSCUtils
 	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint8_t v, char* name = NULL);
 	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint16_t v, char* name = NULL);
 
+	static size_t getMessageAddressLen(OSCMessage& msg); //!< hack to bypass the lack of getAddressLength()
+	static size_t gMAL(OSCMessage& msg) {return getMessageAddressLen(msg);}; //!< hack to bypass the lack of getAddressLength()
 	static char* getMessageAddress(OSCMessage& msg, void* buf, int len, int offset = 0); //!< read message address into memory assigned by alloca() (probably)
 };
 

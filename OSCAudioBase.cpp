@@ -79,7 +79,7 @@ size_t OSCAudioBase::countOfAudioTypes(void) {return COUNT_OF(audioTypes);}
 //-------------------------------------------------------------------------------------------------------
 static void dbgPrt(OSCMessage& msg, int addressOffset)
 {
-	char prt[50];
+	char prt[100];
 	(void) dbgPrt; // avoid warning
 	msg.getAddress(prt,addressOffset);
 
@@ -259,7 +259,6 @@ char* OSCAudioBase::sanitise(const char* src, //!< source string
 
 /**
  * Trim leading and trailing underscores from a string, and compress internal runs.
- * Replaces all invalid characters <space>#*,/?[]{} with _.
  * \return pointer to result string (same as dst)
  */
 char* OSCAudioBase::trimUnderscores(const char* src, //!< source string
@@ -371,7 +370,8 @@ void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& r
     else if (isStaticTarget(msg,addressOffset,"/clearAll",NULL)) 		 {clearAllObjects(msg,addressOffset,reply);} 
 	else
 	{		
-		char* buf= getMessageAddress(msg,alloca(50),50,addressOffset);
+		size_t addrL = getMessageAddressLen(msg) - addressOffset;
+		char* buf= getMessageAddress(msg,alloca(addrL),addrL,addressOffset);
 		OSC_SPTF("No match\n");
 		staticPrepareReplyResult(msg,reply).add(buf).add((int) NOT_ROUTED);
 	}

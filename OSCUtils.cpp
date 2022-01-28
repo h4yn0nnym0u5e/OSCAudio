@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------------------------------------
 static void dbgPrt(OSCMessage& msg, int addressOffset)
 {
-	char prt[50];
+	char prt[100];
 	(void) dbgPrt; // avoid warning
 	msg.getAddress(prt,addressOffset);
 
@@ -40,6 +40,18 @@ static void dbgPrt(OSCMessage& msg, int addressOffset)
 	Serial.println(prt);
 	Serial.println(msg.size());
 	Serial.println(); 
+}
+
+
+/**
+ * Go to insane lengths to find out address length, because library writers were lazy.
+ * GRRR.
+ */
+size_t OSCUtils::getMessageAddressLen(OSCMessage& msg)
+{
+	char* buf = alloca(msg.bytes()); // get stupid amount of stack memory
+	msg.getAddress(buf); 			 // guaranteed enough, though
+	return strlen(buf)+1; // add space to store 0 terminator
 }
 
 
@@ -59,7 +71,7 @@ char* OSCUtils::getMessageAddress(OSCMessage& msg, 	//!< message to extract stri
 	
 	if (NULL != buf) // length must be OK, no further check needed
 	{
-		msg.getAddress(buf,offset,len); // just get first character
+		msg.getAddress(buf,offset,len); 
 		OSC_SPTF("Address pattern: %s\n",buf);
 	}
 	
@@ -88,8 +100,9 @@ OSCMessage& OSCUtils::staticPrepareReplyResult(OSCMessage& msg, 	//!< the receiv
 	int msgCount = reply.size(); // number of messages in bundle
 	OSCMessage* pLastMsg = reply.getOSCMessage(msgCount-1); // point to last message in reply bundle
 	int dataCount = pLastMsg->size(); // how many pieces of data are in that?
-	char* replyAddress = getMessageAddress(*pLastMsg,alloca(50),50);	
-	char* buf = getMessageAddress(msg,alloca(50),50);
+	size_t addrL = getMessageAddressLen(msg);
+	char* replyAddress = getMessageAddress(*pLastMsg,alloca(addrL),addrL);	
+	char* buf = getMessageAddress(msg,alloca(addrL),addrL);
 	
 	if (0 != dataCount) // message already in use...
 		pLastMsg = &reply.add(replyAddress); // ... make ourselves a new one
@@ -111,7 +124,8 @@ OSCMessage& OSCUtils::prepareReplyResult(OSCMessage& msg, 	//!< the received mes
 										 char* name)		//!< name of object that caught action, or NULL
 {
 #if defined(OSC_DEBUG_PRINT)	
-	char* buf = getMessageAddress(msg,alloca(50),50);
+	size_t addrL = getMessageAddressLen(msg);
+	char* buf = getMessageAddress(msg,alloca(addrL),addrL);
 	OSC_SPTF("%s executed %s; result was ",(NULL != name)?(name+1):"<no-name>",buf);
 #endif // defined(OSC_DEBUG_PRINT)	
 	

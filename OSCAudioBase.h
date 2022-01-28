@@ -171,7 +171,7 @@ class OSCAudioBase : public OSCUtils
 	
     void debugPrint(OSCMessage& msg, int addressOffset)
     {
-      char prt[50];
+      char prt[100];
       msg.getAddress(prt,addressOffset);
 
       if (NULL != name)
@@ -224,8 +224,8 @@ class OSCAudioBase : public OSCUtils
 						 bool enterGroups)
 	{
 #if	defined(OSC_DEBUG_PRINT)
-		char addr[50]; 
-		msg.getAddress(addr,offset);
+		size_t addrL = getMessageAddressLen(msg) - offset;
+		char* addr = getMessageAddress(msg,alloca(addrL),addrL,offset);
 #endif
 		while (NULL != ooi)
 		{
