@@ -495,7 +495,8 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 	else
 	{
 		rsrcState_e rsrcState = rsrcFree;
-		if (NULL != OSCAudioBase::audioTypes[objIdx].chkResource) // if it needs claiming...
+		if (objIdx >= 0
+		 && NULL != OSCAudioBase::audioTypes[objIdx].chkResource) // if it needs claiming...
 			rsrcState = OSCAudioBase::audioTypes[objIdx].chkResource(); // ...try to claim
 			
 		if (rsrcState >= rsrcThisActive) // can't create, clashes
