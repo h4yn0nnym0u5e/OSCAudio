@@ -68,7 +68,7 @@ SLIPEncodedSerial HWSERIAL(HWSERIALPORT);
 
 //-----------------------------------------------------------------------------------------------------------------
 void setup() {
-	Serial.begin(115200);
+	Serial.begin(115200); 
   while(!Serial)
     ;
     
@@ -89,6 +89,7 @@ void setup() {
   //-------------------------------
   //testSanitise();
   listObjects();
+  //listAllTypes();
 }
 
 
@@ -146,11 +147,12 @@ void processMessage(OSCMessage* msg,OSCBundle& reply)
     // to whichever engines they choose to implement. The OSCAudio library
     // implements /audio and /dynamic, but /fs is implemented within this demo
     
-    if (!msg->route("/teensy*/audio",routeAudio))                   // see if this object can use the message
-      if (!msg->route("/teensy*/dynamic",routeDynamic))             // or this one
-        if(!msg->route("/teensy*/fs",routeFS))                      // or this one
-          if(!msg->route("/teensy*/subscribe",routeSub))            // or this one
-            reply.getOSCMessage(0)->add(OSCAudioBase::NOT_ROUTED);  // got no takers - say so
+    if (!msg->route("/teensy*/audio",routeAudio))                     // see if this object can use the message
+      if (!msg->route("/teensy*/dynamic",routeDynamic))               // or this one
+        if(!msg->route("/teensy*/fs",routeFS))                        // or this one
+          if(!msg->route("/teensy*/subscribe",routeSub))              // or this one
+            if(!msg->route("/teensy*/system",routeSystem))            // or this one
+              reply.getOSCMessage(0)->add(OSCAudioBase::NOT_ROUTED);  // got no takers - say so
   }
   else
     Serial.println("error in msg");
@@ -193,15 +195,19 @@ void sendReply(OSCBundle& reply)
   OSCMessage* pMsg;
   
   Serial.printf("\nReply has %d messages, %d OSC errors\n",reply.size(),reply.hasError()); 
-  for (int i=reply.size()-1;i>0;i--)
+  for (int i=reply.size()-1;i>=0;i--)
   {
     pMsg = reply.getOSCMessage(i);
     int last = pMsg->size()-1;
-    if (pMsg->isInt(last) && pMsg->getInt(last) != 0)
+    int errv;
+    if (pMsg->isInt(last) && (errv = pMsg->getInt(last)) != 0)
+    {
       errCount++;
+      Serial.printf("%d ",errv);
+    }
   }
   if (errCount > 0)
-    Serial.printf("%d error flags\n",errCount);
+    Serial.printf(": %d error flags\n",errCount);
 
   // for real!
   HWSERIAL.beginPacket();

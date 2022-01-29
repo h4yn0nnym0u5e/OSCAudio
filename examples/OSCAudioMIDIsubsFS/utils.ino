@@ -127,3 +127,11 @@ void goFind(const char* addr)
   Serial.println("urn");
   
 }
+
+void listAllTypes(void)
+{
+    int objIdx;
+    
+    for (objIdx = OSCAudioBase::countOfAudioTypes()-1;objIdx>=0;objIdx--)
+      Serial.println(OSCAudioBase::audioTypes[objIdx].name);
+}
