@@ -60,7 +60,8 @@ class OSCUtils
 	virtual ~OSCUtils(void) {}
     virtual void route(OSCMessage& msg, int addressOffset, OSCBundle&)=0;
 	enum error {OK,NOT_FOUND,BLANK_NAME,DUPLICATE_NAME,NO_DYNAMIC,NO_MEMORY, // 0-5
-				AMBIGUOUS_PATH,NOT_ROUTED,INVALID_METHOD,NOT_CONNECTED}; // 6-9
+				AMBIGUOUS_PATH,NOT_ROUTED,INVALID_METHOD,NOT_CONNECTED, 	 // 6-9
+				IN_USE};
 
 	/**
 	 * Check to see if message's parameter types match those expected for the 

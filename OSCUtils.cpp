@@ -49,9 +49,13 @@ static void dbgPrt(OSCMessage& msg, int addressOffset)
  */
 size_t OSCUtils::getMessageAddressLen(OSCMessage& msg)
 {
+	/*
 	char* buf = alloca(msg.bytes()); // get stupid amount of stack memory
 	msg.getAddress(buf); 			 // guaranteed enough, though
 	return strlen(buf)+1; // add space to store 0 terminator
+	*/
+	
+	return msg.getAddressLength()+1;
 }
 
 

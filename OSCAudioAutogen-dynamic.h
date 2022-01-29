@@ -27,13 +27,31 @@
  * THE SOFTWARE.
  */
 
+#if !defined(OSC_AUTOGEN_H)
+#define OSC_AUTOGEN_H
+
+#if defined(OSC_RSRC_TYPEDEF_ONLY)
+#undef OSC_AUTOGEN_H
+
+#if !defined(OSC_RSRC_TYPEDEF_ONLY_E)
+#define OSC_RSRC_TYPEDEF_ONLY_E
+typedef enum {setgAvailable, setgUnshareable, setg_ADAT_Protocol, setg_I2S_Master, setg_I2S_Slave, setg_LRCLK1_Control, setg_PT8211_Protocol, setg_SPDIF_Control, setg_SPDIF_Protocol, setg_TDM_Protocol, setg_Teensy_Control, setg_COUNT} resourceSetting_e;
+typedef enum {rsrc_ADC1, rsrc_ADC2, rsrc_DAC1, rsrc_DAC2, rsrc_I2S_Device, rsrc_I2S2_Device, rsrc_IN1_Pin, rsrc_IN2_Pin, rsrc_MSQ_Device, rsrc_OUT1A_Pin, rsrc_OUT1B_Pin, rsrc_OUT1C_Pin, rsrc_OUT1D_Pin, rsrc_OUT2_Pin, rsrc_PWM, rsrc_SPDIF_Device, rsrc_SPDIFIN_Pin, rsrc_SPDIFOUT_Pin, rsrc_Sample_Rate, rsrc_USB_Rx_Endpoint, rsrc_USB_Tx_Endpoint, rsrc_COUNT} resourceType_e;
+#endif // !defined(OSC_RSRC_TYPEDEF_ONLY_E)
+
+#else // OSC_RSRC_TYPEDEF_ONLY
+
 #if defined(async_input_spdif3_h_)
 // ============== AsyncAudioInputSPDIF3 ====================
 class AsyncOSCAudioInputSPDIF3 : public AsyncAudioInputSPDIF3, public OSCAudioBase
 {
     public:
-        AsyncOSCAudioInputSPDIF3(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        AsyncOSCAudioInputSPDIF3(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        AsyncOSCAudioInputSPDIF3(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        AsyncOSCAudioInputSPDIF3(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~AsyncOSCAudioInputSPDIF3() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -56,9 +74,20 @@ class AsyncOSCAudioInputSPDIF3 : public AsyncAudioInputSPDIF3, public OSCAudioBa
           }
 		}
 };
-#define OSC_CLASS_async_input_spdif3_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t AsyncOSCAudioInputSPDIF3::resources[] = {
+  {rsrc_SPDIF_Device,setg_SPDIF_Protocol},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_SPDIFIN_Pin,setgUnshareable},
+};
+rsrcState_e AsyncOSCAudioInputSPDIF3::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_async_input_spdif3_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_async_input_spdif3_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_async_input_spdif3_h_(c,o) 
+#define OSC_CLASS_async_input_spdif3_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_async_input_spdif3_h_(c)
 #endif // defined(async_input_spdif3_h_)
 
 #if defined(mixer_h_)
@@ -85,9 +114,9 @@ class OSCAudioAmplifier : public AudioAmplifier, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_mixer_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_mixer_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_mixer_h_(c,o) 
+#define OSC_CLASS_mixer_h_(a,o,c)
 #endif // defined(mixer_h_)
 
 #if defined(analyze_event_h_)
@@ -115,9 +144,9 @@ class OSCAudioAnalyzeEvent : public AudioAnalyzeEvent, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_analyze_event_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_analyze_event_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_analyze_event_h_(c,o) 
+#define OSC_CLASS_analyze_event_h_(a,o,c)
 #endif // defined(analyze_event_h_)
 
 #if defined(analyze_fft1024_h_)
@@ -149,9 +178,9 @@ class OSCAudioAnalyzeFFT1024 : public AudioAnalyzeFFT1024, public OSCAudioBase
 	private:
 		bool windowFunction(OSCMessage& msg);
 };
-#define OSC_CLASS_analyze_fft1024_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_analyze_fft1024_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_analyze_fft1024_h_(c,o) 
+#define OSC_CLASS_analyze_fft1024_h_(a,o,c)
 #endif // defined(analyze_fft1024_h_)
 
 #if defined(analyze_fft256_h_)
@@ -183,9 +212,9 @@ class OSCAudioAnalyzeFFT256 : public AudioAnalyzeFFT256, public OSCAudioBase
 	private:
 		bool windowFunction(OSCMessage& msg);
 };
-#define OSC_CLASS_analyze_fft256_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_analyze_fft256_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_analyze_fft256_h_(c,o) 
+#define OSC_CLASS_analyze_fft256_h_(a,o,c)
 #endif // defined(analyze_fft256_h_)
 
 #if defined(AudioAnalyzeNoteFrequency_h_)
@@ -215,9 +244,9 @@ class OSCAudioAnalyzeNoteFrequency : public AudioAnalyzeNoteFrequency, public OS
           }
 		}
 };
-#define OSC_CLASS_AudioAnalyzeNoteFrequency_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_AudioAnalyzeNoteFrequency_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_AudioAnalyzeNoteFrequency_h_(c,o) 
+#define OSC_CLASS_AudioAnalyzeNoteFrequency_h_(a,o,c)
 #endif // defined(AudioAnalyzeNoteFrequency_h_)
 
 #if defined(analyze_peakdetect_h_)
@@ -245,9 +274,9 @@ class OSCAudioAnalyzePeak : public AudioAnalyzePeak, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_analyze_peakdetect_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_analyze_peakdetect_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_analyze_peakdetect_h_(c,o) 
+#define OSC_CLASS_analyze_peakdetect_h_(a,o,c)
 #endif // defined(analyze_peakdetect_h_)
 
 #if defined(analyze_print_h_)
@@ -281,9 +310,9 @@ class OSCAudioAnalyzePrint : public AudioAnalyzePrint, public OSCAudioBase
 		bool name(OSCMessage& msg);
 		char* namePtr;
 };
-#define OSC_CLASS_analyze_print_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_analyze_print_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_analyze_print_h_(c,o) 
+#define OSC_CLASS_analyze_print_h_(a,o,c)
 #endif // defined(analyze_print_h_)
 
 #if defined(analyze_rms_h_)
@@ -310,9 +339,9 @@ class OSCAudioAnalyzeRMS : public AudioAnalyzeRMS, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_analyze_rms_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_analyze_rms_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_analyze_rms_h_(c,o) 
+#define OSC_CLASS_analyze_rms_h_(a,o,c)
 #endif // defined(analyze_rms_h_)
 
 #if defined(analyze_tonedetect_h_)
@@ -342,9 +371,9 @@ class OSCAudioAnalyzeToneDetect : public AudioAnalyzeToneDetect, public OSCAudio
           }
 		}
 };
-#define OSC_CLASS_analyze_tonedetect_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_analyze_tonedetect_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_analyze_tonedetect_h_(c,o) 
+#define OSC_CLASS_analyze_tonedetect_h_(a,o,c)
 #endif // defined(analyze_tonedetect_h_)
 
 #if defined(control_ak4558_h_)
@@ -380,9 +409,9 @@ class OSCAudioControlAK4558 : public AudioControlAK4558, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_control_ak4558_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_control_ak4558_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_control_ak4558_h_(c,o) 
+#define OSC_CLASS_control_ak4558_h_(a,o,c)
 #endif // defined(control_ak4558_h_)
 
 #if defined(control_cs42448_h_)
@@ -418,9 +447,9 @@ class OSCAudioControlCS42448 : public AudioControlCS42448, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_control_cs42448_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_control_cs42448_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_control_cs42448_h_(c,o) 
+#define OSC_CLASS_control_cs42448_h_(a,o,c)
 #endif // defined(control_cs42448_h_)
 
 #if defined(control_cs4272_h_)
@@ -459,9 +488,9 @@ class OSCAudioControlCS4272 : public AudioControlCS4272, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_control_cs4272_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_control_cs4272_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_control_cs4272_h_(c,o) 
+#define OSC_CLASS_control_cs4272_h_(a,o,c)
 #endif // defined(control_cs4272_h_)
 
 #if defined(control_sgtl5000_h_)
@@ -535,9 +564,9 @@ class OSCAudioControlSGTL5000 : public AudioControlSGTL5000, public OSCAudioBase
 	private:
 		void eqFilter(OSCMessage& msg);
 };
-#define OSC_CLASS_control_sgtl5000_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_control_sgtl5000_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_control_sgtl5000_h_(c,o) 
+#define OSC_CLASS_control_sgtl5000_h_(a,o,c)
 #endif // defined(control_sgtl5000_h_)
 
 #if defined(control_tlv320aic3206_h_)
@@ -583,9 +612,9 @@ class OSCAudioControlTLV320AIC3206 : public AudioControlTLV320AIC3206, public OS
 	private:
 		void setIIRCoeffOnADC(OSCMessage& msg);
 };
-#define OSC_CLASS_control_tlv320aic3206_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_control_tlv320aic3206_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_control_tlv320aic3206_h_(c,o) 
+#define OSC_CLASS_control_tlv320aic3206_h_(a,o,c)
 #endif // defined(control_tlv320aic3206_h_)
 
 #if defined(control_wm8731_h_)
@@ -615,9 +644,9 @@ class OSCAudioControlWM8731 : public AudioControlWM8731, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_control_wm8731_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_control_wm8731_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_control_wm8731_h_(c,o) 
+#define OSC_CLASS_control_wm8731_h_(a,o,c)
 #endif // defined(control_wm8731_h_)
 
 #if defined(control_wm8731_h_)
@@ -643,9 +672,9 @@ class OSCAudioControlWM8731master : public AudioControlWM8731master, public OSCA
           }
 		}
 };
-#define OSC_CLASS_control_wm8731_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_control_wm8731_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_control_wm8731_h_(c,o) 
+#define OSC_CLASS_control_wm8731_h_(a,o,c)
 #endif // defined(control_wm8731_h_)
 
 #if defined(effect_bitcrusher_h_)
@@ -672,9 +701,9 @@ class OSCAudioEffectBitcrusher : public AudioEffectBitcrusher, public OSCAudioBa
           }
 		}
 };
-#define OSC_CLASS_effect_bitcrusher_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_effect_bitcrusher_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_effect_bitcrusher_h_(c,o) 
+#define OSC_CLASS_effect_bitcrusher_h_(a,o,c)
 #endif // defined(effect_bitcrusher_h_)
 
 #if defined(effect_delay_h_)
@@ -701,9 +730,9 @@ class OSCAudioEffectDelay : public AudioEffectDelay, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_effect_delay_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_effect_delay_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_effect_delay_h_(c,o) 
+#define OSC_CLASS_effect_delay_h_(a,o,c)
 #endif // defined(effect_delay_h_)
 
 #if defined(effect_delay_ext_h_)
@@ -730,9 +759,9 @@ class OSCAudioEffectDelayExternal : public AudioEffectDelayExternal, public OSCA
           }
 		}
 };
-#define OSC_CLASS_effect_delay_ext_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_effect_delay_ext_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_effect_delay_ext_h_(c,o) 
+#define OSC_CLASS_effect_delay_ext_h_(a,o,c)
 #endif // defined(effect_delay_ext_h_)
 
 #if defined(effect_digital_combine_h_)
@@ -758,9 +787,9 @@ class OSCAudioEffectDigitalCombine : public AudioEffectDigitalCombine, public OS
           }
 		}
 };
-#define OSC_CLASS_effect_digital_combine_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_effect_digital_combine_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_effect_digital_combine_h_(c,o) 
+#define OSC_CLASS_effect_digital_combine_h_(a,o,c)
 #endif // defined(effect_digital_combine_h_)
 
 #if defined(effect_envelope_h_)
@@ -796,9 +825,9 @@ class OSCAudioEffectEnvelope : public AudioEffectEnvelope, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_effect_envelope_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_effect_envelope_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_effect_envelope_h_(c,o) 
+#define OSC_CLASS_effect_envelope_h_(a,o,c)
 #endif // defined(effect_envelope_h_)
 
 #if defined(effect_expenvelope_h_)
@@ -836,9 +865,9 @@ class OSCAudioEffectExpEnvelope : public AudioEffectExpEnvelope, public OSCAudio
           }
 		}
 };
-#define OSC_CLASS_effect_expenvelope_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_effect_expenvelope_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_effect_expenvelope_h_(c,o) 
+#define OSC_CLASS_effect_expenvelope_h_(a,o,c)
 #endif // defined(effect_expenvelope_h_)
 
 #if defined(effect_fade_h_)
@@ -865,9 +894,9 @@ class OSCAudioEffectFade : public AudioEffectFade, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_effect_fade_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_effect_fade_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_effect_fade_h_(c,o) 
+#define OSC_CLASS_effect_fade_h_(a,o,c)
 #endif // defined(effect_fade_h_)
 
 #if defined(effect_freeverb_h_)
@@ -894,9 +923,9 @@ class OSCAudioEffectFreeverb : public AudioEffectFreeverb, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_effect_freeverb_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_effect_freeverb_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_effect_freeverb_h_(c,o) 
+#define OSC_CLASS_effect_freeverb_h_(a,o,c)
 #endif // defined(effect_freeverb_h_)
 
 #if defined(effect_freeverb_h_)
@@ -923,9 +952,9 @@ class OSCAudioEffectFreeverbStereo : public AudioEffectFreeverbStereo, public OS
           }
 		}
 };
-#define OSC_CLASS_effect_freeverb_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_effect_freeverb_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_effect_freeverb_h_(c,o) 
+#define OSC_CLASS_effect_freeverb_h_(a,o,c)
 #endif // defined(effect_freeverb_h_)
 
 #if defined(_effect_granular_h_)
@@ -959,9 +988,9 @@ class OSCAudioEffectGranular : public AudioEffectGranular, public OSCAudioBase
 		void begin(OSCMessage& msg);
 		int16_t* sample_bank;
 };
-#define OSC_CLASS__effect_granular_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS__effect_granular_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS__effect_granular_h_(c,o) 
+#define OSC_CLASS__effect_granular_h_(a,o,c)
 #endif // defined(_effect_granular_h_)
 
 #if defined(effect_midside_decode_h_)
@@ -988,9 +1017,9 @@ class OSCAudioEffectMidSide : public AudioEffectMidSide, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_effect_midside_decode_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_effect_midside_decode_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_effect_midside_decode_h_(c,o) 
+#define OSC_CLASS_effect_midside_decode_h_(a,o,c)
 #endif // defined(effect_midside_decode_h_)
 
 #if defined(effect_multiply_h_)
@@ -1015,9 +1044,9 @@ class OSCAudioEffectMultiply : public AudioEffectMultiply, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_effect_multiply_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_effect_multiply_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_effect_multiply_h_(c,o) 
+#define OSC_CLASS_effect_multiply_h_(a,o,c)
 #endif // defined(effect_multiply_h_)
 
 #if defined(effect_rectifier_h_)
@@ -1042,9 +1071,9 @@ class OSCAudioEffectRectifier : public AudioEffectRectifier, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_effect_rectifier_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_effect_rectifier_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_effect_rectifier_h_(c,o) 
+#define OSC_CLASS_effect_rectifier_h_(a,o,c)
 #endif // defined(effect_rectifier_h_)
 
 #if defined(effect_reverb_)
@@ -1070,9 +1099,9 @@ class OSCAudioEffectReverb : public AudioEffectReverb, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_effect_reverb_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_effect_reverb_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_effect_reverb_(c,o) 
+#define OSC_CLASS_effect_reverb_(a,o,c)
 #endif // defined(effect_reverb_)
 
 #if defined(effect_wavefolder_h_)
@@ -1097,9 +1126,9 @@ class OSCAudioEffectWaveFolder : public AudioEffectWaveFolder, public OSCAudioBa
           }
 		}
 };
-#define OSC_CLASS_effect_wavefolder_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_effect_wavefolder_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_effect_wavefolder_h_(c,o) 
+#define OSC_CLASS_effect_wavefolder_h_(a,o,c)
 #endif // defined(effect_wavefolder_h_)
 
 #if defined(effect_waveshaper_h_)
@@ -1125,9 +1154,9 @@ class OSCAudioEffectWaveshaper : public AudioEffectWaveshaper, public OSCAudioBa
           }
 		}
 };
-#define OSC_CLASS_effect_waveshaper_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_effect_waveshaper_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_effect_waveshaper_h_(c,o) 
+#define OSC_CLASS_effect_waveshaper_h_(a,o,c)
 #endif // defined(effect_waveshaper_h_)
 
 #if defined(filter_biquad_h_)
@@ -1162,9 +1191,9 @@ class OSCAudioFilterBiquad : public AudioFilterBiquad, public OSCAudioBase
 	private:
 		void setCoefficients(OSCMessage& msg);
 };
-#define OSC_CLASS_filter_biquad_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_filter_biquad_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_filter_biquad_h_(c,o) 
+#define OSC_CLASS_filter_biquad_h_(a,o,c)
 #endif // defined(filter_biquad_h_)
 
 #if defined(filter_fir_h_)
@@ -1191,9 +1220,9 @@ class OSCAudioFilterFIR : public AudioFilterFIR, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_filter_fir_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_filter_fir_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_filter_fir_h_(c,o) 
+#define OSC_CLASS_filter_fir_h_(a,o,c)
 #endif // defined(filter_fir_h_)
 
 #if defined(filter_ladder_h_)
@@ -1224,9 +1253,9 @@ class OSCAudioFilterLadder : public AudioFilterLadder, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_filter_ladder_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_filter_ladder_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_filter_ladder_h_(c,o) 
+#define OSC_CLASS_filter_ladder_h_(a,o,c)
 #endif // defined(filter_ladder_h_)
 
 #if defined(filter_variable_h_)
@@ -1254,9 +1283,9 @@ class OSCAudioFilterStateVariable : public AudioFilterStateVariable, public OSCA
           }
 		}
 };
-#define OSC_CLASS_filter_variable_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_filter_variable_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_filter_variable_h_(c,o) 
+#define OSC_CLASS_filter_variable_h_(a,o,c)
 #endif // defined(filter_variable_h_)
 
 #if defined(input_adc_h_)
@@ -1264,8 +1293,12 @@ class OSCAudioFilterStateVariable : public AudioFilterStateVariable, public OSCA
 class OSCAudioInputAnalog : public AudioInputAnalog, public OSCAudioBase
 {
     public:
-        OSCAudioInputAnalog(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioInputAnalog(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioInputAnalog(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioInputAnalog(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioInputAnalog() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[2];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1281,9 +1314,19 @@ class OSCAudioInputAnalog : public AudioInputAnalog, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_input_adc_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioInputAnalog::resources[] = {
+  {rsrc_ADC1,setgUnshareable},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+};
+rsrcState_e OSCAudioInputAnalog::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_input_adc_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_input_adc_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_input_adc_h_(c,o) 
+#define OSC_CLASS_input_adc_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_input_adc_h_(c)
 #endif // defined(input_adc_h_)
 
 #if defined(input_adcs_h_)
@@ -1291,8 +1334,12 @@ class OSCAudioInputAnalog : public AudioInputAnalog, public OSCAudioBase
 class OSCAudioInputAnalogStereo : public AudioInputAnalogStereo, public OSCAudioBase
 {
     public:
-        OSCAudioInputAnalogStereo(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioInputAnalogStereo(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioInputAnalogStereo(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioInputAnalogStereo(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioInputAnalogStereo() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1308,9 +1355,20 @@ class OSCAudioInputAnalogStereo : public AudioInputAnalogStereo, public OSCAudio
           }
 		}
 };
-#define OSC_CLASS_input_adcs_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioInputAnalogStereo::resources[] = {
+  {rsrc_ADC1,setgUnshareable},
+  {rsrc_ADC2,setgUnshareable},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+};
+rsrcState_e OSCAudioInputAnalogStereo::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_input_adcs_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_input_adcs_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_input_adcs_h_(c,o) 
+#define OSC_CLASS_input_adcs_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_input_adcs_h_(c)
 #endif // defined(input_adcs_h_)
 
 #if defined(_input_i2s_h_)
@@ -1318,8 +1376,12 @@ class OSCAudioInputAnalogStereo : public AudioInputAnalogStereo, public OSCAudio
 class OSCAudioInputI2S : public AudioInputI2S, public OSCAudioBase
 {
     public:
-        OSCAudioInputI2S(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioInputI2S(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioInputI2S(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioInputI2S(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioInputI2S() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1335,9 +1397,20 @@ class OSCAudioInputI2S : public AudioInputI2S, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS__input_i2s_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioInputI2S::resources[] = {
+  {rsrc_I2S_Device,setg_I2S_Master},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_IN1_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioInputI2S::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS__input_i2s_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_i2s_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS__input_i2s_h_(c,o) 
+#define OSC_CLASS__input_i2s_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_i2s_h_(c)
 #endif // defined(_input_i2s_h_)
 
 #if defined(_input_i2s2_h_)
@@ -1345,8 +1418,12 @@ class OSCAudioInputI2S : public AudioInputI2S, public OSCAudioBase
 class OSCAudioInputI2S2 : public AudioInputI2S2, public OSCAudioBase
 {
     public:
-        OSCAudioInputI2S2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioInputI2S2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioInputI2S2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioInputI2S2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioInputI2S2() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1362,9 +1439,20 @@ class OSCAudioInputI2S2 : public AudioInputI2S2, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS__input_i2s2_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioInputI2S2::resources[] = {
+  {rsrc_I2S2_Device,setg_I2S_Master},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_IN2_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioInputI2S2::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS__input_i2s2_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_i2s2_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS__input_i2s2_h_(c,o) 
+#define OSC_CLASS__input_i2s2_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_i2s2_h_(c)
 #endif // defined(_input_i2s2_h_)
 
 #if defined(_input_i2s_hex_h_)
@@ -1372,8 +1460,12 @@ class OSCAudioInputI2S2 : public AudioInputI2S2, public OSCAudioBase
 class OSCAudioInputI2SHex : public AudioInputI2SHex, public OSCAudioBase
 {
     public:
-        OSCAudioInputI2SHex(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioInputI2SHex(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioInputI2SHex(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioInputI2SHex(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioInputI2SHex() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[5];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1389,9 +1481,22 @@ class OSCAudioInputI2SHex : public AudioInputI2SHex, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS__input_i2s_hex_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioInputI2SHex::resources[] = {
+  {rsrc_I2S_Device,setg_I2S_Master},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_IN1_Pin,setgUnshareable},
+  {rsrc_OUT1D_Pin,setgUnshareable},
+  {rsrc_OUT1C_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioInputI2SHex::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS__input_i2s_hex_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_i2s_hex_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS__input_i2s_hex_h_(c,o) 
+#define OSC_CLASS__input_i2s_hex_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_i2s_hex_h_(c)
 #endif // defined(_input_i2s_hex_h_)
 
 #if defined(_input_i2s_oct_h_)
@@ -1399,8 +1504,12 @@ class OSCAudioInputI2SHex : public AudioInputI2SHex, public OSCAudioBase
 class OSCAudioInputI2SOct : public AudioInputI2SOct, public OSCAudioBase
 {
     public:
-        OSCAudioInputI2SOct(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioInputI2SOct(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioInputI2SOct(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioInputI2SOct(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioInputI2SOct() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[6];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1416,9 +1525,23 @@ class OSCAudioInputI2SOct : public AudioInputI2SOct, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS__input_i2s_oct_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioInputI2SOct::resources[] = {
+  {rsrc_I2S_Device,setg_I2S_Master},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_IN1_Pin,setgUnshareable},
+  {rsrc_OUT1D_Pin,setgUnshareable},
+  {rsrc_OUT1C_Pin,setgUnshareable},
+  {rsrc_OUT1B_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioInputI2SOct::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS__input_i2s_oct_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_i2s_oct_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS__input_i2s_oct_h_(c,o) 
+#define OSC_CLASS__input_i2s_oct_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_i2s_oct_h_(c)
 #endif // defined(_input_i2s_oct_h_)
 
 #if defined(_input_i2s_quad_h_)
@@ -1426,8 +1549,12 @@ class OSCAudioInputI2SOct : public AudioInputI2SOct, public OSCAudioBase
 class OSCAudioInputI2SQuad : public AudioInputI2SQuad, public OSCAudioBase
 {
     public:
-        OSCAudioInputI2SQuad(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioInputI2SQuad(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioInputI2SQuad(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioInputI2SQuad(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioInputI2SQuad() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[4];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1443,9 +1570,21 @@ class OSCAudioInputI2SQuad : public AudioInputI2SQuad, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS__input_i2s_quad_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioInputI2SQuad::resources[] = {
+  {rsrc_I2S_Device,setg_I2S_Master},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_IN1_Pin,setgUnshareable},
+  {rsrc_OUT1D_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioInputI2SQuad::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS__input_i2s_quad_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_i2s_quad_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS__input_i2s_quad_h_(c,o) 
+#define OSC_CLASS__input_i2s_quad_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_i2s_quad_h_(c)
 #endif // defined(_input_i2s_quad_h_)
 
 #if defined(_input_pdm_h_)
@@ -1453,8 +1592,12 @@ class OSCAudioInputI2SQuad : public AudioInputI2SQuad, public OSCAudioBase
 class OSCAudioInputPDM : public AudioInputPDM, public OSCAudioBase
 {
     public:
-        OSCAudioInputPDM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioInputPDM(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioInputPDM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioInputPDM(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioInputPDM() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1470,9 +1613,20 @@ class OSCAudioInputPDM : public AudioInputPDM, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS__input_pdm_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioInputPDM::resources[] = {
+  {rsrc_I2S_Device,setg_I2S_Master},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_IN1_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioInputPDM::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS__input_pdm_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_pdm_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS__input_pdm_h_(c,o) 
+#define OSC_CLASS__input_pdm_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_pdm_h_(c)
 #endif // defined(_input_pdm_h_)
 
 #if defined(_input_pdm_i2s2_h_)
@@ -1480,8 +1634,12 @@ class OSCAudioInputPDM : public AudioInputPDM, public OSCAudioBase
 class OSCAudioInputPDM2 : public AudioInputPDM2, public OSCAudioBase
 {
     public:
-        OSCAudioInputPDM2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioInputPDM2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioInputPDM2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioInputPDM2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioInputPDM2() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1497,9 +1655,20 @@ class OSCAudioInputPDM2 : public AudioInputPDM2, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS__input_pdm_i2s2_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioInputPDM2::resources[] = {
+  {rsrc_I2S2_Device,setg_I2S_Master},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_IN2_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioInputPDM2::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS__input_pdm_i2s2_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_pdm_i2s2_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS__input_pdm_i2s2_h_(c,o) 
+#define OSC_CLASS__input_pdm_i2s2_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_pdm_i2s2_h_(c)
 #endif // defined(_input_pdm_i2s2_h_)
 
 #if defined(_input_spdif3_h_)
@@ -1507,8 +1676,12 @@ class OSCAudioInputPDM2 : public AudioInputPDM2, public OSCAudioBase
 class OSCAudioInputSPDIF3 : public AudioInputSPDIF3, public OSCAudioBase
 {
     public:
-        OSCAudioInputSPDIF3(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioInputSPDIF3(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioInputSPDIF3(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioInputSPDIF3(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioInputSPDIF3() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1526,9 +1699,20 @@ class OSCAudioInputSPDIF3 : public AudioInputSPDIF3, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS__input_spdif3_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioInputSPDIF3::resources[] = {
+  {rsrc_SPDIF_Device,setg_SPDIF_Protocol},
+  {rsrc_Sample_Rate,setg_SPDIF_Control},
+  {rsrc_SPDIFIN_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioInputSPDIF3::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS__input_spdif3_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_spdif3_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS__input_spdif3_h_(c,o) 
+#define OSC_CLASS__input_spdif3_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_spdif3_h_(c)
 #endif // defined(_input_spdif3_h_)
 
 #if defined(_input_tdm_h_)
@@ -1536,8 +1720,12 @@ class OSCAudioInputSPDIF3 : public AudioInputSPDIF3, public OSCAudioBase
 class OSCAudioInputTDM : public AudioInputTDM, public OSCAudioBase
 {
     public:
-        OSCAudioInputTDM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioInputTDM(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioInputTDM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioInputTDM(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioInputTDM() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1553,9 +1741,20 @@ class OSCAudioInputTDM : public AudioInputTDM, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS__input_tdm_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioInputTDM::resources[] = {
+  {rsrc_I2S_Device,setg_TDM_Protocol},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_IN1_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioInputTDM::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS__input_tdm_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_tdm_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS__input_tdm_h_(c,o) 
+#define OSC_CLASS__input_tdm_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_tdm_h_(c)
 #endif // defined(_input_tdm_h_)
 
 #if defined(_input_tdm2_h_)
@@ -1563,8 +1762,12 @@ class OSCAudioInputTDM : public AudioInputTDM, public OSCAudioBase
 class OSCAudioInputTDM2 : public AudioInputTDM2, public OSCAudioBase
 {
     public:
-        OSCAudioInputTDM2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioInputTDM2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioInputTDM2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioInputTDM2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioInputTDM2() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1580,9 +1783,20 @@ class OSCAudioInputTDM2 : public AudioInputTDM2, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS__input_tdm2_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioInputTDM2::resources[] = {
+  {rsrc_I2S2_Device,setg_TDM_Protocol},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_IN2_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioInputTDM2::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS__input_tdm2_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_tdm2_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS__input_tdm2_h_(c,o) 
+#define OSC_CLASS__input_tdm2_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC__input_tdm2_h_(c)
 #endif // defined(_input_tdm2_h_)
 
 #if defined(DYNMIXER_H_)
@@ -1610,9 +1824,9 @@ class OSCAudioMixer : public AudioMixer, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_DYNMIXER_H_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_DYNMIXER_H_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_DYNMIXER_H_(c,o) 
+#define OSC_CLASS_DYNMIXER_H_(a,o,c)
 #endif // defined(DYNMIXER_H_)
 
 #if defined(mixer_h_)
@@ -1638,9 +1852,9 @@ class OSCAudioMixer4 : public AudioMixer4, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_mixer_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_mixer_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_mixer_h_(c,o) 
+#define OSC_CLASS_mixer_h_(a,o,c)
 #endif // defined(mixer_h_)
 
 #if defined(DYNMIXER_H_)
@@ -1672,9 +1886,9 @@ class OSCAudioMixerStereo : public AudioMixerStereo, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_DYNMIXER_H_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_DYNMIXER_H_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_DYNMIXER_H_(c,o) 
+#define OSC_CLASS_DYNMIXER_H_(a,o,c)
 #endif // defined(DYNMIXER_H_)
 
 #if defined(output_ADAT_h_)
@@ -1682,8 +1896,12 @@ class OSCAudioMixerStereo : public AudioMixerStereo, public OSCAudioBase
 class OSCAudioOutputADAT : public AudioOutputADAT, public OSCAudioBase
 {
     public:
-        OSCAudioOutputADAT(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputADAT(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputADAT(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputADAT(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputADAT() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1700,9 +1918,20 @@ class OSCAudioOutputADAT : public AudioOutputADAT, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_output_ADAT_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputADAT::resources[] = {
+  {rsrc_I2S_Device,setg_ADAT_Protocol},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_OUT1A_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioOutputADAT::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_ADAT_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_ADAT_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_ADAT_h_(c,o) 
+#define OSC_CLASS_output_ADAT_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_ADAT_h_(c)
 #endif // defined(output_ADAT_h_)
 
 #if defined(output_dac_h_)
@@ -1710,8 +1939,12 @@ class OSCAudioOutputADAT : public AudioOutputADAT, public OSCAudioBase
 class OSCAudioOutputAnalog : public AudioOutputAnalog, public OSCAudioBase
 {
     public:
-        OSCAudioOutputAnalog(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputAnalog(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputAnalog(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputAnalog(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputAnalog() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[2];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1728,9 +1961,19 @@ class OSCAudioOutputAnalog : public AudioOutputAnalog, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_output_dac_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputAnalog::resources[] = {
+  {rsrc_DAC1,setgUnshareable},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+};
+rsrcState_e OSCAudioOutputAnalog::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_dac_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_dac_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_dac_h_(c,o) 
+#define OSC_CLASS_output_dac_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_dac_h_(c)
 #endif // defined(output_dac_h_)
 
 #if defined(output_dacs_h_)
@@ -1738,8 +1981,12 @@ class OSCAudioOutputAnalog : public AudioOutputAnalog, public OSCAudioBase
 class OSCAudioOutputAnalogStereo : public AudioOutputAnalogStereo, public OSCAudioBase
 {
     public:
-        OSCAudioOutputAnalogStereo(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputAnalogStereo(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputAnalogStereo(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputAnalogStereo(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputAnalogStereo() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1756,9 +2003,20 @@ class OSCAudioOutputAnalogStereo : public AudioOutputAnalogStereo, public OSCAud
           }
 		}
 };
-#define OSC_CLASS_output_dacs_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputAnalogStereo::resources[] = {
+  {rsrc_DAC1,setgUnshareable},
+  {rsrc_DAC2,setgUnshareable},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+};
+rsrcState_e OSCAudioOutputAnalogStereo::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_dacs_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_dacs_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_dacs_h_(c,o) 
+#define OSC_CLASS_output_dacs_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_dacs_h_(c)
 #endif // defined(output_dacs_h_)
 
 #if defined(output_i2s_h_)
@@ -1766,8 +2024,12 @@ class OSCAudioOutputAnalogStereo : public AudioOutputAnalogStereo, public OSCAud
 class OSCAudioOutputI2S : public AudioOutputI2S, public OSCAudioBase
 {
     public:
-        OSCAudioOutputI2S(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputI2S(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputI2S(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputI2S(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputI2S() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1783,9 +2045,20 @@ class OSCAudioOutputI2S : public AudioOutputI2S, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_output_i2s_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputI2S::resources[] = {
+  {rsrc_I2S_Device,setg_I2S_Master},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_OUT1A_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioOutputI2S::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_i2s_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_i2s_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_i2s_h_(c,o) 
+#define OSC_CLASS_output_i2s_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_i2s_h_(c)
 #endif // defined(output_i2s_h_)
 
 #if defined(output_i2s2_h_)
@@ -1793,8 +2066,12 @@ class OSCAudioOutputI2S : public AudioOutputI2S, public OSCAudioBase
 class OSCAudioOutputI2S2 : public AudioOutputI2S2, public OSCAudioBase
 {
     public:
-        OSCAudioOutputI2S2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputI2S2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputI2S2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputI2S2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputI2S2() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1810,9 +2087,20 @@ class OSCAudioOutputI2S2 : public AudioOutputI2S2, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_output_i2s2_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputI2S2::resources[] = {
+  {rsrc_I2S2_Device,setg_I2S_Master},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_OUT2_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioOutputI2S2::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_i2s2_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_i2s2_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_i2s2_h_(c,o) 
+#define OSC_CLASS_output_i2s2_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_i2s2_h_(c)
 #endif // defined(output_i2s2_h_)
 
 #if defined(output_i2s_hex_h_)
@@ -1820,8 +2108,12 @@ class OSCAudioOutputI2S2 : public AudioOutputI2S2, public OSCAudioBase
 class OSCAudioOutputI2SHex : public AudioOutputI2SHex, public OSCAudioBase
 {
     public:
-        OSCAudioOutputI2SHex(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputI2SHex(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputI2SHex(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputI2SHex(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputI2SHex() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[5];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1837,9 +2129,22 @@ class OSCAudioOutputI2SHex : public AudioOutputI2SHex, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_output_i2s_hex_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputI2SHex::resources[] = {
+  {rsrc_I2S_Device,setg_I2S_Master},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_OUT1A_Pin,setgUnshareable},
+  {rsrc_OUT1B_Pin,setgUnshareable},
+  {rsrc_OUT1C_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioOutputI2SHex::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_i2s_hex_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_i2s_hex_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_i2s_hex_h_(c,o) 
+#define OSC_CLASS_output_i2s_hex_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_i2s_hex_h_(c)
 #endif // defined(output_i2s_hex_h_)
 
 #if defined(output_i2s_oct_h_)
@@ -1847,8 +2152,12 @@ class OSCAudioOutputI2SHex : public AudioOutputI2SHex, public OSCAudioBase
 class OSCAudioOutputI2SOct : public AudioOutputI2SOct, public OSCAudioBase
 {
     public:
-        OSCAudioOutputI2SOct(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputI2SOct(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputI2SOct(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputI2SOct(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputI2SOct() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[6];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1864,9 +2173,23 @@ class OSCAudioOutputI2SOct : public AudioOutputI2SOct, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_output_i2s_oct_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputI2SOct::resources[] = {
+  {rsrc_I2S_Device,setg_I2S_Master},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_OUT1A_Pin,setgUnshareable},
+  {rsrc_OUT1B_Pin,setgUnshareable},
+  {rsrc_OUT1C_Pin,setgUnshareable},
+  {rsrc_OUT1D_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioOutputI2SOct::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_i2s_oct_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_i2s_oct_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_i2s_oct_h_(c,o) 
+#define OSC_CLASS_output_i2s_oct_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_i2s_oct_h_(c)
 #endif // defined(output_i2s_oct_h_)
 
 #if defined(output_i2s_quad_h_)
@@ -1874,8 +2197,12 @@ class OSCAudioOutputI2SOct : public AudioOutputI2SOct, public OSCAudioBase
 class OSCAudioOutputI2SQuad : public AudioOutputI2SQuad, public OSCAudioBase
 {
     public:
-        OSCAudioOutputI2SQuad(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputI2SQuad(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputI2SQuad(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputI2SQuad(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputI2SQuad() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[4];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1891,9 +2218,21 @@ class OSCAudioOutputI2SQuad : public AudioOutputI2SQuad, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_output_i2s_quad_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputI2SQuad::resources[] = {
+  {rsrc_I2S_Device,setg_I2S_Master},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_OUT1A_Pin,setgUnshareable},
+  {rsrc_OUT1B_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioOutputI2SQuad::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_i2s_quad_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_i2s_quad_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_i2s_quad_h_(c,o) 
+#define OSC_CLASS_output_i2s_quad_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_i2s_quad_h_(c)
 #endif // defined(output_i2s_quad_h_)
 
 #if defined(output_mqs_h_)
@@ -1901,8 +2240,12 @@ class OSCAudioOutputI2SQuad : public AudioOutputI2SQuad, public OSCAudioBase
 class OSCAudioOutputMQS : public AudioOutputMQS, public OSCAudioBase
 {
     public:
-        OSCAudioOutputMQS(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputMQS(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputMQS(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputMQS(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputMQS() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[2];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1918,9 +2261,19 @@ class OSCAudioOutputMQS : public AudioOutputMQS, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_output_mqs_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputMQS::resources[] = {
+  {rsrc_MSQ_Device,setgUnshareable},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+};
+rsrcState_e OSCAudioOutputMQS::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_mqs_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_mqs_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_mqs_h_(c,o) 
+#define OSC_CLASS_output_mqs_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_mqs_h_(c)
 #endif // defined(output_mqs_h_)
 
 #if defined(output_pt8211_h_)
@@ -1928,8 +2281,12 @@ class OSCAudioOutputMQS : public AudioOutputMQS, public OSCAudioBase
 class OSCAudioOutputPT8211 : public AudioOutputPT8211, public OSCAudioBase
 {
     public:
-        OSCAudioOutputPT8211(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputPT8211(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputPT8211(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputPT8211(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputPT8211() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1945,9 +2302,20 @@ class OSCAudioOutputPT8211 : public AudioOutputPT8211, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_output_pt8211_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputPT8211::resources[] = {
+  {rsrc_I2S_Device,setg_PT8211_Protocol},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_OUT1A_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioOutputPT8211::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_pt8211_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_pt8211_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_pt8211_h_(c,o) 
+#define OSC_CLASS_output_pt8211_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_pt8211_h_(c)
 #endif // defined(output_pt8211_h_)
 
 #if defined(output_pt8211_2_h_)
@@ -1955,8 +2323,12 @@ class OSCAudioOutputPT8211 : public AudioOutputPT8211, public OSCAudioBase
 class OSCAudioOutputPT8211_2 : public AudioOutputPT8211_2, public OSCAudioBase
 {
     public:
-        OSCAudioOutputPT8211_2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputPT8211_2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputPT8211_2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputPT8211_2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputPT8211_2() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1972,9 +2344,20 @@ class OSCAudioOutputPT8211_2 : public AudioOutputPT8211_2, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_output_pt8211_2_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputPT8211_2::resources[] = {
+  {rsrc_I2S2_Device,setg_PT8211_Protocol},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_OUT2_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioOutputPT8211_2::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_pt8211_2_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_pt8211_2_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_pt8211_2_h_(c,o) 
+#define OSC_CLASS_output_pt8211_2_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_pt8211_2_h_(c)
 #endif // defined(output_pt8211_2_h_)
 
 #if defined(output_pwm_h_)
@@ -1982,8 +2365,12 @@ class OSCAudioOutputPT8211_2 : public AudioOutputPT8211_2, public OSCAudioBase
 class OSCAudioOutputPWM : public AudioOutputPWM, public OSCAudioBase
 {
     public:
-        OSCAudioOutputPWM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputPWM(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputPWM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputPWM(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputPWM() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[2];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -1999,9 +2386,19 @@ class OSCAudioOutputPWM : public AudioOutputPWM, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_output_pwm_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputPWM::resources[] = {
+  {rsrc_PWM,setgUnshareable},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+};
+rsrcState_e OSCAudioOutputPWM::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_pwm_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_pwm_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_pwm_h_(c,o) 
+#define OSC_CLASS_output_pwm_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_pwm_h_(c)
 #endif // defined(output_pwm_h_)
 
 #if defined(output_SPDIF_h_)
@@ -2009,8 +2406,12 @@ class OSCAudioOutputPWM : public AudioOutputPWM, public OSCAudioBase
 class OSCAudioOutputSPDIF : public AudioOutputSPDIF, public OSCAudioBase
 {
     public:
-        OSCAudioOutputSPDIF(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputSPDIF(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputSPDIF(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputSPDIF(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputSPDIF() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -2027,9 +2428,20 @@ class OSCAudioOutputSPDIF : public AudioOutputSPDIF, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_output_SPDIF_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputSPDIF::resources[] = {
+  {rsrc_I2S_Device,setg_SPDIF_Protocol},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_OUT1A_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioOutputSPDIF::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_SPDIF_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_SPDIF_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_SPDIF_h_(c,o) 
+#define OSC_CLASS_output_SPDIF_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_SPDIF_h_(c)
 #endif // defined(output_SPDIF_h_)
 
 #if defined(output_SPDIF2_h_)
@@ -2037,8 +2449,12 @@ class OSCAudioOutputSPDIF : public AudioOutputSPDIF, public OSCAudioBase
 class OSCAudioOutputSPDIF2 : public AudioOutputSPDIF2, public OSCAudioBase
 {
     public:
-        OSCAudioOutputSPDIF2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputSPDIF2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputSPDIF2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputSPDIF2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputSPDIF2() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -2055,9 +2471,20 @@ class OSCAudioOutputSPDIF2 : public AudioOutputSPDIF2, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_output_SPDIF2_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputSPDIF2::resources[] = {
+  {rsrc_I2S2_Device,setg_SPDIF_Protocol},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_OUT2_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioOutputSPDIF2::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_SPDIF2_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_SPDIF2_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_SPDIF2_h_(c,o) 
+#define OSC_CLASS_output_SPDIF2_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_SPDIF2_h_(c)
 #endif // defined(output_SPDIF2_h_)
 
 #if defined(output_SPDIF3_h_)
@@ -2065,8 +2492,12 @@ class OSCAudioOutputSPDIF2 : public AudioOutputSPDIF2, public OSCAudioBase
 class OSCAudioOutputSPDIF3 : public AudioOutputSPDIF3, public OSCAudioBase
 {
     public:
-        OSCAudioOutputSPDIF3(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputSPDIF3(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputSPDIF3(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputSPDIF3(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputSPDIF3() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -2084,9 +2515,20 @@ class OSCAudioOutputSPDIF3 : public AudioOutputSPDIF3, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_output_SPDIF3_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputSPDIF3::resources[] = {
+  {rsrc_SPDIF_Device,setg_SPDIF_Protocol},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_SPDIFOUT_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioOutputSPDIF3::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_SPDIF3_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_SPDIF3_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_SPDIF3_h_(c,o) 
+#define OSC_CLASS_output_SPDIF3_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_SPDIF3_h_(c)
 #endif // defined(output_SPDIF3_h_)
 
 #if defined(output_tdm_h_)
@@ -2094,8 +2536,12 @@ class OSCAudioOutputSPDIF3 : public AudioOutputSPDIF3, public OSCAudioBase
 class OSCAudioOutputTDM : public AudioOutputTDM, public OSCAudioBase
 {
     public:
-        OSCAudioOutputTDM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputTDM(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputTDM(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputTDM(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputTDM() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -2111,9 +2557,20 @@ class OSCAudioOutputTDM : public AudioOutputTDM, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_output_tdm_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputTDM::resources[] = {
+  {rsrc_I2S_Device,setg_TDM_Protocol},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_OUT1A_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioOutputTDM::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_tdm_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_tdm_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_tdm_h_(c,o) 
+#define OSC_CLASS_output_tdm_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_tdm_h_(c)
 #endif // defined(output_tdm_h_)
 
 #if defined(output_tdm2_h_)
@@ -2121,8 +2578,12 @@ class OSCAudioOutputTDM : public AudioOutputTDM, public OSCAudioBase
 class OSCAudioOutputTDM2 : public AudioOutputTDM2, public OSCAudioBase
 {
     public:
-        OSCAudioOutputTDM2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioOutputTDM2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioOutputTDM2(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputTDM2(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputTDM2() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[3];
+        static rsrcState_e rsrcState;
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -2138,9 +2599,20 @@ class OSCAudioOutputTDM2 : public AudioOutputTDM2, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_output_tdm2_h_(c,o) OSC_CLASS(c,o)
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputTDM2::resources[] = {
+  {rsrc_I2S2_Device,setg_TDM_Protocol},
+  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_OUT2_Pin,setgUnshareable},
+};
+rsrcState_e OSCAudioOutputTDM2::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+#define OSC_CLASS_output_tdm2_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_tdm2_h_(c) OSC_AUDIO_CHECK_RSRC(c)
 #else
-#define OSC_CLASS_output_tdm2_h_(c,o) 
+#define OSC_CLASS_output_tdm2_h_(a,o,c)
+#define OSC_AUDIO_CHECK_RSRC_output_tdm2_h_(c)
 #endif // defined(output_tdm2_h_)
 
 #if defined(play_memory_h_)
@@ -2172,9 +2644,9 @@ class OSCAudioPlayMemory : public AudioPlayMemory, public OSCAudioBase
 	private:
 		void play(OSCMessage& msg);
 };
-#define OSC_CLASS_play_memory_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_play_memory_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_play_memory_h_(c,o) 
+#define OSC_CLASS_play_memory_h_(a,o,c)
 #endif // defined(play_memory_h_)
 
 #if defined(play_queue_h_)
@@ -2207,9 +2679,9 @@ class OSCAudioPlayQueue : public AudioPlayQueue, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_play_queue_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_play_queue_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_play_queue_h_(c,o) 
+#define OSC_CLASS_play_queue_h_(a,o,c)
 #endif // defined(play_queue_h_)
 
 #if defined(play_sd_raw_h_)
@@ -2242,9 +2714,9 @@ class OSCAudioPlaySdRaw : public AudioPlaySdRaw, public OSCAudioBase
 	private:
 		void play(OSCMessage& msg);
 };
-#define OSC_CLASS_play_sd_raw_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_play_sd_raw_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_play_sd_raw_h_(c,o) 
+#define OSC_CLASS_play_sd_raw_h_(a,o,c)
 #endif // defined(play_sd_raw_h_)
 
 #if defined(play_sd_wav_h_)
@@ -2280,9 +2752,9 @@ class OSCAudioPlaySdWav : public AudioPlaySdWav, public OSCAudioBase
 	private:
 		void play(OSCMessage& msg);
 };
-#define OSC_CLASS_play_sd_wav_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_play_sd_wav_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_play_sd_wav_h_(c,o) 
+#define OSC_CLASS_play_sd_wav_h_(a,o,c)
 #endif // defined(play_sd_wav_h_)
 
 #if defined(play_serial_raw_h_)
@@ -2315,9 +2787,9 @@ class OSCAudioPlaySerialflashRaw : public AudioPlaySerialflashRaw, public OSCAud
 	private:
 		void play(OSCMessage& msg);
 };
-#define OSC_CLASS_play_serial_raw_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_play_serial_raw_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_play_serial_raw_h_(c,o) 
+#define OSC_CLASS_play_serial_raw_h_(a,o,c)
 #endif // defined(play_serial_raw_h_)
 
 #if defined(record_queue_h_)
@@ -2348,9 +2820,9 @@ class OSCAudioRecordQueue : public AudioRecordQueue, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_record_queue_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_record_queue_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_record_queue_h_(c,o) 
+#define OSC_CLASS_record_queue_h_(a,o,c)
 #endif // defined(record_queue_h_)
 
 #if defined(synth_karplusstrong_h_)
@@ -2377,9 +2849,9 @@ class OSCAudioSynthKarplusStrong : public AudioSynthKarplusStrong, public OSCAud
           }
 		}
 };
-#define OSC_CLASS_synth_karplusstrong_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_synth_karplusstrong_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_synth_karplusstrong_h_(c,o) 
+#define OSC_CLASS_synth_karplusstrong_h_(a,o,c)
 #endif // defined(synth_karplusstrong_h_)
 
 #if defined(synth_pinknoise_h_)
@@ -2405,9 +2877,9 @@ class OSCAudioSynthNoisePink : public AudioSynthNoisePink, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_synth_pinknoise_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_synth_pinknoise_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_synth_pinknoise_h_(c,o) 
+#define OSC_CLASS_synth_pinknoise_h_(a,o,c)
 #endif // defined(synth_pinknoise_h_)
 
 #if defined(synth_whitenoise_h_)
@@ -2433,9 +2905,9 @@ class OSCAudioSynthNoiseWhite : public AudioSynthNoiseWhite, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_synth_whitenoise_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_synth_whitenoise_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_synth_whitenoise_h_(c,o) 
+#define OSC_CLASS_synth_whitenoise_h_(a,o,c)
 #endif // defined(synth_whitenoise_h_)
 
 #if defined(_SYNTH_SIMPLE_DRUM_H_)
@@ -2465,9 +2937,9 @@ class OSCAudioSynthSimpleDrum : public AudioSynthSimpleDrum, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS__SYNTH_SIMPLE_DRUM_H_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS__SYNTH_SIMPLE_DRUM_H_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS__SYNTH_SIMPLE_DRUM_H_(c,o) 
+#define OSC_CLASS__SYNTH_SIMPLE_DRUM_H_(a,o,c)
 #endif // defined(_SYNTH_SIMPLE_DRUM_H_)
 
 #if defined(synth_tonesweep_h_)
@@ -2495,9 +2967,9 @@ class OSCAudioSynthToneSweep : public AudioSynthToneSweep, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_synth_tonesweep_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_synth_tonesweep_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_synth_tonesweep_h_(c,o) 
+#define OSC_CLASS_synth_tonesweep_h_(a,o,c)
 #endif // defined(synth_tonesweep_h_)
 
 #if defined(synth_waveform_h_)
@@ -2534,9 +3006,9 @@ class OSCAudioSynthWaveform : public AudioSynthWaveform, public OSCAudioBase
 		bool arbitraryWaveform(OSCMessage& msg);
 		int16_t* arbdata;
 };
-#define OSC_CLASS_synth_waveform_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_synth_waveform_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_synth_waveform_h_(c,o) 
+#define OSC_CLASS_synth_waveform_h_(a,o,c)
 #endif // defined(synth_waveform_h_)
 
 #if defined(synth_dc_h_)
@@ -2564,9 +3036,9 @@ class OSCAudioSynthWaveformDc : public AudioSynthWaveformDc, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_synth_dc_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_synth_dc_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_synth_dc_h_(c,o) 
+#define OSC_CLASS_synth_dc_h_(a,o,c)
 #endif // defined(synth_dc_h_)
 
 #if defined(synth_waveform_h_)
@@ -2603,9 +3075,9 @@ class OSCAudioSynthWaveformModulated : public AudioSynthWaveformModulated, publi
 		bool arbitraryWaveform(OSCMessage& msg);
 		int16_t* arbdata;
 };
-#define OSC_CLASS_synth_waveform_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_synth_waveform_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_synth_waveform_h_(c,o) 
+#define OSC_CLASS_synth_waveform_h_(a,o,c)
 #endif // defined(synth_waveform_h_)
 
 #if defined(synth_pwm_h_)
@@ -2632,9 +3104,9 @@ class OSCAudioSynthWaveformPWM : public AudioSynthWaveformPWM, public OSCAudioBa
           }
 		}
 };
-#define OSC_CLASS_synth_pwm_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_synth_pwm_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_synth_pwm_h_(c,o) 
+#define OSC_CLASS_synth_pwm_h_(a,o,c)
 #endif // defined(synth_pwm_h_)
 
 #if defined(synth_sine_h_)
@@ -2662,9 +3134,9 @@ class OSCAudioSynthWaveformSine : public AudioSynthWaveformSine, public OSCAudio
           }
 		}
 };
-#define OSC_CLASS_synth_sine_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_synth_sine_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_synth_sine_h_(c,o) 
+#define OSC_CLASS_synth_sine_h_(a,o,c)
 #endif // defined(synth_sine_h_)
 
 #if defined(synth_sine_h_)
@@ -2692,9 +3164,9 @@ class OSCAudioSynthWaveformSineHires : public AudioSynthWaveformSineHires, publi
           }
 		}
 };
-#define OSC_CLASS_synth_sine_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_synth_sine_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_synth_sine_h_(c,o) 
+#define OSC_CLASS_synth_sine_h_(a,o,c)
 #endif // defined(synth_sine_h_)
 
 #if defined(synth_sine_h_)
@@ -2722,9 +3194,9 @@ class OSCAudioSynthWaveformSineModulated : public AudioSynthWaveformSineModulate
           }
 		}
 };
-#define OSC_CLASS_synth_sine_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS_synth_sine_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS_synth_sine_h_(c,o) 
+#define OSC_CLASS_synth_sine_h_(a,o,c)
 #endif // defined(synth_sine_h_)
 
 #if defined(_synth_wavetable_h_)
@@ -2760,97 +3232,133 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS__synth_wavetable_h_(c,o) OSC_CLASS(c,o)
+#define OSC_CLASS__synth_wavetable_h_(a,o,c) OSC_CLASS(a,o,c)
 #else
-#define OSC_CLASS__synth_wavetable_h_(c,o) 
+#define OSC_CLASS__synth_wavetable_h_(a,o,c)
 #endif // defined(_synth_wavetable_h_)
 
 #define OSC_AUDIO_CLASSES \
-	OSC_CLASS_async_input_spdif3_h_(AsyncAudioInputSPDIF3,AsyncOSCAudioInputSPDIF3) \
-	OSC_CLASS_mixer_h_(AudioAmplifier,OSCAudioAmplifier) \
-	OSC_CLASS_analyze_event_h_(AudioAnalyzeEvent,OSCAudioAnalyzeEvent) \
-	OSC_CLASS_analyze_fft1024_h_(AudioAnalyzeFFT1024,OSCAudioAnalyzeFFT1024) \
-	OSC_CLASS_analyze_fft256_h_(AudioAnalyzeFFT256,OSCAudioAnalyzeFFT256) \
-	OSC_CLASS_AudioAnalyzeNoteFrequency_h_(AudioAnalyzeNoteFrequency,OSCAudioAnalyzeNoteFrequency) \
-	OSC_CLASS_analyze_peakdetect_h_(AudioAnalyzePeak,OSCAudioAnalyzePeak) \
-	OSC_CLASS_analyze_print_h_(AudioAnalyzePrint,OSCAudioAnalyzePrint) \
-	OSC_CLASS_analyze_rms_h_(AudioAnalyzeRMS,OSCAudioAnalyzeRMS) \
-	OSC_CLASS_analyze_tonedetect_h_(AudioAnalyzeToneDetect,OSCAudioAnalyzeToneDetect) \
-	OSC_CLASS_control_ak4558_h_(AudioControlAK4558,OSCAudioControlAK4558) \
-	OSC_CLASS_control_cs42448_h_(AudioControlCS42448,OSCAudioControlCS42448) \
-	OSC_CLASS_control_cs4272_h_(AudioControlCS4272,OSCAudioControlCS4272) \
-	OSC_CLASS_control_sgtl5000_h_(AudioControlSGTL5000,OSCAudioControlSGTL5000) \
-	OSC_CLASS_control_tlv320aic3206_h_(AudioControlTLV320AIC3206,OSCAudioControlTLV320AIC3206) \
-	OSC_CLASS_control_wm8731_h_(AudioControlWM8731,OSCAudioControlWM8731) \
-	OSC_CLASS_control_wm8731_h_(AudioControlWM8731master,OSCAudioControlWM8731master) \
-	OSC_CLASS_effect_bitcrusher_h_(AudioEffectBitcrusher,OSCAudioEffectBitcrusher) \
-	OSC_CLASS_effect_delay_h_(AudioEffectDelay,OSCAudioEffectDelay) \
-	OSC_CLASS_effect_delay_ext_h_(AudioEffectDelayExternal,OSCAudioEffectDelayExternal) \
-	OSC_CLASS_effect_digital_combine_h_(AudioEffectDigitalCombine,OSCAudioEffectDigitalCombine) \
-	OSC_CLASS_effect_envelope_h_(AudioEffectEnvelope,OSCAudioEffectEnvelope) \
-	OSC_CLASS_effect_expenvelope_h_(AudioEffectExpEnvelope,OSCAudioEffectExpEnvelope) \
-	OSC_CLASS_effect_fade_h_(AudioEffectFade,OSCAudioEffectFade) \
-	OSC_CLASS_effect_freeverb_h_(AudioEffectFreeverb,OSCAudioEffectFreeverb) \
-	OSC_CLASS_effect_freeverb_h_(AudioEffectFreeverbStereo,OSCAudioEffectFreeverbStereo) \
-	OSC_CLASS__effect_granular_h_(AudioEffectGranular,OSCAudioEffectGranular) \
-	OSC_CLASS_effect_midside_decode_h_(AudioEffectMidSide,OSCAudioEffectMidSide) \
-	OSC_CLASS_effect_multiply_h_(AudioEffectMultiply,OSCAudioEffectMultiply) \
-	OSC_CLASS_effect_rectifier_h_(AudioEffectRectifier,OSCAudioEffectRectifier) \
-	OSC_CLASS_effect_reverb_(AudioEffectReverb,OSCAudioEffectReverb) \
-	OSC_CLASS_effect_wavefolder_h_(AudioEffectWaveFolder,OSCAudioEffectWaveFolder) \
-	OSC_CLASS_effect_waveshaper_h_(AudioEffectWaveshaper,OSCAudioEffectWaveshaper) \
-	OSC_CLASS_filter_biquad_h_(AudioFilterBiquad,OSCAudioFilterBiquad) \
-	OSC_CLASS_filter_fir_h_(AudioFilterFIR,OSCAudioFilterFIR) \
-	OSC_CLASS_filter_ladder_h_(AudioFilterLadder,OSCAudioFilterLadder) \
-	OSC_CLASS_filter_variable_h_(AudioFilterStateVariable,OSCAudioFilterStateVariable) \
-	OSC_CLASS_input_adc_h_(AudioInputAnalog,OSCAudioInputAnalog) \
-	OSC_CLASS_input_adcs_h_(AudioInputAnalogStereo,OSCAudioInputAnalogStereo) \
-	OSC_CLASS__input_i2s_h_(AudioInputI2S,OSCAudioInputI2S) \
-	OSC_CLASS__input_i2s2_h_(AudioInputI2S2,OSCAudioInputI2S2) \
-	OSC_CLASS__input_i2s_hex_h_(AudioInputI2SHex,OSCAudioInputI2SHex) \
-	OSC_CLASS__input_i2s_oct_h_(AudioInputI2SOct,OSCAudioInputI2SOct) \
-	OSC_CLASS__input_i2s_quad_h_(AudioInputI2SQuad,OSCAudioInputI2SQuad) \
-	OSC_CLASS__input_pdm_h_(AudioInputPDM,OSCAudioInputPDM) \
-	OSC_CLASS__input_pdm_i2s2_h_(AudioInputPDM2,OSCAudioInputPDM2) \
-	OSC_CLASS__input_spdif3_h_(AudioInputSPDIF3,OSCAudioInputSPDIF3) \
-	OSC_CLASS__input_tdm_h_(AudioInputTDM,OSCAudioInputTDM) \
-	OSC_CLASS__input_tdm2_h_(AudioInputTDM2,OSCAudioInputTDM2) \
-	OSC_CLASS_mixer_h_(AudioMixer4,OSCAudioMixer4) \
-	OSC_CLASS_output_ADAT_h_(AudioOutputADAT,OSCAudioOutputADAT) \
-	OSC_CLASS_output_dac_h_(AudioOutputAnalog,OSCAudioOutputAnalog) \
-	OSC_CLASS_output_dacs_h_(AudioOutputAnalogStereo,OSCAudioOutputAnalogStereo) \
-	OSC_CLASS_output_i2s_h_(AudioOutputI2S,OSCAudioOutputI2S) \
-	OSC_CLASS_output_i2s2_h_(AudioOutputI2S2,OSCAudioOutputI2S2) \
-	OSC_CLASS_output_i2s_hex_h_(AudioOutputI2SHex,OSCAudioOutputI2SHex) \
-	OSC_CLASS_output_i2s_oct_h_(AudioOutputI2SOct,OSCAudioOutputI2SOct) \
-	OSC_CLASS_output_i2s_quad_h_(AudioOutputI2SQuad,OSCAudioOutputI2SQuad) \
-	OSC_CLASS_output_mqs_h_(AudioOutputMQS,OSCAudioOutputMQS) \
-	OSC_CLASS_output_pt8211_h_(AudioOutputPT8211,OSCAudioOutputPT8211) \
-	OSC_CLASS_output_pt8211_2_h_(AudioOutputPT8211_2,OSCAudioOutputPT8211_2) \
-	OSC_CLASS_output_pwm_h_(AudioOutputPWM,OSCAudioOutputPWM) \
-	OSC_CLASS_output_SPDIF_h_(AudioOutputSPDIF,OSCAudioOutputSPDIF) \
-	OSC_CLASS_output_SPDIF2_h_(AudioOutputSPDIF2,OSCAudioOutputSPDIF2) \
-	OSC_CLASS_output_SPDIF3_h_(AudioOutputSPDIF3,OSCAudioOutputSPDIF3) \
-	OSC_CLASS_output_tdm_h_(AudioOutputTDM,OSCAudioOutputTDM) \
-	OSC_CLASS_output_tdm2_h_(AudioOutputTDM2,OSCAudioOutputTDM2) \
-	OSC_CLASS_play_memory_h_(AudioPlayMemory,OSCAudioPlayMemory) \
-	OSC_CLASS_play_queue_h_(AudioPlayQueue,OSCAudioPlayQueue) \
-	OSC_CLASS_play_sd_raw_h_(AudioPlaySdRaw,OSCAudioPlaySdRaw) \
-	OSC_CLASS_play_sd_wav_h_(AudioPlaySdWav,OSCAudioPlaySdWav) \
-	OSC_CLASS_play_serial_raw_h_(AudioPlaySerialflashRaw,OSCAudioPlaySerialflashRaw) \
-	OSC_CLASS_record_queue_h_(AudioRecordQueue,OSCAudioRecordQueue) \
-	OSC_CLASS_synth_karplusstrong_h_(AudioSynthKarplusStrong,OSCAudioSynthKarplusStrong) \
-	OSC_CLASS_synth_pinknoise_h_(AudioSynthNoisePink,OSCAudioSynthNoisePink) \
-	OSC_CLASS_synth_whitenoise_h_(AudioSynthNoiseWhite,OSCAudioSynthNoiseWhite) \
-	OSC_CLASS__SYNTH_SIMPLE_DRUM_H_(AudioSynthSimpleDrum,OSCAudioSynthSimpleDrum) \
-	OSC_CLASS_synth_tonesweep_h_(AudioSynthToneSweep,OSCAudioSynthToneSweep) \
-	OSC_CLASS_synth_waveform_h_(AudioSynthWaveform,OSCAudioSynthWaveform) \
-	OSC_CLASS_synth_dc_h_(AudioSynthWaveformDc,OSCAudioSynthWaveformDc) \
-	OSC_CLASS_synth_waveform_h_(AudioSynthWaveformModulated,OSCAudioSynthWaveformModulated) \
-	OSC_CLASS_synth_pwm_h_(AudioSynthWaveformPWM,OSCAudioSynthWaveformPWM) \
-	OSC_CLASS_synth_sine_h_(AudioSynthWaveformSine,OSCAudioSynthWaveformSine) \
-	OSC_CLASS_synth_sine_h_(AudioSynthWaveformSineHires,OSCAudioSynthWaveformSineHires) \
-	OSC_CLASS_synth_sine_h_(AudioSynthWaveformSineModulated,OSCAudioSynthWaveformSineModulated) \
-	OSC_CLASS__synth_wavetable_h_(AudioSynthWavetable,OSCAudioSynthWavetable) \
+	OSC_CLASS_async_input_spdif3_h_(AsyncAudioInputSPDIF3,AsyncOSCAudioInputSPDIF3,AsyncOSCAudioInputSPDIF3) \
+	OSC_CLASS_mixer_h_(AudioAmplifier,OSCAudioAmplifier,noRequirementCheck) \
+	OSC_CLASS_analyze_event_h_(AudioAnalyzeEvent,OSCAudioAnalyzeEvent,noRequirementCheck) \
+	OSC_CLASS_analyze_fft1024_h_(AudioAnalyzeFFT1024,OSCAudioAnalyzeFFT1024,noRequirementCheck) \
+	OSC_CLASS_analyze_fft256_h_(AudioAnalyzeFFT256,OSCAudioAnalyzeFFT256,noRequirementCheck) \
+	OSC_CLASS_AudioAnalyzeNoteFrequency_h_(AudioAnalyzeNoteFrequency,OSCAudioAnalyzeNoteFrequency,noRequirementCheck) \
+	OSC_CLASS_analyze_peakdetect_h_(AudioAnalyzePeak,OSCAudioAnalyzePeak,noRequirementCheck) \
+	OSC_CLASS_analyze_print_h_(AudioAnalyzePrint,OSCAudioAnalyzePrint,noRequirementCheck) \
+	OSC_CLASS_analyze_rms_h_(AudioAnalyzeRMS,OSCAudioAnalyzeRMS,noRequirementCheck) \
+	OSC_CLASS_analyze_tonedetect_h_(AudioAnalyzeToneDetect,OSCAudioAnalyzeToneDetect,noRequirementCheck) \
+	OSC_CLASS_control_ak4558_h_(AudioControlAK4558,OSCAudioControlAK4558,noRequirementCheck) \
+	OSC_CLASS_control_cs42448_h_(AudioControlCS42448,OSCAudioControlCS42448,noRequirementCheck) \
+	OSC_CLASS_control_cs4272_h_(AudioControlCS4272,OSCAudioControlCS4272,noRequirementCheck) \
+	OSC_CLASS_control_sgtl5000_h_(AudioControlSGTL5000,OSCAudioControlSGTL5000,noRequirementCheck) \
+	OSC_CLASS_control_tlv320aic3206_h_(AudioControlTLV320AIC3206,OSCAudioControlTLV320AIC3206,noRequirementCheck) \
+	OSC_CLASS_control_wm8731_h_(AudioControlWM8731,OSCAudioControlWM8731,noRequirementCheck) \
+	OSC_CLASS_control_wm8731_h_(AudioControlWM8731master,OSCAudioControlWM8731master,noRequirementCheck) \
+	OSC_CLASS_effect_bitcrusher_h_(AudioEffectBitcrusher,OSCAudioEffectBitcrusher,noRequirementCheck) \
+	OSC_CLASS_effect_delay_h_(AudioEffectDelay,OSCAudioEffectDelay,noRequirementCheck) \
+	OSC_CLASS_effect_delay_ext_h_(AudioEffectDelayExternal,OSCAudioEffectDelayExternal,noRequirementCheck) \
+	OSC_CLASS_effect_digital_combine_h_(AudioEffectDigitalCombine,OSCAudioEffectDigitalCombine,noRequirementCheck) \
+	OSC_CLASS_effect_envelope_h_(AudioEffectEnvelope,OSCAudioEffectEnvelope,noRequirementCheck) \
+	OSC_CLASS_effect_expenvelope_h_(AudioEffectExpEnvelope,OSCAudioEffectExpEnvelope,noRequirementCheck) \
+	OSC_CLASS_effect_fade_h_(AudioEffectFade,OSCAudioEffectFade,noRequirementCheck) \
+	OSC_CLASS_effect_freeverb_h_(AudioEffectFreeverb,OSCAudioEffectFreeverb,noRequirementCheck) \
+	OSC_CLASS_effect_freeverb_h_(AudioEffectFreeverbStereo,OSCAudioEffectFreeverbStereo,noRequirementCheck) \
+	OSC_CLASS__effect_granular_h_(AudioEffectGranular,OSCAudioEffectGranular,noRequirementCheck) \
+	OSC_CLASS_effect_midside_decode_h_(AudioEffectMidSide,OSCAudioEffectMidSide,noRequirementCheck) \
+	OSC_CLASS_effect_multiply_h_(AudioEffectMultiply,OSCAudioEffectMultiply,noRequirementCheck) \
+	OSC_CLASS_effect_rectifier_h_(AudioEffectRectifier,OSCAudioEffectRectifier,noRequirementCheck) \
+	OSC_CLASS_effect_reverb_(AudioEffectReverb,OSCAudioEffectReverb,noRequirementCheck) \
+	OSC_CLASS_effect_wavefolder_h_(AudioEffectWaveFolder,OSCAudioEffectWaveFolder,noRequirementCheck) \
+	OSC_CLASS_effect_waveshaper_h_(AudioEffectWaveshaper,OSCAudioEffectWaveshaper,noRequirementCheck) \
+	OSC_CLASS_filter_biquad_h_(AudioFilterBiquad,OSCAudioFilterBiquad,noRequirementCheck) \
+	OSC_CLASS_filter_fir_h_(AudioFilterFIR,OSCAudioFilterFIR,noRequirementCheck) \
+	OSC_CLASS_filter_ladder_h_(AudioFilterLadder,OSCAudioFilterLadder,noRequirementCheck) \
+	OSC_CLASS_filter_variable_h_(AudioFilterStateVariable,OSCAudioFilterStateVariable,noRequirementCheck) \
+	OSC_CLASS_input_adc_h_(AudioInputAnalog,OSCAudioInputAnalog,OSCAudioInputAnalog) \
+	OSC_CLASS_input_adcs_h_(AudioInputAnalogStereo,OSCAudioInputAnalogStereo,OSCAudioInputAnalogStereo) \
+	OSC_CLASS__input_i2s_h_(AudioInputI2S,OSCAudioInputI2S,OSCAudioInputI2S) \
+	OSC_CLASS__input_i2s2_h_(AudioInputI2S2,OSCAudioInputI2S2,OSCAudioInputI2S2) \
+	OSC_CLASS__input_i2s_hex_h_(AudioInputI2SHex,OSCAudioInputI2SHex,OSCAudioInputI2SHex) \
+	OSC_CLASS__input_i2s_oct_h_(AudioInputI2SOct,OSCAudioInputI2SOct,OSCAudioInputI2SOct) \
+	OSC_CLASS__input_i2s_quad_h_(AudioInputI2SQuad,OSCAudioInputI2SQuad,OSCAudioInputI2SQuad) \
+	OSC_CLASS__input_pdm_h_(AudioInputPDM,OSCAudioInputPDM,OSCAudioInputPDM) \
+	OSC_CLASS__input_pdm_i2s2_h_(AudioInputPDM2,OSCAudioInputPDM2,OSCAudioInputPDM2) \
+	OSC_CLASS__input_spdif3_h_(AudioInputSPDIF3,OSCAudioInputSPDIF3,OSCAudioInputSPDIF3) \
+	OSC_CLASS__input_tdm_h_(AudioInputTDM,OSCAudioInputTDM,OSCAudioInputTDM) \
+	OSC_CLASS__input_tdm2_h_(AudioInputTDM2,OSCAudioInputTDM2,OSCAudioInputTDM2) \
+	OSC_CLASS_mixer_h_(AudioMixer4,OSCAudioMixer4,noRequirementCheck) \
+	OSC_CLASS_output_ADAT_h_(AudioOutputADAT,OSCAudioOutputADAT,OSCAudioOutputADAT) \
+	OSC_CLASS_output_dac_h_(AudioOutputAnalog,OSCAudioOutputAnalog,OSCAudioOutputAnalog) \
+	OSC_CLASS_output_dacs_h_(AudioOutputAnalogStereo,OSCAudioOutputAnalogStereo,OSCAudioOutputAnalogStereo) \
+	OSC_CLASS_output_i2s_h_(AudioOutputI2S,OSCAudioOutputI2S,OSCAudioOutputI2S) \
+	OSC_CLASS_output_i2s2_h_(AudioOutputI2S2,OSCAudioOutputI2S2,OSCAudioOutputI2S2) \
+	OSC_CLASS_output_i2s_hex_h_(AudioOutputI2SHex,OSCAudioOutputI2SHex,OSCAudioOutputI2SHex) \
+	OSC_CLASS_output_i2s_oct_h_(AudioOutputI2SOct,OSCAudioOutputI2SOct,OSCAudioOutputI2SOct) \
+	OSC_CLASS_output_i2s_quad_h_(AudioOutputI2SQuad,OSCAudioOutputI2SQuad,OSCAudioOutputI2SQuad) \
+	OSC_CLASS_output_mqs_h_(AudioOutputMQS,OSCAudioOutputMQS,OSCAudioOutputMQS) \
+	OSC_CLASS_output_pt8211_h_(AudioOutputPT8211,OSCAudioOutputPT8211,OSCAudioOutputPT8211) \
+	OSC_CLASS_output_pt8211_2_h_(AudioOutputPT8211_2,OSCAudioOutputPT8211_2,OSCAudioOutputPT8211_2) \
+	OSC_CLASS_output_pwm_h_(AudioOutputPWM,OSCAudioOutputPWM,OSCAudioOutputPWM) \
+	OSC_CLASS_output_SPDIF_h_(AudioOutputSPDIF,OSCAudioOutputSPDIF,OSCAudioOutputSPDIF) \
+	OSC_CLASS_output_SPDIF2_h_(AudioOutputSPDIF2,OSCAudioOutputSPDIF2,OSCAudioOutputSPDIF2) \
+	OSC_CLASS_output_SPDIF3_h_(AudioOutputSPDIF3,OSCAudioOutputSPDIF3,OSCAudioOutputSPDIF3) \
+	OSC_CLASS_output_tdm_h_(AudioOutputTDM,OSCAudioOutputTDM,OSCAudioOutputTDM) \
+	OSC_CLASS_output_tdm2_h_(AudioOutputTDM2,OSCAudioOutputTDM2,OSCAudioOutputTDM2) \
+	OSC_CLASS_play_memory_h_(AudioPlayMemory,OSCAudioPlayMemory,noRequirementCheck) \
+	OSC_CLASS_play_queue_h_(AudioPlayQueue,OSCAudioPlayQueue,noRequirementCheck) \
+	OSC_CLASS_play_sd_raw_h_(AudioPlaySdRaw,OSCAudioPlaySdRaw,noRequirementCheck) \
+	OSC_CLASS_play_sd_wav_h_(AudioPlaySdWav,OSCAudioPlaySdWav,noRequirementCheck) \
+	OSC_CLASS_play_serial_raw_h_(AudioPlaySerialflashRaw,OSCAudioPlaySerialflashRaw,noRequirementCheck) \
+	OSC_CLASS_record_queue_h_(AudioRecordQueue,OSCAudioRecordQueue,noRequirementCheck) \
+	OSC_CLASS_synth_karplusstrong_h_(AudioSynthKarplusStrong,OSCAudioSynthKarplusStrong,noRequirementCheck) \
+	OSC_CLASS_synth_pinknoise_h_(AudioSynthNoisePink,OSCAudioSynthNoisePink,noRequirementCheck) \
+	OSC_CLASS_synth_whitenoise_h_(AudioSynthNoiseWhite,OSCAudioSynthNoiseWhite,noRequirementCheck) \
+	OSC_CLASS__SYNTH_SIMPLE_DRUM_H_(AudioSynthSimpleDrum,OSCAudioSynthSimpleDrum,noRequirementCheck) \
+	OSC_CLASS_synth_tonesweep_h_(AudioSynthToneSweep,OSCAudioSynthToneSweep,noRequirementCheck) \
+	OSC_CLASS_synth_waveform_h_(AudioSynthWaveform,OSCAudioSynthWaveform,noRequirementCheck) \
+	OSC_CLASS_synth_dc_h_(AudioSynthWaveformDc,OSCAudioSynthWaveformDc,noRequirementCheck) \
+	OSC_CLASS_synth_waveform_h_(AudioSynthWaveformModulated,OSCAudioSynthWaveformModulated,noRequirementCheck) \
+	OSC_CLASS_synth_pwm_h_(AudioSynthWaveformPWM,OSCAudioSynthWaveformPWM,noRequirementCheck) \
+	OSC_CLASS_synth_sine_h_(AudioSynthWaveformSine,OSCAudioSynthWaveformSine,noRequirementCheck) \
+	OSC_CLASS_synth_sine_h_(AudioSynthWaveformSineHires,OSCAudioSynthWaveformSineHires,noRequirementCheck) \
+	OSC_CLASS_synth_sine_h_(AudioSynthWaveformSineModulated,OSCAudioSynthWaveformSineModulated,noRequirementCheck) \
+	OSC_CLASS__synth_wavetable_h_(AudioSynthWavetable,OSCAudioSynthWavetable,noRequirementCheck) \
 
+#define OSC_AUDIO_CHECK_RSRC_LIST \
+	OSC_AUDIO_CHECK_RSRC_noRequirementCheck(noRequirementCheck) \
+	OSC_AUDIO_CHECK_RSRC_async_input_spdif3_h_(AsyncOSCAudioInputSPDIF3) \
+	OSC_AUDIO_CHECK_RSRC_input_adc_h_(OSCAudioInputAnalog) \
+	OSC_AUDIO_CHECK_RSRC_input_adcs_h_(OSCAudioInputAnalogStereo) \
+	OSC_AUDIO_CHECK_RSRC__input_i2s_h_(OSCAudioInputI2S) \
+	OSC_AUDIO_CHECK_RSRC__input_i2s2_h_(OSCAudioInputI2S2) \
+	OSC_AUDIO_CHECK_RSRC__input_i2s_hex_h_(OSCAudioInputI2SHex) \
+	OSC_AUDIO_CHECK_RSRC__input_i2s_oct_h_(OSCAudioInputI2SOct) \
+	OSC_AUDIO_CHECK_RSRC__input_i2s_quad_h_(OSCAudioInputI2SQuad) \
+	OSC_AUDIO_CHECK_RSRC__input_pdm_h_(OSCAudioInputPDM) \
+	OSC_AUDIO_CHECK_RSRC__input_pdm_i2s2_h_(OSCAudioInputPDM2) \
+	OSC_AUDIO_CHECK_RSRC__input_spdif3_h_(OSCAudioInputSPDIF3) \
+	OSC_AUDIO_CHECK_RSRC__input_tdm_h_(OSCAudioInputTDM) \
+	OSC_AUDIO_CHECK_RSRC__input_tdm2_h_(OSCAudioInputTDM2) \
+	OSC_AUDIO_CHECK_RSRC_output_ADAT_h_(OSCAudioOutputADAT) \
+	OSC_AUDIO_CHECK_RSRC_output_dac_h_(OSCAudioOutputAnalog) \
+	OSC_AUDIO_CHECK_RSRC_output_dacs_h_(OSCAudioOutputAnalogStereo) \
+	OSC_AUDIO_CHECK_RSRC_output_i2s_h_(OSCAudioOutputI2S) \
+	OSC_AUDIO_CHECK_RSRC_output_i2s2_h_(OSCAudioOutputI2S2) \
+	OSC_AUDIO_CHECK_RSRC_output_i2s_hex_h_(OSCAudioOutputI2SHex) \
+	OSC_AUDIO_CHECK_RSRC_output_i2s_oct_h_(OSCAudioOutputI2SOct) \
+	OSC_AUDIO_CHECK_RSRC_output_i2s_quad_h_(OSCAudioOutputI2SQuad) \
+	OSC_AUDIO_CHECK_RSRC_output_mqs_h_(OSCAudioOutputMQS) \
+	OSC_AUDIO_CHECK_RSRC_output_pt8211_h_(OSCAudioOutputPT8211) \
+	OSC_AUDIO_CHECK_RSRC_output_pt8211_2_h_(OSCAudioOutputPT8211_2) \
+	OSC_AUDIO_CHECK_RSRC_output_pwm_h_(OSCAudioOutputPWM) \
+	OSC_AUDIO_CHECK_RSRC_output_SPDIF_h_(OSCAudioOutputSPDIF) \
+	OSC_AUDIO_CHECK_RSRC_output_SPDIF2_h_(OSCAudioOutputSPDIF2) \
+	OSC_AUDIO_CHECK_RSRC_output_SPDIF3_h_(OSCAudioOutputSPDIF3) \
+	OSC_AUDIO_CHECK_RSRC_output_tdm_h_(OSCAudioOutputTDM) \
+	OSC_AUDIO_CHECK_RSRC_output_tdm2_h_(OSCAudioOutputTDM2) \
+
+
+#endif // !defined(OSC_RSRC_TYPEDEF_ONLY)
+#endif // !defined(OSC_AUTOGEN_H)
 

@@ -65,17 +65,46 @@ class OSCAudioBase;
 class OSCAudioGroup;
 class OSCAudioConnection;
 
+
+
+// Pull in just the resource enums:
+#define OSC_RSRC_TYPEDEF_ONLY
+#if defined(DYNAMIC_AUDIO_AVAILABLE)
+#include <OSCAudioAutogen-dynamic.h>
+#else
+#include <OSCAudioAutogen-static.h>
+#endif // defined(DYNAMIC_AUDIO_AVAILABLE)
+
+typedef struct OSCAudioResourceCheck_s
+{
+	resourceType_e resource;
+	resourceSetting_e setting;
+} OSCAudioResourceCheck_t;
+#undef OSC_RSRC_TYPEDEF_ONLY
+
+
+typedef	enum {rsrcFree,rsrcShareable,rsrcThisDormant,rsrcThisActive,rsrcOther} rsrcState_e;
+
+typedef struct OSCAudioResourceSetting_s
+{
+	const OSCAudioResourceCheck_t* resArray;	//!< object index using it
+	resourceSetting_e setting;			//!< current setting
+} OSCAudioResourceSetting_t;
+
+
 typedef struct OSCAudioTypes_s {
   const char* name;	//!< the name of the [OSC]AudioStream type
 #if defined(DYNAMIC_AUDIO_AVAILABLE)
   OSCAudioBase* (*mkRoot)(const char*); //!< make object at root
   OSCAudioBase* (*mkGroup)(const char*,OSCAudioGroup&); //!< make object within group
+  rsrcState_e (*chkResource)(void);
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 } OSCAudioTypes_t;
 
 
 class OSCAudioBase : public OSCUtils
 {
+	static OSCAudioResourceSetting_t settings[rsrc_COUNT];	//!< settings etc for potentially unshareable resources
   public:
 	friend class OSCAudioConnection;
 	friend class OSCAudioGroup;
@@ -337,6 +366,8 @@ class OSCAudioBase : public OSCUtils
 	static char* sanitise(const char* src, char* dst, int offset = 0);
 	static char* trimUnderscores(const char* src, char* dst);
     static void routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& reply);
+	static rsrcState_e checkResource(const OSCAudioResourceCheck_t*,int, rsrcState_e);
+	static rsrcState_e claimResource(const OSCAudioResourceCheck_t*,int, rsrcState_e);
 	
 	
 //protected:
@@ -492,5 +523,6 @@ class OSCAudioGroup : public OSCAudioBase
 #else
 #include <OSCAudioAutogen-static.h>
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
+
 
 #endif // !defined(_OSCAUDIOBASE_H_)

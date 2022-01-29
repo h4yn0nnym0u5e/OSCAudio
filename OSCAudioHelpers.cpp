@@ -27,6 +27,7 @@
  * THE SOFTWARE.
  */
 
+#define OSC_RSRC_ENABLE_DEFINE_ARRAYS
 #include "OSCAudioHelpers.h"
 
 static void* getSpace(void** pptr,size_t len, size_t oldLen)

@@ -29,14 +29,15 @@
 
 #include "OSCAudioBase.h"
 OSCAudioBase* OSCAudioBase::first_route = NULL;
+OSCAudioResourceSetting_t OSCAudioBase::settings[rsrc_COUNT] = {0};
 
 
 /* ******************************************************************
  * Generate an array with the names of all the available AudioStream-derived objects,
  * together with pointers to the functions to call to create instances of each.
  */
-#if defined(DYNAMIC_AUDIO_AVAILABLE) // build create tables
-#define OSC_CLASS(a,o) \
+#if defined(DYNAMIC_AUDIO_AVAILABLE) // build create functions
+#define OSC_CLASS(a,o,c) \
 OSCAudioBase* mk1_##o(const char* nm) {return (OSCAudioBase*) new o(nm);} \
 OSCAudioBase* mk2_##o(const char* nm,OSCAudioGroup& grp) {return (OSCAudioBase*) new o(nm,grp);} 
 OSC_AUDIO_CLASSES
@@ -52,7 +53,15 @@ OSCAudioBase* mk1_AudioMixerStereo(const char* nm, unsigned char ninputs) {retur
 OSCAudioBase* mk2_AudioMixerStereo(const char* nm, OSCAudioGroup& grp, unsigned char ninputs) {return (OSCAudioBase*) new OSCAudioMixerStereo(nm,grp,ninputs);} 
 #endif // defined(MULTI_CENTRED)
 
-#define OSC_CLASS(a,o) {#a,mk1_##o,mk2_##o},
+// some classes need resource checks
+#define OSC_AUDIO_CHECK_RSRC_noRequirementCheck(...)
+#define checkResource_noRequirementCheck NULL
+#define OSC_AUDIO_CHECK_RSRC(c) rsrcState_e checkResource_##c(void) {return OSCAudioBase::claimResource(c::resources,COUNT_OF(c::resources),c::rsrcState);}
+OSC_AUDIO_CHECK_RSRC_LIST
+#undef OSC_AUDIO_CHECK_RSRC
+
+// build table of pointers to creation functions
+#define OSC_CLASS(a,o,c) {#a,mk1_##o,mk2_##o,checkResource_##c},
 const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
   OSC_AUDIO_CLASSES
 };
@@ -60,7 +69,7 @@ const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
 
 #else // no dynamic audio, just a list of class names
 	
-#define OSC_CLASS(a,o) {#a},
+#define OSC_CLASS(a,o,c) {#a},
 const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
   OSC_AUDIO_CLASSES
 };
@@ -485,50 +494,59 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 		retval = OSCAudioBase::DUPLICATE_NAME;
 	else
 	{
-		if (NULL == parent) // create at root
+		rsrcState_e rsrcState = rsrcFree;
+		if (NULL != OSCAudioBase::audioTypes[objIdx].chkResource) // if it needs claiming...
+			rsrcState = OSCAudioBase::audioTypes[objIdx].chkResource(); // ...try to claim
+			
+		if (rsrcState >= rsrcThisActive) // can't create, clashes
+			retval = OSCAudioBase::IN_USE;
+		else // OK, create it!
 		{
-			switch (objIdx)
+			if (NULL == parent) // create at root
 			{
-			  default:
-				pNewObj = OSCAudioBase::audioTypes[objIdx].mkRoot(objName+1);
-				break;
-					
-			  case AUDIOMIXER_INDEX:
-				if (mixerSize > 0)
-					pNewObj = mk1_AudioMixer(objName+1,mixerSize);
-				break;
-					
-			  case AUDIOMIXERSTEREO_INDEX:
-				if (mixerSize > 0)
-					pNewObj = mk1_AudioMixerStereo(objName+1,mixerSize);
-				break;
-					
-			  case CONNECTION_INDEX:
-				pNewObj = new OSCAudioConnection(objName+1);
-				break;
+				switch (objIdx)
+				{
+				  default:
+					pNewObj = OSCAudioBase::audioTypes[objIdx].mkRoot(objName+1);
+					break;
+						
+				  case AUDIOMIXER_INDEX:
+					if (mixerSize > 0)
+						pNewObj = mk1_AudioMixer(objName+1,mixerSize);
+					break;
+						
+				  case AUDIOMIXERSTEREO_INDEX:
+					if (mixerSize > 0)
+						pNewObj = mk1_AudioMixerStereo(objName+1,mixerSize);
+					break;
+						
+				  case CONNECTION_INDEX:
+					pNewObj = new OSCAudioConnection(objName+1);
+					break;
+				}
 			}
-		}
-		else // create in a group
-		{
-			switch (objIdx)
+			else // create in a group
 			{
-			  default:
-				pNewObj = OSCAudioBase::audioTypes[objIdx].mkGroup(objName+1,*((OSCAudioGroup*) parent));
-				break;
-				
-			  case AUDIOMIXER_INDEX:
-				if (mixerSize > 0)
-					pNewObj = mk2_AudioMixer(objName+1,*((OSCAudioGroup*) parent),mixerSize);
-				break;
-				
-			  case AUDIOMIXERSTEREO_INDEX:
-				if (mixerSize > 0)
-					pNewObj = mk2_AudioMixerStereo(objName+1,*((OSCAudioGroup*) parent),mixerSize);
-				break;
-				
-			  case CONNECTION_INDEX:
-				pNewObj = new OSCAudioConnection(objName+1,*((OSCAudioGroup*) parent));
-				break;
+				switch (objIdx)
+				{
+				  default:
+					pNewObj = OSCAudioBase::audioTypes[objIdx].mkGroup(objName+1,*((OSCAudioGroup*) parent));
+					break;
+					
+				  case AUDIOMIXER_INDEX:
+					if (mixerSize > 0)
+						pNewObj = mk2_AudioMixer(objName+1,*((OSCAudioGroup*) parent),mixerSize);
+					break;
+					
+				  case AUDIOMIXERSTEREO_INDEX:
+					if (mixerSize > 0)
+						pNewObj = mk2_AudioMixerStereo(objName+1,*((OSCAudioGroup*) parent),mixerSize);
+					break;
+					
+				  case CONNECTION_INDEX:
+					pNewObj = new OSCAudioConnection(objName+1,*((OSCAudioGroup*) parent));
+					break;
+				}
 			}
 		}
 		
@@ -560,6 +578,71 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 }
 #endif // defined(DISABLE_FULL_DYNAMIC)
 //-------------------------------------------------------------------------------------------------------
+
+
+/**
+ * Check to see if a resource is available for use.
+ * It will not be if it's not possible to share it, or if the required settings differ from
+ * those currently in place.
+ */
+rsrcState_e OSCAudioBase::checkResource(const OSCAudioResourceCheck_t* reqRsrc,  	//!< resources needed
+													  int nRsrc,			//!< count of resources
+													  rsrcState_e curState)	//!< current state
+{
+	rsrcState_e result = rsrcFree;
+	
+	for (int i=0;i<nRsrc && result < rsrcThisActive;i++)
+	{
+		resourceSetting_e setting = settings[reqRsrc[i].resource].setting; // get current setting
+		
+		switch (setting)
+		{
+			case setgAvailable: // not in use, OK
+				break;
+				
+			case setgUnshareable: // in use, not shareable
+				if (settings[reqRsrc[i].resource].resArray != reqRsrc) // not us using it, either
+					result = rsrcOther; // can't use
+				else
+					result = curState;  // OK if our first use or we're dormant; not OK if we're active
+			
+			default: // some other setting
+				if (settings[reqRsrc[i].resource].resArray != reqRsrc) // not us using it
+				{
+					if (settings[reqRsrc[i].resource].setting != reqRsrc[i].setting) // are settings different?
+						result = rsrcOther; // yup, can't use it
+				}
+				break;
+		}		
+	}
+	
+	return result;
+}
+
+
+/**
+ * Claim a resource if it's available for use.
+ * It will not be if it's not possible to share it, or if the required settings differ from
+ * those currently in place.
+ */
+rsrcState_e OSCAudioBase::claimResource(const OSCAudioResourceCheck_t* reqRsrc,  	//!< resources needed
+													  int nRsrc,			//!< count of resources
+													  rsrcState_e curState)	//!< current state
+{
+	rsrcState_e result = checkResource(reqRsrc,nRsrc,curState);
+	if (result < rsrcThisActive) // if we can claim it
+	{
+		for (int i=0;i<nRsrc && result < rsrcThisActive;i++)
+		{
+			settings[reqRsrc[i].resource].setting = reqRsrc[i].setting; // set current setting
+			settings[reqRsrc[i].resource].resArray = reqRsrc; //and which object is using it
+		}
+	}
+	return result;
+}
+
+
+
 struct crObContext_s {int objIdx; const char* name; OSCAudioBase::error retval; int mixerSize;};
 void createObjectCB(OSCAudioBase* parent,OSCMessage& msg,int offset,void* ctxt)
 {
