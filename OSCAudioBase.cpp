@@ -666,7 +666,7 @@ void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 	int objIdx;
 	int mixerSize = -1;
 	int ml = msg.size() - 1;
-	bool isRoot = ml<2;
+	bool isRoot = !(ml>1 && msg.isString(2)); // sss or sssi, but not ssi, are group creates
 	
 	typ = getMessageString(msg,0,alloca(msg.getDataLength(0)));
 	objName = getMessageString(msg,1,alloca(msg.getDataLength(1)+1),true);
@@ -680,13 +680,11 @@ void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 			{
 				mixerSize = msg.getInt(ml); // get mixer width
 				objIdx = AUDIOMIXER_INDEX;
-				isRoot = ml<3;
 			}
 			else if (msg.isInt(ml) && 0 == strcmp(AudioMixerStereoName,typ)) // last parameter is an integer? variable width mixer?
 			{
 				mixerSize = msg.getInt(ml); // get mixer width
 				objIdx = AUDIOMIXERSTEREO_INDEX;
-				isRoot = ml<3;
 			}
 		}
 		

@@ -43,7 +43,14 @@
  
 
 #define noOSC_DEBUG_PRINT
+#if !defined(DEBUG_SER)
 #if defined(OSC_DEBUG_PRINT)
+// might have previous "no debug" definition
+#undef OSC_SPRT
+#undef OSC_SPLN
+#undef OSC_SPTF
+#undef OSC_SFSH
+#undef OSC_DBGP
 #define DEBUG_SER Serial
 #define OSC_SPRT(...) DEBUG_SER.print(__VA_ARGS__)
 #define OSC_SPLN(...) DEBUG_SER.println(__VA_ARGS__)
@@ -57,6 +64,7 @@
 #define OSC_SFSH(...)
 #define OSC_DBGP(...)
 #endif // defined(OSC_DEBUG_PRINT)
+#endif // !defined(DEBUG_SER)
 
 extern void listObjects(void);
 

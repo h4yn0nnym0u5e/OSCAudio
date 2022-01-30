@@ -47,6 +47,9 @@
 //#include "dynamic-util.h"
 #include "OSCAudioBase.h"
 
+#define LIST_OBJECTS true
+void listObjects(void) {listObjects(LIST_OBJECTS);}
+
 #define noOSC_USE_USB_SERIAL
 #if defined(OSC_USE_USB_SERIAL)
 // set this to the USB serial port you wish to use
@@ -88,7 +91,7 @@ void setup() {
   AudioMemory(50); // no idea what we'll need, so allow plenty
   //-------------------------------
   //testSanitise();
-  listObjects();
+  listObjects(LIST_OBJECTS);
   //listAllTypes();
 }
 
@@ -278,7 +281,7 @@ void updateOSC()
       {
         processBundle(bndl,reply);
         sendReply(reply);
-        listObjects();
+        listObjects(LIST_OBJECTS);
       }
       else 
       {
@@ -286,7 +289,7 @@ void updateOSC()
         {
           processMessage(&msg,reply);   
           sendReply(reply);
-          listObjects();
+          listObjects(LIST_OBJECTS);
         }
       }
       Serial.println();

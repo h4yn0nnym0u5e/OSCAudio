@@ -74,17 +74,19 @@ void listObjects(OSCAudioBase* obj,int indent=0)
   depth--;
   if (0 == depth && !locked)
     count = 0;
-  Serial.printf("Count: %d\n",count);
+  //Serial.printf("Count: %d\n",count);
 }
 
 
-void listObjectsx(void)
+void listObjects(bool doit)
 {
-  listObjects(OSCAudioBase::getFirst());
-  Serial.println("--------------\n");
+  if (doit)
+  {
+    listObjects(OSCAudioBase::getFirst());
+    Serial.println("--------------\n");
+  }
 }
 
-void listObjects(void){}
 
 //=============================================================
 void goFind(OSCMessage& msg,int o,int md,OSCAudioBase* ooi)
