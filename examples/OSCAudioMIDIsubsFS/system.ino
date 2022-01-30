@@ -44,12 +44,20 @@ void printStack(OSCMessage& repl)
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
+#if defined(ARDUINO_TEENSY41) || defined(ARDUINO_TEENSY40)
+extern uint8_t _heap_start,_heap_end;
+#define HEAP_START &_heap_start
+#define HEAP_END   &_heap_end
+#else
 extern uint8_t __bss_end;
+#define HEAP_START &__bss_end
+#define HEAP_END   (&_estack - 4096) // guess - allow 4k stack
+#endif
 void printHeap(OSCMessage& repl)
 {
   char* a = (char*) malloc(10000);
-  int u = ((uint32_t) a) - ((uint32_t) &__bss_end);
-  int f = ((uint32_t) &a) - ((uint32_t) a);
+  int u = ((uint32_t) a) - ((uint32_t) HEAP_START);
+  int f = ((uint32_t) HEAP_END) - ((uint32_t) a);
   Serial.printf("Heap used %lu bytes; free %lu bytes\n",u,f);  
   free(a);
   repl.add(u).add(f);
@@ -69,7 +77,7 @@ void printAudioMax(OSCMessage& repl,bool res = false)
 {
   int blocks = AudioMemoryUsageMax();
   float cpu = AudioProcessorUsageMax();
-  Serial.printf("Max memory used %d blocks; max CPU %f\n",blocks,cpu);  
+  Serial.printf("Max memory used %d blocks; max CPU %.2f\n",blocks,cpu);  
   repl.add(blocks).add(cpu);
 
   if (res)
