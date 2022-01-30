@@ -129,6 +129,14 @@ void routeSub(OSCMessage& msg, int addressOffset)
 
 
 //-----------------------------------------------------------------------------------------------------------------
+// route messages to system functions
+void routeSys(OSCMessage& msg, int addressOffset)
+{
+  routeSystem(msg,addressOffset,*replyStack);
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------
 // Process a message. Because we can only extract messages from a bundle 
 // by address, we have to accept a pointer rather than a reference
 void processMessage(OSCMessage* msg,OSCBundle& reply)
@@ -151,7 +159,7 @@ void processMessage(OSCMessage* msg,OSCBundle& reply)
       if (!msg->route("/teensy*/dynamic",routeDynamic))               // or this one
         if(!msg->route("/teensy*/fs",routeFS))                        // or this one
           if(!msg->route("/teensy*/subscribe",routeSub))              // or this one
-            if(!msg->route("/teensy*/system",routeSystem))            // or this one
+            if(!msg->route("/teensy*/system",routeSys))               // or this one
               reply.getOSCMessage(0)->add(OSCAudioBase::NOT_ROUTED);  // got no takers - say so
   }
   else
@@ -271,7 +279,6 @@ void updateOSC()
         processBundle(bndl,reply);
         sendReply(reply);
         listObjects();
-        delete bndl;
       }
       else 
       {
@@ -283,6 +290,7 @@ void updateOSC()
         }
       }
       Serial.println();
+      delete bndl;
       state = boot;
       break;
   }

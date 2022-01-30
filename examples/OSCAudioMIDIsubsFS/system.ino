@@ -35,11 +35,74 @@
 
 
 //------------------------------------------------------------------------------------------------------------------------------
-// route messages to system:
-void routeSystem(OSCMessage& msg, int addressOffset)
+extern uint8_t _estack;
+void printStack(OSCMessage& repl)
 {
+  int a = ((uint32_t) &_estack) - ((uint32_t) &a);
+  Serial.printf("Stack used %lu bytes\n",a);  
+  repl.add(a);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+extern uint8_t __bss_end;
+void printHeap(OSCMessage& repl)
+{
+  char* a = (char*) malloc(10000);
+  int u = ((uint32_t) a) - ((uint32_t) &__bss_end);
+  int f = ((uint32_t) &a) - ((uint32_t) a);
+  Serial.printf("Heap used %lu bytes; free %lu bytes\n",u,f);  
+  free(a);
+  repl.add(u).add(f);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+void printAudioCurrent(OSCMessage& repl)
+{
+  int blocks = AudioMemoryUsage();
+  float cpu = AudioProcessorUsage();
+  Serial.printf("Memory used %d blocks; CPU %f\n",blocks,cpu);  
+  repl.add(blocks).add(cpu);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
+void printAudioMax(OSCMessage& repl,bool res = false)
+{
+  int blocks = AudioMemoryUsageMax();
+  float cpu = AudioProcessorUsageMax();
+  Serial.printf("Max memory used %d blocks; max CPU %f\n",blocks,cpu);  
+  repl.add(blocks).add(cpu);
+
+  if (res)
+  {
+    AudioMemoryUsageMaxReset();
+    AudioProcessorUsageMaxReset();
+  }
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------
+// route messages to system:
+void routeSystem(OSCMessage& msg, int addressOffset,OSCBundle& reply)
+{
+   OSCMessage& repl = OSCAudioBase::staticPrepareReplyResult(msg,*replyStack);
+   
   Serial.println("system message!"); Serial.flush();
-  if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/reset",""))
+  if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/reset",NULL))
     WRITE_RESTART(0x5FA0004);
+  else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/stack",NULL))
+    printStack(repl);
+  else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/heap",NULL))
+    printHeap(repl);
+  else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/usage",NULL))
+    printAudioCurrent(repl);
+  else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/max","*"))
+  {
+    bool res = false;
+    if (msg.size() > 0)
+      res = msg.getBoolean(0);
+    printAudioMax(repl,res);
+  }
+
+  repl.add(0);
 }
 //-----------------------------------------------------------------------------------------------------------------
