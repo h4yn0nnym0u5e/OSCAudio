@@ -966,6 +966,20 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 			{
 				int connResult = connect(*src,(int) srcp,*dst,(int) dstp); // make the audio connection
 				sprintf(buf,"%s:%d -> %s:%d (%d)",srcn,srcp,dstn,dstp,connResult);
+				switch (connResult) // this may be unreliable, result numbers are not really supported
+				{
+					case 0: // OK
+						break;
+					
+					case 4: // destination in use
+					case 6: // connection already in place
+						retval = IN_USE;
+						break;
+						
+					default: // object or input number not found
+						retval = NOT_FOUND;
+						break;
+				}
 				mkLinks(*srcB,*dstB); // make the OSC linkages
 			}
 			else
