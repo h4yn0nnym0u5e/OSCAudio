@@ -77,7 +77,7 @@ void printAudioMax(OSCMessage& repl,bool res = false)
 {
   int blocks = AudioMemoryUsageMax();
   float cpu = AudioProcessorUsageMax();
-  Serial.printf("Max memory used %d blocks; max CPU %.2f\n",blocks,cpu);  
+  Serial.printf("Max memory used %d blocks; max CPU %.2f%s\n",blocks,cpu,res?" reset":"");  
   repl.add(blocks).add(cpu);
 
   if (res)

@@ -123,7 +123,7 @@ if 1:
     # set mixer gains to something vaguely sane   
     for i in range(0,poly):
         msgl += [OSCpackAuto('/teensy1/audio/mixer/gain',i,0.16)]
-        msgl += [OSCpackAuto('/teensy1/audio/mixer/pan',i,2.0*float(i)/(poly - 1)-1.0)]
+        msgl += [OSCpackAuto('/teensy1/audio/mixer/pan',i,(2.0*float(i)/(poly - 1)-1.0)*0.9)]
         msgl += [OSCpackAuto('/teensy1/audio/voice1/i*/mixer/ga',i,0.5)]
 
     # root-level connections
