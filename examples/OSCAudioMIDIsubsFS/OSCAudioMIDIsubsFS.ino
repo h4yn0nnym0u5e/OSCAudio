@@ -47,7 +47,7 @@
 //#include "dynamic-util.h"
 #include "OSCAudioBase.h"
 
-#define LIST_OBJECTS true
+#define LIST_OBJECTS false
 void listObjects(void) {listObjects(LIST_OBJECTS);}
 
 #define noOSC_USE_USB_SERIAL
@@ -78,6 +78,7 @@ void setup() {
   initFS();
   initMIDI();
   initSubscribe();
+  initSynth();
   
   if (CrashReport)
   {
@@ -166,7 +167,10 @@ void processMessage(OSCMessage* msg,OSCBundle& reply)
               reply.getOSCMessage(0)->add(OSCAudioBase::NOT_ROUTED);  // got no takers - say so
   }
   else
+  {
     Serial.println("error in msg");
+    reply.getOSCMessage(0)->add(OSCAudioBase::NOT_ROUTED);
+  }
   
   replyStack = replyPush;
 }

@@ -28,8 +28,12 @@
  */
 
 #include "OSCAudioBase.h"
+
+// class-static variables:
 OSCAudioBase* OSCAudioBase::first_route = NULL;
+#if defined(DYNAMIC_AUDIO_AVAILABLE) // build create functions
 OSCAudioResourceSetting_t OSCAudioBase::settings[rsrc_COUNT] = {0};
+#endif // defined(DYNAMIC_AUDIO_AVAILABLE) // build create functions
 
 
 /* ******************************************************************
@@ -69,7 +73,7 @@ const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
 
 #else // no dynamic audio, just a list of class names
 	
-#define OSC_CLASS(a,o,c) {#a},
+#define OSC_CLASS(a) {#a},
 const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
   OSC_AUDIO_CLASSES
 };

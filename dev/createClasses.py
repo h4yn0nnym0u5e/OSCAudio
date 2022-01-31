@@ -10,8 +10,8 @@ ftrl = ['play_wav' # files to reject
         ]
 
 limit = 1000
-rp = '..'
-idxf = '../gui/index.html'
+rp = '../../Audio'
+idxf = '../../Audio/gui/index.html'
 
 ##############################################################################################
 def printFn(base,fnT):
@@ -280,6 +280,7 @@ def mkClass(cn,fd):
 {{
     public:
         {cno}(const char* _name{cp}) : {cinit} OSCAudioBase(_name, (AudioStream*) this){init} {{}}
+        {cno}(const char* _name, OSCAudioGroup& grp{cp}) : {cinit} OSCAudioBase(_name, grp, (AudioStream*) this){init} {{{ctorBody}}}
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {{
@@ -508,7 +509,10 @@ fi.close()
 # more special cases
 if not dynamic:
     for cl in notD:
-        del d[cl]
+        try:
+            del d[cl]
+        except:
+            pass
 
 #############################################################################################################
 # Output file

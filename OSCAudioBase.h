@@ -74,15 +74,12 @@ class OSCAudioGroup;
 class OSCAudioConnection;
 
 
-
+#if defined(DYNAMIC_AUDIO_AVAILABLE)
 // Pull in just the resource enums:
 #define OSC_RSRC_TYPEDEF_ONLY
-#if defined(DYNAMIC_AUDIO_AVAILABLE)
 #include <OSCAudioAutogen-dynamic.h>
-#else
-#include <OSCAudioAutogen-static.h>
-#endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 
+//! Setting of a resource required for an object
 typedef struct OSCAudioResourceCheck_s
 {
 	resourceType_e resource;
@@ -91,13 +88,20 @@ typedef struct OSCAudioResourceCheck_s
 #undef OSC_RSRC_TYPEDEF_ONLY
 
 
-typedef	enum {rsrcFree,rsrcShareable,rsrcThisDormant,rsrcThisActive,rsrcOther} rsrcState_e;
+//! Current staus of a resource
+typedef	enum {rsrcFree,			//!< not in use
+			  rsrcShareable,	//!< shareable
+			  rsrcThisDormant,	//!< in use by dormant copy of this object
+			  rsrcThisActive,	//!< in use by active copy of this object
+			  rsrcOther			//!< in use by a different object type
+} rsrcState_e;
 
 typedef struct OSCAudioResourceSetting_s
 {
 	const OSCAudioResourceCheck_t* resArray;	//!< object index using it
-	resourceSetting_e setting;			//!< current setting
+	resourceSetting_e setting;					//!< current setting
 } OSCAudioResourceSetting_t;
+#endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 
 
 typedef struct OSCAudioTypes_s {
@@ -112,7 +116,6 @@ typedef struct OSCAudioTypes_s {
 
 class OSCAudioBase : public OSCUtils
 {
-	static OSCAudioResourceSetting_t settings[rsrc_COUNT];	//!< settings etc for potentially unshareable resources
   public:
 	friend class OSCAudioConnection;
 	friend class OSCAudioGroup;
@@ -374,8 +377,6 @@ class OSCAudioBase : public OSCUtils
 	static char* sanitise(const char* src, char* dst, int offset = 0);
 	static char* trimUnderscores(const char* src, char* dst);
     static void routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& reply);
-	static rsrcState_e checkResource(const OSCAudioResourceCheck_t*,int, rsrcState_e);
-	static rsrcState_e claimResource(const OSCAudioResourceCheck_t*,int, rsrcState_e);
 	
 	
 //protected:
@@ -432,6 +433,8 @@ class OSCAudioBase : public OSCUtils
 	
 #if defined(DYNAMIC_AUDIO_AVAILABLE)
 //============================== Dynamic Audio Objects ==================================================
+	static rsrcState_e checkResource(const OSCAudioResourceCheck_t*,int, rsrcState_e);
+	static rsrcState_e claimResource(const OSCAudioResourceCheck_t*,int, rsrcState_e);
     
   private:
 	// dynamic audio objects:
@@ -440,6 +443,9 @@ class OSCAudioBase : public OSCUtils
 	static void createGroup(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 	static void destroyObject(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 	static void clearAllObjects(OSCMessage& msg, int addressOffset, OSCBundle& reply);
+
+	// resource checking
+	static OSCAudioResourceSetting_t settings[rsrc_COUNT];	//!< settings etc for potentially unshareable resources
 	
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)	
 };
@@ -462,9 +468,17 @@ class OSCAudioConnection : public OSCAudioBase, public AudioConnection
 		pSrcParent(NULL),pDstParent(NULL),next_src(NULL),next_dst(NULL)  
 		{}
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
-		
+
+	// construct at root
 	OSCAudioConnection(const char* _name, OSCAudioBase& src, uint8_t srcO, OSCAudioBase& dst, uint8_t dstI) 
 		:  OSCAudioBase(_name),AudioConnection(*src.sibling,srcO,*dst.sibling,dstI),
+		pSrcParent(NULL),pDstParent(NULL) ,next_src(NULL),next_dst(NULL) 
+		{mkLinks(src,dst);}
+				
+	// construct in group
+	OSCAudioConnection(const char* _name, OSCAudioBase& first,
+					   OSCAudioBase& src, uint8_t srcO, OSCAudioBase& dst, uint8_t dstI) 
+		:  OSCAudioBase(_name, first),AudioConnection(*src.sibling,srcO,*dst.sibling,dstI),
 		pSrcParent(NULL),pDstParent(NULL) ,next_src(NULL),next_dst(NULL) 
 		{mkLinks(src,dst);}
 				

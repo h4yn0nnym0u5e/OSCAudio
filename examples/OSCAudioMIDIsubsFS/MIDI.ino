@@ -84,7 +84,7 @@ byte pending[VOICES];
 // mark slot as "taken" by this note.
 int allocateMIDI(byte note)
 {
-  size_t i;
+  int i;
   for (i=COUNT_OF(allocate)-1;i>=0;i--)
     if (AVAIL == allocate[i] || note == allocate[i])
     {
@@ -191,7 +191,7 @@ void pollMIDIstopWav()
         envActive = reply.getOSCMessage(0)->getBoolean(2);
         if (!envActive)
         {
-          Serial.println("Env inactive!");
+//Serial.printf("Env %d inactive!\n",i);
           pending[i] = AVAIL;
           bndl.empty();
           reply.empty();
@@ -219,7 +219,7 @@ void OSCnoteOff(byte channel, byte note, byte velocity)
   OSCBundle reply;
   int slot = deallocateMIDI(note);
 
-  //Serial.print("\nNote off: ");
+//Serial.print("\nNote off: ");
   dbgMIDI(channel,0x90,note,velocity);    
 
   if (slot >= 0)
@@ -284,8 +284,8 @@ void handleCC(byte channel, byte control, byte value)
       OSCBundle reply;
       
       pw = (value+1) / 256.0; // go from 0.39% to 50%
-      //Serial.print("pulse width = ");
-      //Serial.println(pw);
+//Serial.print("pulse width = ");
+//Serial.println(pw);
 #if !defined(USE_GROUPS)    
       bndl.add("/teensy1/audio/wav*/pul").add(pw); 
 #else    
