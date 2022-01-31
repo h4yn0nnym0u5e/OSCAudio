@@ -481,7 +481,8 @@ class OSCAudioConnection : public OSCAudioBase, public AudioConnection
 		:  OSCAudioBase(_name, first),AudioConnection(*src.sibling,srcO,*dst.sibling,dstI),
 		pSrcParent(NULL),pDstParent(NULL) ,next_src(NULL),next_dst(NULL) 
 		{mkLinks(src,dst);}
-				
+	
+	// root
 	OSCAudioConnection(const char* _name, OSCAudioBase* src, uint8_t srcO, OSCAudioBase* dst, uint8_t dstI) 
 		:  OSCAudioConnection(_name,*src,srcO,*dst,dstI) {}
 		
@@ -490,6 +491,19 @@ class OSCAudioConnection : public OSCAudioBase, public AudioConnection
 		
 	OSCAudioConnection(const char* _name, OSCAudioBase* src, OSCAudioBase* dst) 
 		:  OSCAudioConnection(_name,*src,*dst) {}
+		
+	// group			
+	OSCAudioConnection(const char* _name, OSCAudioBase& first,
+						OSCAudioBase* src, uint8_t srcO, OSCAudioBase* dst, uint8_t dstI) 
+		:  OSCAudioConnection(_name, first, *src,srcO,*dst,dstI) {}
+		
+	OSCAudioConnection(const char* _name, OSCAudioBase& first,
+					   OSCAudioBase& src, OSCAudioBase& dst) 
+		:  OSCAudioConnection(_name,first,src,0,dst,0) {}
+		
+	OSCAudioConnection(const char* _name, OSCAudioBase& first,
+					   OSCAudioBase* src, OSCAudioBase* dst) 
+		:  OSCAudioConnection(_name,first,*src,*dst) {}
 		
 		
 	~OSCAudioConnection();

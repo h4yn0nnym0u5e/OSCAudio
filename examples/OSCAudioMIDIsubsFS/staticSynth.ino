@@ -66,6 +66,7 @@ void initSynth(void)
     mixer->gain(1,0.5f);
     outMix->gain(i%4,0.16f);
   }
+  Serial.println("Created 6-voice synth");
 }
 #else
 void initSynth(void) {}
