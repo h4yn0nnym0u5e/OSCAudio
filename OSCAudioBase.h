@@ -433,6 +433,7 @@ class OSCAudioBase : public OSCUtils
 	
 #if defined(DYNAMIC_AUDIO_AVAILABLE)
 //============================== Dynamic Audio Objects ==================================================
+  public:
 	static rsrcState_e checkResource(const OSCAudioResourceCheck_t*,int, rsrcState_e);
 	static rsrcState_e claimResource(const OSCAudioResourceCheck_t*,int, rsrcState_e);
     
