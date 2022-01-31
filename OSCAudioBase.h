@@ -30,7 +30,7 @@
 #if !defined(_OSCAUDIOBASE_H_)
 #define _OSCAUDIOBASE_H_
 
-#include <OSCBundle.h>
+#include <OSCUtils.h>
 #include <Audio.h>
 
 #if defined(SAFE_RELEASE)  // only defined in Dynamic Audio Objects library
@@ -43,7 +43,14 @@
  
 
 #define noOSC_DEBUG_PRINT
+#if !defined(DEBUG_SER)
 #if defined(OSC_DEBUG_PRINT)
+// might have previous "no debug" definition
+#undef OSC_SPRT
+#undef OSC_SPLN
+#undef OSC_SPTF
+#undef OSC_SFSH
+#undef OSC_DBGP
 #define DEBUG_SER Serial
 #define OSC_SPRT(...) DEBUG_SER.print(__VA_ARGS__)
 #define OSC_SPLN(...) DEBUG_SER.println(__VA_ARGS__)
@@ -57,6 +64,7 @@
 #define OSC_SFSH(...)
 #define OSC_DBGP(...)
 #endif // defined(OSC_DEBUG_PRINT)
+#endif // !defined(DEBUG_SER)
 
 extern void listObjects(void);
 
@@ -65,17 +73,46 @@ class OSCAudioBase;
 class OSCAudioGroup;
 class OSCAudioConnection;
 
+
+
+// Pull in just the resource enums:
+#define OSC_RSRC_TYPEDEF_ONLY
+#if defined(DYNAMIC_AUDIO_AVAILABLE)
+#include <OSCAudioAutogen-dynamic.h>
+#else
+#include <OSCAudioAutogen-static.h>
+#endif // defined(DYNAMIC_AUDIO_AVAILABLE)
+
+typedef struct OSCAudioResourceCheck_s
+{
+	resourceType_e resource;
+	resourceSetting_e setting;
+} OSCAudioResourceCheck_t;
+#undef OSC_RSRC_TYPEDEF_ONLY
+
+
+typedef	enum {rsrcFree,rsrcShareable,rsrcThisDormant,rsrcThisActive,rsrcOther} rsrcState_e;
+
+typedef struct OSCAudioResourceSetting_s
+{
+	const OSCAudioResourceCheck_t* resArray;	//!< object index using it
+	resourceSetting_e setting;			//!< current setting
+} OSCAudioResourceSetting_t;
+
+
 typedef struct OSCAudioTypes_s {
   const char* name;	//!< the name of the [OSC]AudioStream type
 #if defined(DYNAMIC_AUDIO_AVAILABLE)
   OSCAudioBase* (*mkRoot)(const char*); //!< make object at root
   OSCAudioBase* (*mkGroup)(const char*,OSCAudioGroup&); //!< make object within group
+  rsrcState_e (*chkResource)(void);
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 } OSCAudioTypes_t;
 
 
-class OSCAudioBase
+class OSCAudioBase : public OSCUtils
 {
+	static OSCAudioResourceSetting_t settings[rsrc_COUNT];	//!< settings etc for potentially unshareable resources
   public:
 	friend class OSCAudioConnection;
 	friend class OSCAudioGroup;
@@ -103,12 +140,9 @@ class OSCAudioBase
 	
     
     virtual ~OSCAudioBase() {OSC_SPTF("dtor for %s at %08X!\n",name,(uint32_t) this); OSC_SFSH(); if (NULL != name) free(name); linkOut(); }
-    virtual void route(OSCMessage& msg, int addressOffset, OSCBundle&)=0;
     char* name;
     size_t nameLen;
 	AudioStream* sibling;
-	enum error {OK,NOT_FOUND,BLANK_NAME,DUPLICATE_NAME,NO_DYNAMIC,NO_MEMORY, // 0-5
-				AMBIGUOUS_PATH,NOT_ROUTED,INVALID_METHOD,NOT_CONNECTED}; // 6-9
 	static const OSCAudioTypes_t audioTypes[];
 	static size_t countOfAudioTypes(void);
 
@@ -171,56 +205,10 @@ class OSCAudioBase
 	 */
 	int isMine(OSCMessage& msg, int addressOffset) {return msg.match(name,addressOffset);}
 	
-			
-	/**
-	 * Check to see if message's parameter types match those expected for the 
-	 * candidate function to be called.
-	 */
-	static bool validParams(OSCMessage& msg,	//!< OSC message to check
-						const char* types)	//!< expected parameter types: NULL imples none expected
-	{
-		size_t sl = 0;
-		bool result;
-	
-		if (NULL != types)
-		sl = strlen(types);
-		result= (size_t) msg.size() == sl;
-	
-		for (size_t i=0;i<sl && result;i++)
-		{
-			char type = msg.getType(i);
-			
-			result = types[i] == type;
-			if (!result && ';' == types[i]) // boolean: encoded directly in type
-				result = type == 'T' || type == 'F';
-		}
-		
-		return result;
-	}
-
-
-	/**
-	 * Check to see if message matches expected target pattern and parameter types
-	 */
-	bool isTarget(OSCMessage& msg,int addressOffset,const char* pattern,const char* types)
-	{
-		bool result = msg.fullMatch(pattern,addressOffset) && validParams(msg,types);
-		
-		return result;
-	}
-	
-	/**
-	 * Check to see if message matches expected target pattern and parameter types
-	 */
-	static bool isStaticTarget(OSCMessage& msg,int addressOffset,const char* pattern,const char* types)
-	{
-		return msg.fullMatch(pattern,addressOffset) && validParams(msg,types);
-	}
-	
 	
     void debugPrint(OSCMessage& msg, int addressOffset)
     {
-      char prt[50];
+      char prt[100];
       msg.getAddress(prt,addressOffset);
 
       if (NULL != name)
@@ -273,8 +261,8 @@ class OSCAudioBase
 						 bool enterGroups)
 	{
 #if	defined(OSC_DEBUG_PRINT)
-		char addr[50]; 
-		msg.getAddress(addr,offset);
+		size_t addrL = getMessageAddressLen(msg) - offset;
+		char* addr = getMessageAddress(msg,alloca(addrL),addrL,offset);
 #endif
 		while (NULL != ooi)
 		{
@@ -311,6 +299,38 @@ class OSCAudioBase
 			
 			callBack(msg,0,hitAtOffset,ooi,cbk,context,enterGroups);
 		}
+	}
+	
+	/**
+	 * Get total path name length to and including given object
+	 */
+	static int getPathNameLength(OSCAudioBase* ooi)
+	{
+		int result = 1;
+		
+		if (NULL != ooi)
+			result = ooi->nameLen+1 + getPathNameLength((OSCAudioBase*) (ooi->pParent));
+		
+		return result;
+	}
+	
+	/**
+	 * Get total path name to and including given object. 
+	 */
+	static int getPathNameTo(OSCAudioBase* ooi,char* buf)
+	{
+		int result = 1;
+		
+		if (NULL != ooi)
+		{
+			result = getPathNameTo((OSCAudioBase*) (ooi->pParent),buf);
+			strcpy(buf+result,ooi->name);
+			result += ooi->nameLen+1;
+		}
+		else
+			*buf = '/';
+		
+		return result;
 	}
 	
 	// count matches to pattern
@@ -354,19 +374,10 @@ class OSCAudioBase
 	static char* sanitise(const char* src, char* dst, int offset = 0);
 	static char* trimUnderscores(const char* src, char* dst);
     static void routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& reply);
+	static rsrcState_e checkResource(const OSCAudioResourceCheck_t*,int, rsrcState_e);
+	static rsrcState_e claimResource(const OSCAudioResourceCheck_t*,int, rsrcState_e);
 	
-	// Reply mechanisms:
-	void addReplyExecuted(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 	
-	static OSCMessage& staticPrepareReplyResult(OSCMessage& msg, OSCBundle& reply);
-	OSCMessage& prepareReplyResult(OSCMessage& msg, OSCBundle& reply);
-	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, bool v, error ret = OK);
-	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, float v);
-	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, int32_t v);
-	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint32_t v);
-	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint8_t v);
-	void addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint16_t v);
-
 //protected:
 	// existing objects: message passing and linking in/out
 	static OSCAudioBase* first_route; //!< linked list to route OSC messages to all derived instances
@@ -417,8 +428,6 @@ class OSCAudioBase
 
   protected:		
 	static char* getMessageString(OSCMessage& msg, int position, void* buf, bool slashPad = false); //!< read message string into memory assigned by alloca() (probably)
-	static char* getMessageAddress(OSCMessage& msg, void* buf, int len, int offset = 0); //!< read message address into memory assigned by alloca() (probably)
-
 		
 	
 #if defined(DYNAMIC_AUDIO_AVAILABLE)
@@ -522,5 +531,6 @@ class OSCAudioGroup : public OSCAudioBase
 #else
 #include <OSCAudioAutogen-static.h>
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
+
 
 #endif // !defined(_OSCAUDIOBASE_H_)

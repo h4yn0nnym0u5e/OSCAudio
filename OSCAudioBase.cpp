@@ -29,14 +29,15 @@
 
 #include "OSCAudioBase.h"
 OSCAudioBase* OSCAudioBase::first_route = NULL;
+OSCAudioResourceSetting_t OSCAudioBase::settings[rsrc_COUNT] = {0};
 
 
 /* ******************************************************************
  * Generate an array with the names of all the available AudioStream-derived objects,
  * together with pointers to the functions to call to create instances of each.
  */
-#if defined(DYNAMIC_AUDIO_AVAILABLE) // build create tables
-#define OSC_CLASS(a,o) \
+#if defined(DYNAMIC_AUDIO_AVAILABLE) // build create functions
+#define OSC_CLASS(a,o,c) \
 OSCAudioBase* mk1_##o(const char* nm) {return (OSCAudioBase*) new o(nm);} \
 OSCAudioBase* mk2_##o(const char* nm,OSCAudioGroup& grp) {return (OSCAudioBase*) new o(nm,grp);} 
 OSC_AUDIO_CLASSES
@@ -52,7 +53,15 @@ OSCAudioBase* mk1_AudioMixerStereo(const char* nm, unsigned char ninputs) {retur
 OSCAudioBase* mk2_AudioMixerStereo(const char* nm, OSCAudioGroup& grp, unsigned char ninputs) {return (OSCAudioBase*) new OSCAudioMixerStereo(nm,grp,ninputs);} 
 #endif // defined(MULTI_CENTRED)
 
-#define OSC_CLASS(a,o) {#a,mk1_##o,mk2_##o},
+// some classes need resource checks
+#define OSC_AUDIO_CHECK_RSRC_noRequirementCheck(...)
+#define checkResource_noRequirementCheck NULL
+#define OSC_AUDIO_CHECK_RSRC(c) rsrcState_e checkResource_##c(void) {return OSCAudioBase::claimResource(c::resources,COUNT_OF(c::resources),c::rsrcState);}
+OSC_AUDIO_CHECK_RSRC_LIST
+#undef OSC_AUDIO_CHECK_RSRC
+
+// build table of pointers to creation functions
+#define OSC_CLASS(a,o,c) {#a,mk1_##o,mk2_##o,checkResource_##c},
 const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
   OSC_AUDIO_CLASSES
 };
@@ -60,7 +69,7 @@ const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
 
 #else // no dynamic audio, just a list of class names
 	
-#define OSC_CLASS(a,o) {#a},
+#define OSC_CLASS(a,o,c) {#a},
 const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
   OSC_AUDIO_CLASSES
 };
@@ -79,7 +88,7 @@ size_t OSCAudioBase::countOfAudioTypes(void) {return COUNT_OF(audioTypes);}
 //-------------------------------------------------------------------------------------------------------
 static void dbgPrt(OSCMessage& msg, int addressOffset)
 {
-	char prt[50];
+	char prt[100];
 	(void) dbgPrt; // avoid warning
 	msg.getAddress(prt,addressOffset);
 
@@ -159,30 +168,6 @@ char* OSCAudioBase::getMessageString(OSCMessage& msg, 	//!< message to extract s
 			*buf = '/';
 		}
 		OSC_SPTF("Message string: %s\n",buf);
-	}
-	
-	return buf;
-}
-
-
-/*
- * Copy message Address Pattern into pre-allocated memory buffer.
- * The buffer pointer MUST have enough space for the pattern, but may be NULL (e.g. if the 
- * allocation failed) in which case the pattern is not copied. Note that OSCMessage::getAddress()
- * does not do the NULL check so is unsafe to use. And the length-protected version is undocumented.
- * \return pointer to buffer, cast to char*
- */
-char* OSCAudioBase::getMessageAddress(OSCMessage& msg, 	//!< message to extract string from
-									 void* vbuf,		//!< big enough buffer, or NULL
-									 int len,			//!< length of buffer
-									 int offset)		//!< offset into address pattern  (default 0)
-{
-	char* buf = (char*) vbuf;
-	
-	if (NULL != buf) // length must be OK, no further check needed
-	{
-		msg.getAddress(buf,offset,len); // just get first character
-		OSC_SPTF("Address pattern: %s\n",buf);
 	}
 	
 	return buf;
@@ -283,7 +268,6 @@ char* OSCAudioBase::sanitise(const char* src, //!< source string
 
 /**
  * Trim leading and trailing underscores from a string, and compress internal runs.
- * Replaces all invalid characters <space>#*,/?[]{} with _.
  * \return pointer to result string (same as dst)
  */
 char* OSCAudioBase::trimUnderscores(const char* src, //!< source string
@@ -321,64 +305,6 @@ char* OSCAudioBase::trimUnderscores(const char* src, //!< source string
 
 
 //-------------------------------------------------------------------------------------------------------
-/**
- * Add to the reply bundle as a result of having executed an OSC message routed to us.
- */
-void OSCAudioBase::addReplyExecuted(OSCMessage& msg, int addressOffset, OSCBundle& reply) 
-{
-	addReplyResult(msg,addressOffset,reply,true); // add a "true" bool to the response, because we did the method
-}
-
-
-/**
- * Prepare the initial part of a reply to a message routed to us.
- * Fills in the standard information generated for any successful routing.
- * \return reference to the OSCMessage, ready to add any extra information, dependent on the method called
- */
-OSCMessage& OSCAudioBase::staticPrepareReplyResult(OSCMessage& msg, 	//!< the received message
-												   OSCBundle& reply) 	//!< the bundle that will become the reply
-{
-	int msgCount = reply.size(); // number of messages in bundle
-	OSCMessage* pLastMsg = reply.getOSCMessage(msgCount-1); // point to last message in reply bundle
-	int dataCount = pLastMsg->size(); // how many pieces of data are in that?
-	char* replyAddress = getMessageAddress(*pLastMsg,alloca(50),50);	
-	char* buf = getMessageAddress(msg,alloca(50),50);
-	
-	if (0 != dataCount) // message already in use...
-		pLastMsg = &reply.add(replyAddress); // ... make ourselves a new one
-		
-	// start composing our reply:
-	pLastMsg->add(buf);				// which address the routed message was destined for
-	
-	return *pLastMsg;
-}
-
-
-/**
- * Prepare the initial part of a reply to a message routed to us.
- * Fills in the standard information generated for any successful routing.
- * \return reference to the OSCMessage, ready to add any extra information, dependent on the method called
- */
-OSCMessage& OSCAudioBase::prepareReplyResult(OSCMessage& msg, 	//!< the received message
-											 OSCBundle& reply) 	//!< the bundle that will become the reply
-{
-#if defined(OSC_DEBUG_PRINT)	
-	char* buf = getMessageAddress(msg,alloca(50),50);
-	OSC_SPTF("%s executed %s; result was ",name+1,buf);
-#endif // defined(OSC_DEBUG_PRINT)	
-	
-	return staticPrepareReplyResult(msg,reply).add(name+1); // add which element caught the routed message
-}
-
-
-// Despatch function overloaded with the various reply types we might append to the standard information
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, bool v, error ret) { prepareReplyResult(msg, reply).add(v).add(ret); OSC_SPLN(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, float v) { prepareReplyResult(msg, reply).add(v).add(OK); OSC_SPLN(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, int32_t v) { prepareReplyResult(msg, reply).add(v).add(OK); OSC_SPLN(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint32_t v) { prepareReplyResult(msg, reply).add((unsigned int)v).add(OK); OSC_SPLN(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint8_t v) { prepareReplyResult(msg, reply).add(v).add(OK); OSC_SPLN(v); }
-void OSCAudioBase::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint16_t v) { prepareReplyResult(msg, reply).add(v).add(OK); OSC_SPLN(v); }
-
 
 
 //=======================================================================================================
@@ -453,7 +379,8 @@ void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& r
     else if (isStaticTarget(msg,addressOffset,"/clearAll",NULL)) 		 {clearAllObjects(msg,addressOffset,reply);} 
 	else
 	{		
-		char* buf= getMessageAddress(msg,alloca(50),50,addressOffset);
+		size_t addrL = getMessageAddressLen(msg) - addressOffset;
+		char* buf= getMessageAddress(msg,alloca(addrL),addrL,addressOffset);
 		OSC_SPTF("No match\n");
 		staticPrepareReplyResult(msg,reply).add(buf).add((int) NOT_ROUTED);
 	}
@@ -500,7 +427,7 @@ void OSCAudioBase::destroyObject(OSCMessage& msg, int addressOffset, OSCBundle& 
 			OSC_SPLN("not found!"); // but not really an error!
 		}
 		
-		staticPrepareReplyResult(msg,reply).add(vName).add((int) OK);
+		staticPrepareReplyResult(msg,reply).add(vName).add(matchCount).add((int) OK);
 	}
 }
 
@@ -567,50 +494,60 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 		retval = OSCAudioBase::DUPLICATE_NAME;
 	else
 	{
-		if (NULL == parent) // create at root
+		rsrcState_e rsrcState = rsrcFree;
+		if (objIdx >= 0
+		 && NULL != OSCAudioBase::audioTypes[objIdx].chkResource) // if it needs claiming...
+			rsrcState = OSCAudioBase::audioTypes[objIdx].chkResource(); // ...try to claim
+			
+		if (rsrcState >= rsrcThisActive) // can't create, clashes
+			retval = OSCAudioBase::IN_USE;
+		else // OK, create it!
 		{
-			switch (objIdx)
+			if (NULL == parent) // create at root
 			{
-			  default:
-				pNewObj = OSCAudioBase::audioTypes[objIdx].mkRoot(objName+1);
-				break;
-					
-			  case AUDIOMIXER_INDEX:
-				if (mixerSize > 0)
-					pNewObj = mk1_AudioMixer(objName+1,mixerSize);
-				break;
-					
-			  case AUDIOMIXERSTEREO_INDEX:
-				if (mixerSize > 0)
-					pNewObj = mk1_AudioMixerStereo(objName+1,mixerSize);
-				break;
-					
-			  case CONNECTION_INDEX:
-				pNewObj = new OSCAudioConnection(objName+1);
-				break;
+				switch (objIdx)
+				{
+				  default:
+					pNewObj = OSCAudioBase::audioTypes[objIdx].mkRoot(objName+1);
+					break;
+						
+				  case AUDIOMIXER_INDEX:
+					if (mixerSize > 0)
+						pNewObj = mk1_AudioMixer(objName+1,mixerSize);
+					break;
+						
+				  case AUDIOMIXERSTEREO_INDEX:
+					if (mixerSize > 0)
+						pNewObj = mk1_AudioMixerStereo(objName+1,mixerSize);
+					break;
+						
+				  case CONNECTION_INDEX:
+					pNewObj = new OSCAudioConnection(objName+1);
+					break;
+				}
 			}
-		}
-		else // create in a group
-		{
-			switch (objIdx)
+			else // create in a group
 			{
-			  default:
-				pNewObj = OSCAudioBase::audioTypes[objIdx].mkGroup(objName+1,*((OSCAudioGroup*) parent));
-				break;
-				
-			  case AUDIOMIXER_INDEX:
-				if (mixerSize > 0)
-					pNewObj = mk2_AudioMixer(objName+1,*((OSCAudioGroup*) parent),mixerSize);
-				break;
-				
-			  case AUDIOMIXERSTEREO_INDEX:
-				if (mixerSize > 0)
-					pNewObj = mk2_AudioMixerStereo(objName+1,*((OSCAudioGroup*) parent),mixerSize);
-				break;
-				
-			  case CONNECTION_INDEX:
-				pNewObj = new OSCAudioConnection(objName+1,*((OSCAudioGroup*) parent));
-				break;
+				switch (objIdx)
+				{
+				  default:
+					pNewObj = OSCAudioBase::audioTypes[objIdx].mkGroup(objName+1,*((OSCAudioGroup*) parent));
+					break;
+					
+				  case AUDIOMIXER_INDEX:
+					if (mixerSize > 0)
+						pNewObj = mk2_AudioMixer(objName+1,*((OSCAudioGroup*) parent),mixerSize);
+					break;
+					
+				  case AUDIOMIXERSTEREO_INDEX:
+					if (mixerSize > 0)
+						pNewObj = mk2_AudioMixerStereo(objName+1,*((OSCAudioGroup*) parent),mixerSize);
+					break;
+					
+				  case CONNECTION_INDEX:
+					pNewObj = new OSCAudioConnection(objName+1,*((OSCAudioGroup*) parent));
+					break;
+				}
 			}
 		}
 		
@@ -642,6 +579,71 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 }
 #endif // defined(DISABLE_FULL_DYNAMIC)
 //-------------------------------------------------------------------------------------------------------
+
+
+/**
+ * Check to see if a resource is available for use.
+ * It will not be if it's not possible to share it, or if the required settings differ from
+ * those currently in place.
+ */
+rsrcState_e OSCAudioBase::checkResource(const OSCAudioResourceCheck_t* reqRsrc,  	//!< resources needed
+													  int nRsrc,			//!< count of resources
+													  rsrcState_e curState)	//!< current state
+{
+	rsrcState_e result = rsrcFree;
+	
+	for (int i=0;i<nRsrc && result < rsrcThisActive;i++)
+	{
+		resourceSetting_e setting = settings[reqRsrc[i].resource].setting; // get current setting
+		
+		switch (setting)
+		{
+			case setgAvailable: // not in use, OK
+				break;
+				
+			case setgUnshareable: // in use, not shareable
+				if (settings[reqRsrc[i].resource].resArray != reqRsrc) // not us using it, either
+					result = rsrcOther; // can't use
+				else
+					result = curState;  // OK if our first use or we're dormant; not OK if we're active
+			
+			default: // some other setting
+				if (settings[reqRsrc[i].resource].resArray != reqRsrc) // not us using it
+				{
+					if (settings[reqRsrc[i].resource].setting != reqRsrc[i].setting) // are settings different?
+						result = rsrcOther; // yup, can't use it
+				}
+				break;
+		}		
+	}
+	
+	return result;
+}
+
+
+/**
+ * Claim a resource if it's available for use.
+ * It will not be if it's not possible to share it, or if the required settings differ from
+ * those currently in place.
+ */
+rsrcState_e OSCAudioBase::claimResource(const OSCAudioResourceCheck_t* reqRsrc,  	//!< resources needed
+													  int nRsrc,			//!< count of resources
+													  rsrcState_e curState)	//!< current state
+{
+	rsrcState_e result = checkResource(reqRsrc,nRsrc,curState);
+	if (result < rsrcThisActive) // if we can claim it
+	{
+		for (int i=0;i<nRsrc && result < rsrcThisActive;i++)
+		{
+			settings[reqRsrc[i].resource].setting = reqRsrc[i].setting; // set current setting
+			settings[reqRsrc[i].resource].resArray = reqRsrc; //and which object is using it
+		}
+	}
+	return result;
+}
+
+
+
 struct crObContext_s {int objIdx; const char* name; OSCAudioBase::error retval; int mixerSize;};
 void createObjectCB(OSCAudioBase* parent,OSCMessage& msg,int offset,void* ctxt)
 {
@@ -664,7 +666,7 @@ void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 	int objIdx;
 	int mixerSize = -1;
 	int ml = msg.size() - 1;
-	bool isRoot = ml<2;
+	bool isRoot = !(ml>1 && msg.isString(2)); // sss or sssi, but not ssi, are group creates
 	
 	typ = getMessageString(msg,0,alloca(msg.getDataLength(0)));
 	objName = getMessageString(msg,1,alloca(msg.getDataLength(1)+1),true);
@@ -678,13 +680,11 @@ void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 			{
 				mixerSize = msg.getInt(ml); // get mixer width
 				objIdx = AUDIOMIXER_INDEX;
-				isRoot = ml<3;
 			}
 			else if (msg.isInt(ml) && 0 == strcmp(AudioMixerStereoName,typ)) // last parameter is an integer? variable width mixer?
 			{
 				mixerSize = msg.getInt(ml); // get mixer width
 				objIdx = AUDIOMIXERSTEREO_INDEX;
-				isRoot = ml<3;
 			}
 		}
 		
@@ -964,6 +964,20 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 			{
 				int connResult = connect(*src,(int) srcp,*dst,(int) dstp); // make the audio connection
 				sprintf(buf,"%s:%d -> %s:%d (%d)",srcn,srcp,dstn,dstp,connResult);
+				switch (connResult) // this may be unreliable, result numbers are not really supported
+				{
+					case 0: // OK
+						break;
+					
+					case 4: // destination in use
+					case 6: // connection already in place
+						retval = IN_USE;
+						break;
+						
+					default: // object or input number not found
+						retval = NOT_FOUND;
+						break;
+				}
 				mkLinks(*srcB,*dstB); // make the OSC linkages
 			}
 			else
@@ -978,7 +992,7 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 		}
 		OSC_SPLN(buf);
 		
-		prepareReplyResult(msg,reply).set(1,buf).add((int) retval);
+		prepareReplyResult(msg,reply,name).set(1,buf).add((int) retval);
 	}
 }
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
@@ -1010,7 +1024,7 @@ void OSCAudioConnection::route(OSCMessage& msg, int addressOffset, OSCBundle& re
 #if defined(DYNAMIC_AUDIO_AVAILABLE) // route OSC commands to Connection
 		if (isTarget(msg,addressOffset,"/c*","ss")) {OSCconnect(msg,addressOffset,reply,true);}
 		else if (isTarget(msg,addressOffset,"/c*","sisi")) {OSCconnect(msg,addressOffset,reply);} 
-		else if (isTarget(msg,addressOffset,"/d*",NULL)) {int r = disconnect(); addReplyResult(msg,addressOffset,reply,r==0,r?NOT_CONNECTED:OK);} 
+		else if (isTarget(msg,addressOffset,"/d*",NULL)) {int r = disconnect(); addReplyResult(msg,addressOffset,reply,r==0,name,r?NOT_CONNECTED:OK);} 
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 	}
 }
