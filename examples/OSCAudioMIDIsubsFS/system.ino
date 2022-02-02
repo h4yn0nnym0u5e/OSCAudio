@@ -89,6 +89,21 @@ void printAudioMax(OSCMessage& repl,bool res = false)
 
 
 //------------------------------------------------------------------------------------------------------------------------------
+void setDebug(OSCMessage& msg,OSCMessage& repl)
+{
+  int which = msg.getInt(0),value = msg.getInt(1);
+
+  (void) value; // may not use it
+  switch (which)
+  {
+    case 1:
+      list_enable = !list_enable;
+      break;
+  }
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------
 // route messages to system:
 void routeSystem(OSCMessage& msg, int addressOffset,OSCBundle& reply)
 {
@@ -101,6 +116,8 @@ void routeSystem(OSCMessage& msg, int addressOffset,OSCBundle& reply)
     printStack(repl);
   else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/heap",NULL))
     printHeap(repl);
+  else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/debug","ii"))
+    setDebug(msg,repl);
   else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/usage",NULL))
     printAudioCurrent(repl);
   else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/max","*"))

@@ -47,8 +47,8 @@
 //#include "dynamic-util.h"
 #include "OSCAudioBase.h"
 
-#define LIST_OBJECTS false
-void listObjects(void) {listObjects(LIST_OBJECTS);}
+bool list_enable = false;
+void listObjects(void) {listObjects(list_enable);}
 
 #define noOSC_USE_USB_SERIAL
 #if defined(OSC_USE_USB_SERIAL)
@@ -64,7 +64,7 @@ SLIPEncodedUSBSerial HWSERIAL(USBSERIALPORT);
 SLIPEncodedUSBSerial<usb_serial2_class> HWSERIAL(SerialUSB1);
 #else
 // set this to the hardware serial port you wish to use
-#define HWSERIALPORT Serial3
+#define HWSERIALPORT Serial1
 #include <SLIPEncodedSerial.h>
 SLIPEncodedSerial HWSERIAL(HWSERIALPORT);
 #endif // defined(OSC_USE_USB_SERIAL)
@@ -92,12 +92,24 @@ void setup() {
   AudioMemory(50); // no idea what we'll need, so allow plenty
   //-------------------------------
   //testSanitise();
-  listObjects(LIST_OBJECTS);
+  listObjects(list_enable);
   //listAllTypes();
 }
 
 
 OSCBundle* replyStack; // where reply is currently being built
+//-----------------------------------------------------------------------------------------------------------------
+// Append error code if message didn't reach a destination
+void checkIfRouted(OSCBundle* reply, const char* dst)
+{
+  if (1 == reply->size())
+  {
+    OSCMessage* pMsg = reply->getOSCMessage(0);
+    if (0 == pMsg->size()) // message wasn't routed...
+      pMsg->add(dst).add(OSCAudioBase::NOT_ROUTED);
+  }
+}
+
 
 //-----------------------------------------------------------------------------------------------------------------
 // route messages to existing audio objects
@@ -107,6 +119,7 @@ void routeAudio(OSCMessage& msg, int addressOffset)
   //Serial.println("audio message!");
   OSCAudioBase::routeAll(msg,addressOffset,*replyStack);
   AudioInterrupts();
+  checkIfRouted(replyStack,"audio");
 }
 
 
@@ -122,13 +135,16 @@ void routeDynamic(OSCMessage& msg, int addressOffset)
 #else
   Serial.println("dynamic objects not available!");
 #endif // defined(SAFE_RELEASE)  
+  checkIfRouted(replyStack,"dynamic");
 }
+
 
 //-----------------------------------------------------------------------------------------------------------------
 // route messages to create / modify subscriptions
 void routeSub(OSCMessage& msg, int addressOffset)
 {
   routeSubscribe(msg,addressOffset,*replyStack);
+  checkIfRouted(replyStack,"subscribe");
 }
 
 
@@ -137,6 +153,7 @@ void routeSub(OSCMessage& msg, int addressOffset)
 void routeSys(OSCMessage& msg, int addressOffset)
 {
   routeSystem(msg,addressOffset,*replyStack);
+  checkIfRouted(replyStack,"system");
 }
 
 
@@ -208,6 +225,8 @@ void sendReply(OSCBundle& reply)
   // for debug
   //reply.send(Serial);
   OSCMessage* pMsg;
+
+  checkIfRouted(&reply,"teensy");
   
   Serial.printf("\nReply has %d messages, %d OSC errors\n",reply.size(),reply.hasError()); 
   for (int i=reply.size()-1;i>=0;i--)
@@ -215,7 +234,7 @@ void sendReply(OSCBundle& reply)
     pMsg = reply.getOSCMessage(i);
     int last = pMsg->size()-1;
     int errv;
-    if (pMsg->isInt(last) && (errv = pMsg->getInt(last)) != 0)
+    if (last > 0 && pMsg->isInt(last) && (errv = pMsg->getInt(last)) != 0)
     {
       errCount++;
       Serial.printf("%d ",errv);
@@ -285,7 +304,7 @@ void updateOSC()
       {
         processBundle(bndl,reply);
         sendReply(reply);
-        listObjects(LIST_OBJECTS);
+        listObjects(list_enable);
       }
       else 
       {
@@ -293,7 +312,7 @@ void updateOSC()
         {
           processMessage(&msg,reply);   
           sendReply(reply);
-          listObjects(LIST_OBJECTS);
+          listObjects(list_enable);
         }
       }
       Serial.println();
