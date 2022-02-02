@@ -79,7 +79,8 @@ SLIPser = sliplib.SlipStream(ser,chunk_size=1)
 #########################################################################
 # Requires AudioMixerX aka DynMixer
 poly = 6
-i2s = False
+pt8211 = False
+i2s = True
 dac = True
 # Create a bundle that we could get actioned immediately
 msgl = []
@@ -87,6 +88,8 @@ msgl = []
 msgl += [OSCpackAuto('/teensy1/dynamic/clearAll')]
 
 # adjust this to suit your audio system
+if pt8211:
+    msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioOutputPT8211','pt8211')]
 if i2s:
     msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioControlSGTL5000','sgtl5000')]
     msgl += [OSCpackAuto('/teensy1/dynamic/crOb','AudioOutputI2S','i2s')]
@@ -127,6 +130,12 @@ if 1:
         msgl += [OSCpackAuto('/teensy1/audio/voice1/i*/mixer/ga',i,0.5)]
 
     # root-level connections
+    if pt8211:
+        msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p_mix_outL')]
+        msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p_mix_outR')]
+        msgl += [OSCpackAuto('/teensy1/audio/p_mix_outL/co','/mixer',0,'/pt8211',0)]
+        msgl += [OSCpackAuto('/teensy1/audio/p_mix_outR/co','/mixer',1,'/pt8211',1)]
+      
     if i2s:
         msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p_mix_outL')]
         msgl += [OSCpackAuto('/teensy1/dynamic/crCo','p_mix_outR')]

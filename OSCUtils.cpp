@@ -142,7 +142,7 @@ OSCMessage& OSCUtils::prepareReplyResult(OSCMessage& msg, 	//!< the received mes
 
 
 // Despatch function overloaded with the various reply types we might append to the standard information
-void OSCUtils::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, bool v, char* name, error ret) { prepareReplyResult(msg, reply, name).add(v).add(ret); OSC_SPLN(v); }
+void OSCUtils::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, bool v, char* name, error ret) { prepareReplyResult(msg, reply, name).add(v).add(ret); OSC_SPLN(v?"true":"false"); }
 void OSCUtils::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, float v, char* name) { prepareReplyResult(msg, reply, name).add(v).add(OK); OSC_SPLN(v); }
 void OSCUtils::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, int32_t v, char* name) { prepareReplyResult(msg, reply, name).add(v).add(OK); OSC_SPLN(v); }
 void OSCUtils::addReplyResult(OSCMessage& msg, int addressOffset, OSCBundle& reply, uint32_t v, char* name) { prepareReplyResult(msg, reply, name).add((unsigned int)v).add(OK); OSC_SPLN(v); }

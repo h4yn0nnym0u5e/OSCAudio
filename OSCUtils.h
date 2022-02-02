@@ -78,22 +78,29 @@ class OSCUtils
 	 * If the types string has a '*' then we say the match is OK; allows for optional parameters.
 	 */
 	static bool validParams(OSCMessage& msg,	//!< OSC message to check
-						const char* types)		//!< expected parameter types: NULL imples none expected
+						const char* types)		//!< expected parameter types: NULL implies none expected
 	{
 		size_t sl = 0;
+		size_t ml = msg.size();
 		bool result = true;
 	
-		if (NULL != types)
+		if (NULL == types)
+			result = 0 == msg.size();
+		else
 			sl = strlen(types);
-	
+		OSC_SPTF("%d parameters; %d types%s\n",ml,sl,msg.hasError()?"; has error":"");
+		
 		for (size_t i=0;i<sl && result && '*' != types[i];i++)
 		{
-			char type = msg.getType(i);
+			char type = i<ml?msg.getType(i):0; // attempt to get past end makes message have error. W. T. F.
 			
-			result = types[i] == type;
+			result = (types[i] == type);
+			OSC_SPTF("%c (%d)/%c...",type,type,types[i]);
+			
 			if (!result && ';' == types[i]) // boolean: encoded directly in type
-				result = type == 'T' || type == 'F';
+				result = (type == 'T' || type == 'F');
 		}
+		OSC_SPTF(": params %s\n",result?"OK":"bad");
 		
 		return result;
 	}
