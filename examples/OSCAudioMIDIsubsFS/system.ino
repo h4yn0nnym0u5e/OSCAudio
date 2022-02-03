@@ -110,14 +110,16 @@ void routeSystem(OSCMessage& msg, int addressOffset,OSCBundle& reply)
    OSCMessage& repl = OSCAudioBase::staticPrepareReplyResult(msg,*replyStack);
    
   Serial.println("system message!"); Serial.flush();
+
+  // Board reset
   if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/reset",NULL))
     WRITE_RESTART(0x5FA0004);
+
+  // memory and CPU information
   else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/stack",NULL))
     printStack(repl);
   else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/heap",NULL))
     printHeap(repl);
-  else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/debug","ii"))
-    setDebug(msg,repl);
   else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/usage",NULL))
     printAudioCurrent(repl);
   else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/max","*"))
@@ -127,6 +129,16 @@ void routeSystem(OSCMessage& msg, int addressOffset,OSCBundle& reply)
       res = msg.getBoolean(0);
     printAudioMax(repl,res);
   }
+
+  // trigger special debug modes
+  else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/debug","ii"))
+    setDebug(msg,repl);
+
+  // demo synth building in code
+  else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/buildSynth",NULL))
+    buildSynth();
+  else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/destroySynth",NULL))
+    destroySynth();
 
   repl.add(0);
 }
