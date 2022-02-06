@@ -113,25 +113,24 @@ class OSCVoice1grp : public OSCVoice1
 class OSCMixAndOutput // only bother with the ungrouped version for now
 {
 public:
-    OSCAudioMixerStereo&                 mixerStereo;
     OSCAudioOutputAnalogStereo&          dacs;
+    OSCAudioMixerStereo&                 mixerStereo;
     OSCAudioOutputI2S&                   i2s;
     OSCAudioControlSGTL5000& sgtl5000;
     OSCAudioConnection                  *patchCord[4]; // total patchCordCount:4 including array typed ones.
 
     OSCMixAndOutput(unsigned char nch=6) :
-      mixerStereo(*new OSCAudioMixerStereo{"mixer",nch}),
       dacs(*new OSCAudioOutputAnalogStereo{"dacs"}),
+      mixerStereo(*new OSCAudioMixerStereo{"mixer",nch}),
       i2s(*new OSCAudioOutputI2S{"i2s"}),
       sgtl5000(*new OSCAudioControlSGTL5000{"sgtl5000"})
     { // constructor (this is called when class-object is created)
         int pci = 0; // used only for adding new patchcords
 
-
         patchCord[pci++] = new OSCAudioConnection("mix_dacs_L", mixerStereo, 0, dacs, 0);
-        patchCord[pci++] = new OSCAudioConnection("mix_i2s_L", mixerStereo, 0, i2s, 0);
+        patchCord[pci++] = new OSCAudioConnection("mix_i2s_L",  mixerStereo, 0, i2s, 0);
         patchCord[pci++] = new OSCAudioConnection("mix_dacs_R", mixerStereo, 1, dacs, 1);
-        patchCord[pci++] = new OSCAudioConnection("mix_i2s_R", mixerStereo, 1, i2s, 1);
+        patchCord[pci++] = new OSCAudioConnection("mix_i2s_R",  mixerStereo, 1, i2s, 1);
         
     }
 
@@ -139,16 +138,19 @@ public:
         for (int i = 0; i < 4; i++) {
             patchCord[i]->disconnect(); // don't actually need this!
             delete patchCord[i];
-        Serial.println("OSCMixAndOutput dtor done");
         }
-        
+        delete &dacs;
+        delete &mixerStereo;
+        delete &i2s;
+        delete &sgtl5000;
+        Serial.println("OSCMixAndOutput dtor done");
     }
 };
 
 // Build the synth. Note that we would "lose track" of everything on
 // exit from the function, except that the OSCAudio system can 
 // find the elements for us. Or just store a couple of pointers...
-#define XVOICES 2
+#define XVOICES 6
 OSCMixAndOutput* mixo;
 OSCAudioGroup* voice1;
 void buildSynth(void)
@@ -165,8 +167,8 @@ void buildSynth(void)
     vi->mixer.gain(1,0.5);
     
     sprintf(pcName,"i%d_mixer",i);
-    // OSCAudioConnection* pc = new OSCAudioConnection{pcName,*vi->grp}; 
-    // pc->connect(vi->env,0,mixo->mixerStereo,i);
+    //OSCAudioConnection* pc = new OSCAudioConnection{pcName,*vi->grp}; 
+    //pc->connect(vi->env,0,mixo->mixerStereo,i);
     OSCAudioConnection* pc = new OSCAudioConnection{pcName,*vi->grp,vi->env,0,mixo->mixerStereo,(uint8_t) i};
     (void) pc;
 
