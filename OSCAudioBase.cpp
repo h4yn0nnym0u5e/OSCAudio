@@ -140,16 +140,6 @@ void OSCAudioBase::linkOutGroup(OSCAudioGroup** p)
 	}	
 }
 
-void OSCAudioBase::smash(void)
-{
-	id |= 0x20202020; 
-	for (int i=0;i<16;i++) name[i] = '-';
-}
-
-void OSCAudioBase::smash2(void)
-{
-	name = (char*)(nameLen = 0x78787878);
-}
 
 //-------------------------------------------------------------------------------------------------------
 /*
@@ -745,13 +735,11 @@ void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& r
 OSCAudioGroup::OSCAudioGroup(const char* _name, OSCAudioGroup* parent) 
 							:  OSCAudioBase(_name), first_src(NULL), first_dst(NULL) 
 {
-	gid = 'RPRG'; gid2 = '>RRG';
 	if (NULL != parent) // we're a group member not on the main routing list
 	{
 		linkOut();
 		linkInGroup(parent);
 		OSC_SPTF("%s group re-linked:\n",name);
-		gid = 'GPRG'; gid2 = '>GRG';
 	}
 }
 

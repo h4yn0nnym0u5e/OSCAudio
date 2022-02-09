@@ -64,9 +64,7 @@
 
 class OSCUtils
 {
-	int uid;
   public:
-	OSCUtils() : uid('LITU'){}
 	virtual ~OSCUtils(void) {}
     virtual void route(OSCMessage& msg, int addressOffset, OSCBundle&)=0;
 	enum error {OK,NOT_FOUND,BLANK_NAME,DUPLICATE_NAME,NO_DYNAMIC,NO_MEMORY, // 0-5

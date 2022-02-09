@@ -153,41 +153,46 @@ public:
 class OSCVoice1grp : public OSCAudioGroup
 {
 public:
-    int id;
-    int st;
-    /*
-    OSCAudioGroup& grp;
-    
+    // the actual voice elements we want to group together
     OSCAudioSynthWaveform&               wav;
     OSCAudioSynthWaveform&               wav2;
     OSCAudioMixer4&                      mixer;
-    */
-    //OSCAudioEffectEnvelope&              env;
-    //OSCAudioConnection                  *patchCord[3]; // total patchCordCount:3 including array typed ones.
+    OSCAudioEffectEnvelope&              env;
 
+    // total patchCordCount:3 including array typed ones.
+    //OSCAudioConnection&                  pc1,pc2,pc3; 
+    OSCAudioConnection                  *patchCord[3]; // total patchCordCount:3 including array typed ones.
        
     OSCVoice1grp(const char* _name,OSCAudioGroup* parent) : // constructor 
-      OSCAudioGroup(_name,parent)
-      //wav(*new OSCAudioSynthWaveform{"wav",grp}),
-      //wav2(*new OSCAudioSynthWaveform{"wav2",grp}),
-      //mixer(*new OSCAudioMixer4{"mixer",grp}),
-      //env(*new OSCAudioEffectEnvelope{"env",grp})
-    { /*
+      OSCAudioGroup(_name,parent), // construct our base class instance
+      wav(*new OSCAudioSynthWaveform{"wav",*((OSCAudioGroup*) this)}),
+      wav2(*new OSCAudioSynthWaveform{"wav2",*((OSCAudioGroup*) this)}),
+      mixer(*new OSCAudioMixer4{"mixer",*((OSCAudioGroup*) this)}),
+      env(*new OSCAudioEffectEnvelope{"env",*((OSCAudioGroup*) this)}) // ,
+/*
+      pc1(*new OSCAudioConnection{"wav_mixer", *((OSCAudioGroup*) this), wav,   0, mixer, 0}),
+      pc2(*new OSCAudioConnection{"wav2_mixer",*((OSCAudioGroup*) this), wav2,  0, mixer, 1}),
+      pc3(*new OSCAudioConnection{"mixer_env", *((OSCAudioGroup*) this), mixer, 0, env,   0})                
+*/      
+//    { } // no code needed, initialisers have done it all
+    { 
         int pci = 0; // used only for adding new patchcords
+        OSCAudioGroup& grp = *((OSCAudioGroup*) this);
 
-        patchCord[pci++] = new OSCAudioConnection("wav_mixer", grp, wav, 0, mixer, 0);
-        patchCord[pci++] = new OSCAudioConnection("wav2_mixer",grp, wav2, 0, mixer, 1);
-        patchCord[pci++] = new OSCAudioConnection("mixer_env", grp, mixer, 0, env, 0);      
-      */
-      id = 'PRGV'; id2 = 'VGRP'; st='++++';
+        patchCord[pci++] = new OSCAudioConnection("wav_mixer", grp, wav,   0, mixer, 0);
+        patchCord[pci++] = new OSCAudioConnection("wav2_mixer",grp, wav2,  0, mixer, 1);
+        patchCord[pci++] = new OSCAudioConnection("mixer_env", grp, mixer, 0, env,   0);                
     } 
 
-    ~OSCVoice1grp()
-    {
-        st = '----';
-        //delete &grp; // automatically deletes all group members!
+    ~OSCVoice1grp() 
+    { 
+      for (int i = 0; i < 3; i++)
+        delete patchCord[i];
     }
-    int id2;
+    
+    // no destructor needed: the base OSCAudioGroup will delete
+    // all its members when it's destroyed
+    //~OSCVoice1grp() { }
 };
 
 class OSCMixAndOutput // only bother with the ungrouped version for now
@@ -233,28 +238,25 @@ public:
 #define XVOICES 3
 OSCMixAndOutput* mixo;
 OSCAudioGroup* voice1;
-char* grpName = "iABCDx";
 void buildSynth(void)
 {
-  //mixo = new OSCMixAndOutput{XVOICES};
+  mixo = new OSCMixAndOutput{XVOICES};
   voice1 = new OSCAudioGroup{"voice1",nullptr};
   for (int i=0;i<XVOICES;i++)
   {
-    char /*grpName[50],*/pcName[20];
+    char grpName[50],pcName[20];
     
-    //sprintf(grpName,"iABCD%d",i);//"abcdefghijklmnopqrstuvwxyz_%010d",i);
+    sprintf(grpName,"i%d",i);//"abcdefghijklmnopqrstuvwxyz_%010d",i);
     grpName[5]='0'+i;
     OSCVoice1grp* vi = new OSCVoice1grp{grpName,voice1};
-    /*
     vi->mixer.gain(0,0.5);
     vi->mixer.gain(1,0.5);
-    */
     
     if (NULL != mixo)
     {
       sprintf(pcName,"i%d_mixer",i);
-      //OSCAudioConnection* pc = new OSCAudioConnection{pcName,vi->grp,vi->env,0,mixo->mixerStereo,(uint8_t) i};
-      //(void) pc;
+      OSCAudioConnection* pc = new OSCAudioConnection{pcName,*((OSCAudioGroup*) vi),vi->env,0,mixo->mixerStereo,(uint8_t) i};
+      (void) pc;
 
       mixo->mixerStereo.pan(i,(2.0f*i/(XVOICES - 1)-1.0f)*0.9f);
     }
@@ -278,13 +280,13 @@ void destroySynth(void)
   {
     delete mixo;
     mixo = NULL;
-    //Serial.println("mixo is no more!"); Serial.flush();
+    Serial.println("mixo is no more!"); Serial.flush();
   }
   if (NULL != voice1)
   {
     delete voice1;
     voice1 = NULL;
-    //Serial.println("voice1 has left the building"); Serial.flush();
+    Serial.println("voice1 has left the building"); Serial.flush();
   }
   AudioInterrupts();
 }
@@ -295,9 +297,9 @@ void testSynth()
   
   for (int i = 0;i<10;i++)
   {
-    /*printHeapX(&d,&d);*/ zapHeap(); memDump(0x20216D8C,1024);
+    printHeapX(&d,&d); zapHeap(); memDump(0x20216D8C,1024);
     destroySynth();
-    /*printHeapX(&d,&d);*/ zapHeap(); memDump(0x20216D8C,1024);
+    printHeapX(&d,&d); zapHeap(); memDump(0x20216D8C,1024);
     buildSynth();
   }
   printHeapX(&d,&d);
