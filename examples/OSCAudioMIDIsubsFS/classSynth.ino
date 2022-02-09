@@ -33,6 +33,7 @@
 
 #include "OSCAudioBase.h"
 
+// Non-OSC version of the Voice1 class
 class Voice1 
 {
 public:
@@ -45,136 +46,43 @@ public:
     Voice1() { // constructor (this is called when class-object is created)
         int pci = 0; // used only for adding new patchcords
 
-
         patchCord[pci++] = new AudioConnection(wav, 0, mixer, 0);
         patchCord[pci++] = new AudioConnection(wav2, 0, mixer, 1);
         patchCord[pci++] = new AudioConnection(mixer, 0, env, 0);
         
     }
-};
-
-/*
-class OSCVoice1 
-{
-public:
-    OSCAudioSynthWaveform&               wav;
-    OSCAudioSynthWaveform&               wav2;
-    OSCAudioMixer4&                      mixer;
-    OSCAudioEffectEnvelope&              env;
-    OSCAudioConnection                  *patchCord[3]; // total patchCordCount:3 including array typed ones.
-
-    OSCVoice1() : // constructor (this is called when class-object is created)
-      wav(*new OSCAudioSynthWaveform{"wav"}),
-      wav2(*new OSCAudioSynthWaveform{"wav2"}),
-      mixer(*new OSCAudioMixer4{"mixer"}),
-      env(*new OSCAudioEffectEnvelope{"env"})
-    { 
-        int pci = 0; // used only for adding new patchcords
-
-        patchCord[pci++] = new OSCAudioConnection("wav_mixer",  wav, 0, mixer, 0);
-        patchCord[pci++] = new OSCAudioConnection("wav2_mixer", wav2, 0, mixer, 1);
-        patchCord[pci++] = new OSCAudioConnection("mixer_env",  mixer, 0, env, 0);        
-    }
-          
-    OSCVoice1(OSCAudioGroup& grp) : // constructor for grouped version
-      wav(*new OSCAudioSynthWaveform{"wav",grp}),
-      wav2(*new OSCAudioSynthWaveform{"wav2",grp}),
-      mixer(*new OSCAudioMixer4{"mixer",grp}),
-      env(*new OSCAudioEffectEnvelope{"env",grp})
-    { 
-        int pci = 0; // used only for adding new patchcords
-
-        patchCord[pci++] = new OSCAudioConnection("wav_mixer", grp, wav, 0, mixer, 0);
-        patchCord[pci++] = new OSCAudioConnection("wav2_mixer",grp, wav2, 0, mixer, 1);
-        patchCord[pci++] = new OSCAudioConnection("mixer_env", grp, mixer, 0, env, 0);                
-    } 
-
-    ~OSCVoice1()
+    
+    ~Voice1()  // destructor (this is called when the class-object is deleted)
     {
-        // delete the patchCords, otherwise
-        // we'd have a memory leak
-        
-        int pci = 0; 
-        delete patchCord[pci++];
-        delete patchCord[pci++];
-        delete patchCord[pci++];
-
-        // also the voice objects:
-        delete &wav;
-        delete &wav2;
-        delete &mixer;
-        delete &env;
+      for (int i = 0; i < 3; i++) {
+        patchCord[i]->disconnect(); // don't actually need this!
+        delete patchCord[i];
+      }
     }
 };
 
 
-
-class OSCVoice1grp : public OSCVoice1
-{
-  public:
-    OSCVoice1grp(const char* _name,OSCAudioGroup* parent) : OSCVoice1(*(grp = new OSCAudioGroup(_name,parent))) {}
-    ~OSCVoice1grp() {delete grp;}
-    OSCAudioGroup* grp; 
-};
-*/
-
-class OSCVoice1grpX 
-{
-public:
-    OSCAudioGroup& grp;
-    OSCAudioSynthWaveform&               wav;
-    OSCAudioSynthWaveform&               wav2;
-    OSCAudioMixer4&                      mixer;
-    OSCAudioEffectEnvelope&              env;
-    OSCAudioConnection                  *patchCord[3]; // total patchCordCount:3 including array typed ones.
-
-       
-    OSCVoice1grpX(const char* _name,OSCAudioGroup* parent) : // constructor 
-      grp(*new OSCAudioGroup{_name,parent}),
-      wav(*new OSCAudioSynthWaveform{"wav",grp}),
-      wav2(*new OSCAudioSynthWaveform{"wav2",grp}),
-      mixer(*new OSCAudioMixer4{"mixer",grp}),
-      env(*new OSCAudioEffectEnvelope{"env",grp})
-    { 
-        int pci = 0; // used only for adding new patchcords
-
-        patchCord[pci++] = new OSCAudioConnection("wav_mixer", grp, wav, 0, mixer, 0);
-        patchCord[pci++] = new OSCAudioConnection("wav2_mixer",grp, wav2, 0, mixer, 1);
-        patchCord[pci++] = new OSCAudioConnection("mixer_env", grp, mixer, 0, env, 0);                
-    } 
-
-    ~OSCVoice1grpX()
-    {
-        delete &grp; // automatically deletes all group members!
-    }
-};
-
-
+// OSC version of the Voice1 class
 class OSCVoice1grp : public OSCAudioGroup
 {
 public:
     // the actual voice elements we want to group together
-    OSCAudioSynthWaveform&               wav;
-    OSCAudioSynthWaveform&               wav2;
-    OSCAudioMixer4&                      mixer;
-    OSCAudioEffectEnvelope&              env;
+    OSCAudioSynthWaveform&  wav;
+    OSCAudioSynthWaveform&  wav2;
+    OSCAudioMixer4&         mixer;
+    OSCAudioEffectEnvelope& env;
 
+    // internal patch cords
     // total patchCordCount:3 including array typed ones.
-    //OSCAudioConnection&                  pc1,pc2,pc3; 
-    OSCAudioConnection                  *patchCord[3]; // total patchCordCount:3 including array typed ones.
-       
+    OSCAudioConnection*     patchCord[3];
+
+    // create as sub-group
     OSCVoice1grp(const char* _name,OSCAudioGroup* parent) : // constructor 
       OSCAudioGroup(_name,parent), // construct our base class instance
       wav(*new OSCAudioSynthWaveform{"wav",*((OSCAudioGroup*) this)}),
       wav2(*new OSCAudioSynthWaveform{"wav2",*((OSCAudioGroup*) this)}),
       mixer(*new OSCAudioMixer4{"mixer",*((OSCAudioGroup*) this)}),
-      env(*new OSCAudioEffectEnvelope{"env",*((OSCAudioGroup*) this)}) // ,
-/*
-      pc1(*new OSCAudioConnection{"wav_mixer", *((OSCAudioGroup*) this), wav,   0, mixer, 0}),
-      pc2(*new OSCAudioConnection{"wav2_mixer",*((OSCAudioGroup*) this), wav2,  0, mixer, 1}),
-      pc3(*new OSCAudioConnection{"mixer_env", *((OSCAudioGroup*) this), mixer, 0, env,   0})                
-*/      
-//    { } // no code needed, initialisers have done it all
+      env(*new OSCAudioEffectEnvelope{"env",*((OSCAudioGroup*) this)})
     { 
         int pci = 0; // used only for adding new patchcords
         OSCAudioGroup& grp = *((OSCAudioGroup*) this);
@@ -184,16 +92,13 @@ public:
         patchCord[pci++] = new OSCAudioConnection("mixer_env", grp, mixer, 0, env,   0);                
     } 
 
-    ~OSCVoice1grp() 
-    { 
-      for (int i = 0; i < 3; i++)
-        delete patchCord[i];
-    }
-    
-    // no destructor needed: the base OSCAudioGroup will delete
-    // all its members when it's destroyed
-    //~OSCVoice1grp() { }
+    // create at root
+    OSCVoice1grp(const char* _name) : OSCVoice1grp(_name,NULL) {}
+
+    // no destructor needed, the base OSCAudioGroup   
+    // destroys its members when it's destroyed
 };
+
 
 class OSCMixAndOutput // only bother with the ungrouped version for now
 {
@@ -242,12 +147,15 @@ void buildSynth(void)
 {
   mixo = new OSCMixAndOutput{XVOICES};
   voice1 = new OSCAudioGroup{"voice1",nullptr};
+  
   for (int i=0;i<XVOICES;i++)
   {
     char grpName[50],pcName[20];
-    
+
+    // Create new voice instance.
+    // It is a sub-member of the voice1 group, so will be
+    // destroyed when we delete voice1.
     sprintf(grpName,"i%d",i);
-    grpName[5]='0'+i;
     OSCVoice1grp* vi = new OSCVoice1grp{grpName,voice1};
     vi->mixer.gain(0,0.5);
     vi->mixer.gain(1,0.5);
@@ -255,7 +163,10 @@ void buildSynth(void)
     if (NULL != mixo)
     {
       sprintf(pcName,"i%d_mixer",i);
-      OSCAudioConnection* pc = new OSCAudioConnection{pcName,*((OSCAudioGroup*) vi),vi->env,0,mixo->mixerStereo,(uint8_t) i};
+      // Make a connection from a voice instance to the output mixer.
+      // We make it a group member of the voice instance, so it will be destroyed
+      // when the instance is destroyed, and we don't need to keep track of it.
+      OSCAudioConnection* pc = new OSCAudioConnection{pcName,*vi,vi->env,0,mixo->mixerStereo,(uint8_t) i};
       (void) pc;
 
       mixo->mixerStereo.pan(i,(2.0f*i/(XVOICES - 1)-1.0f)*0.9f);
@@ -290,6 +201,7 @@ void destroySynth(void)
   }
   AudioInterrupts();
 }
+
 
 void testSynth()
 {
