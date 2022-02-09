@@ -235,7 +235,7 @@ public:
 // Build the synth. Note that we would "lose track" of everything on
 // exit from the function, except that the OSCAudio system can 
 // find the elements for us. Or just store a couple of pointers...
-#define XVOICES 3
+#define XVOICES 6
 OSCMixAndOutput* mixo;
 OSCAudioGroup* voice1;
 void buildSynth(void)
@@ -246,7 +246,7 @@ void buildSynth(void)
   {
     char grpName[50],pcName[20];
     
-    sprintf(grpName,"i%d",i);//"abcdefghijklmnopqrstuvwxyz_%010d",i);
+    sprintf(grpName,"i%d",i);
     grpName[5]='0'+i;
     OSCVoice1grp* vi = new OSCVoice1grp{grpName,voice1};
     vi->mixer.gain(0,0.5);
@@ -297,9 +297,9 @@ void testSynth()
   
   for (int i = 0;i<10;i++)
   {
-    printHeapX(&d,&d); zapHeap(); memDump(0x20216D8C,1024);
+    printHeapX(&d,&d); zapHeap(); memDump((char*) 0x20216D8C,1024);
     destroySynth();
-    printHeapX(&d,&d); zapHeap(); memDump(0x20216D8C,1024);
+    printHeapX(&d,&d); zapHeap(); memDump((char*) 0x20216D8C,1024);
     buildSynth();
   }
   printHeapX(&d,&d);

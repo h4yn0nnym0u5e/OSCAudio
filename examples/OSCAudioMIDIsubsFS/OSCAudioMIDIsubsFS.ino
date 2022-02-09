@@ -47,7 +47,7 @@
 //#include "dynamic-util.h"
 #include "OSCAudioBase.h"
 
-bool list_enable = true;
+bool list_enable = false;
 void listObjects(void) {listObjects(list_enable);}
 
 #define noOSC_USE_USB_SERIAL
@@ -96,7 +96,7 @@ void setup() {
   //listAllTypes();
 
   buildSynth();
-  testSynth();
+  //testSynth();
 }
 
 

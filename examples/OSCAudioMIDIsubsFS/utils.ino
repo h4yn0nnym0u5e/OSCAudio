@@ -27,7 +27,7 @@ void memDump(char* p, int n)
   for (int i=0;i<n/DUMP_LEN;i++)
   {
     char buf[100];
-    int off = sprintf(buf,"%08X: ",p);
+    int off = sprintf(buf,"%08lX: ",(uint32_t) p);
     for (int j=0;j<DUMP_LEN;j++)
       off += sprintf(buf+off,"%02X ",q[j]);
     off += sprintf(buf+off," ");
@@ -59,7 +59,7 @@ void zapHeap(void)
   do
   {
     free(rm2);
-    void* rm2 = malloc(++rs);  
+    rm2 = malloc(++rs);  
   } while (rs <= ZAP_MAX && rm2 == rm);
   free(rm2);
   rs--;
