@@ -53,13 +53,21 @@ extern uint8_t __bss_end;
 #define HEAP_START &__bss_end
 #define HEAP_END   (&_estack - 4096) // guess - allow 4k stack
 #endif
-void printHeap(OSCMessage& repl)
+
+void printHeapX(int* x, int* y)
 {
   char* a = (char*) malloc(10000);
   int u = ((uint32_t) a) - ((uint32_t) HEAP_START);
   int f = ((uint32_t) HEAP_END) - ((uint32_t) a);
   Serial.printf("Heap used %lu bytes; free %lu bytes\n",u,f);  
   free(a);
+  *x = u; *y = f;
+}
+
+void printHeap(OSCMessage& repl)
+{
+  int u,f;
+  printHeapX(&u,&f);
   repl.add(u).add(f);
 }
 

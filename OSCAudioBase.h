@@ -116,6 +116,7 @@ typedef struct OSCAudioTypes_s {
 
 class OSCAudioBase : public OSCUtils
 {
+	uint32_t id;
   public:
 	friend class OSCAudioConnection;
 	friend class OSCAudioGroup;
@@ -123,6 +124,7 @@ class OSCAudioBase : public OSCUtils
     OSCAudioBase(const char* _name,AudioStream* _sibling = NULL) : 
 				name(NULL), sibling(_sibling), next_group(NULL), pParent(NULL)
     {
+		id = 'ESAB'; id2='BASE';
 		setName(_name); 
 		linkIn(); 
 		OSC_SPTF("%s base created:\n",name);
@@ -135,6 +137,7 @@ class OSCAudioBase : public OSCUtils
 				 AudioStream* _sibling = NULL) : 
 				name(NULL), sibling(_sibling), next_group(NULL), pParent(NULL)
     {
+		id = 'GSAB';
 		setName(_name); 
 		linkInGroup(&first);
 		OSC_SPTF("%s base created; member of %s:\n",name,first.name);
@@ -142,13 +145,19 @@ class OSCAudioBase : public OSCUtils
     }
 	
     
-    virtual ~OSCAudioBase() {OSC_SPTF("dtor for %s at %08X!\n",name,(uint32_t) this); OSC_SFSH(); if (NULL != name) free(name); linkOut(); }
+    virtual ~OSCAudioBase() {
+	smash();
+		OSC_SPTF("dtor for %s at %08X!\n",name,(uint32_t) this); OSC_SFSH(); if (NULL != name) {free(name); OSC_SPTF("Freed %08X\n",name);} linkOut(); 
+		smash2();
+	// AudioStream pParent= first_route = next_route = next_group
+	}
     char* name;
     size_t nameLen;
 	AudioStream* sibling;
 	static const OSCAudioTypes_t audioTypes[];
 	static size_t countOfAudioTypes(void);
-
+	void smash(void);
+	void smash2(void);
 
 	/**
 	 * (Re)set the name of the OSCAudio object so the system can find it.
@@ -167,20 +176,24 @@ class OSCAudioBase : public OSCUtils
 			if (nameAlloc < nameLen+NAME_PAD || NULL == name)
 			{
 				nameAlloc = nameLen+NAME_PAD;
+				nameAlloc = 16;
 				name = (char*) malloc(nameAlloc); // include space for // and null terminator
+				for (int i=0;i<16;i++) name[i] = '+';
+				OSC_SPTF("Name %s allocated at %08X\n",_name,(uint32_t) name);
 			}
 			else
 				toFree = NULL;
 			
-					if (NULL != name)
-					{
-						name[0] = '/'; // for routing
-						strcpy(name+1,_name);
-					}
+			if (NULL != name)
+			{
+				name[0] = '/'; // for routing
+				strcpy(name+1,_name);
+			}
 			
 			if (NULL != toFree)
 			{
 				free(toFree);
+				OSC_SPTF("Freed %08X\n",toFree);
 			}		
 		}
 	}
@@ -449,6 +462,7 @@ class OSCAudioBase : public OSCUtils
 	static OSCAudioResourceSetting_t settings[rsrc_COUNT];	//!< settings etc for potentially unshareable resources
 	
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)	
+	int id2;
 };
 
 
@@ -536,6 +550,7 @@ class OSCAudioConnection : public OSCAudioBase, public AudioConnection
 // ============== AudioGroup ====================
 class OSCAudioGroup : public OSCAudioBase
 {
+	int gid;
   public:
 	OSCAudioGroup(const char* _name, OSCAudioGroup* parent = NULL);
 	~OSCAudioGroup();
@@ -550,6 +565,7 @@ class OSCAudioGroup : public OSCAudioBase
 	friend class OSCAudioConnection;
 	OSCAudioConnection* first_src;	//!< list of connections whose source is in this group
 	OSCAudioConnection* first_dst;	//!< list of connections whose destination is in this group
+	int gid2;
 };
 
 	

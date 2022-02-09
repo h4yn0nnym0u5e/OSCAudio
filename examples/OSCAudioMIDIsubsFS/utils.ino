@@ -15,6 +15,70 @@ void dbgMatch(char* addr,char* patt,int indent)
   }
 }
 
+
+//=============================================================
+#define DUMP_LEN 16
+void memDump(char* p, int n)
+{
+  // copy to stack to avoid corruption
+  char* q=alloca(n);
+  memcpy(q,p,n);
+  
+  for (int i=0;i<n/DUMP_LEN;i++)
+  {
+    char buf[100];
+    int off = sprintf(buf,"%08X: ",p);
+    for (int j=0;j<DUMP_LEN;j++)
+      off += sprintf(buf+off,"%02X ",q[j]);
+    off += sprintf(buf+off," ");
+    for (int j=0;j<DUMP_LEN;j++)
+    {
+      char c = q[j];
+      if (c<32 || c> 126) c = '.';
+      off += sprintf(buf+off,"%c",c);
+    }
+
+    Serial.println(buf);
+    p += DUMP_LEN;
+    q += DUMP_LEN;
+  }
+  Serial.println();
+}
+
+
+//=============================================================
+#define ZAP_MAX 12
+#define ZAP_DEPTH 26
+void zapHeap(void)
+{
+  static int depth = 0;
+  static char co = 'a';
+  int rs = 1;
+  void* rm = malloc(rs);
+  void* rm2 = rm;
+  do
+  {
+    free(rm2);
+    void* rm2 = malloc(++rs);  
+  } while (rs <= ZAP_MAX && rm2 == rm);
+  free(rm2);
+  rs--;
+  rm = malloc(rs);
+  for (int i=0;i<rs;i++)
+    *((char*) rm+i) = depth+co;
+  //Serial.printf("%d bytes at %08X; depth %d\n",rs,(uint32_t) rm,depth);
+  if (/*rs <ZAP_MAX &&*/ depth < ZAP_DEPTH)
+  {
+    ++depth;
+    zapHeap();
+    --depth;
+  }
+  free(rm);
+  if (0 == depth)
+    co = 'A'+'a'-co;
+}
+
+
 #define LO_MAX_COUNT 1000000
 //=============================================================
 void listObjects(OSCAudioBase* obj,int indent=0)
