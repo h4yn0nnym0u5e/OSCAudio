@@ -141,6 +141,8 @@ void routeSystem(OSCMessage& msg, int addressOffset,OSCBundle& reply)
   // trigger special debug modes
   else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/debug","ii"))
     setDebug(msg,repl);
+  else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/listObjects",NULL))
+    listObjects(true);
 
   // demo synth building in code
   else if (OSCAudioBase::isStaticTarget(msg,addressOffset,"/buildSynth",NULL))

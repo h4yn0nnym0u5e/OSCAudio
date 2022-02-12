@@ -75,21 +75,29 @@ public:
     // internal patch cords
     // total patchCordCount:3 including array typed ones.
     OSCAudioConnection*     patchCord[3];
+    //OSCAudioConnection *pc1,*pc2,*pc3;
 
     // create as sub-group
     OSCVoice1grp(const char* _name,OSCAudioGroup* parent) : // constructor 
       OSCAudioGroup(_name,parent), // construct our base class instance
-      wav(*new OSCAudioSynthWaveform{"wav",*((OSCAudioGroup*) this)}),
-      wav2(*new OSCAudioSynthWaveform{"wav2",*((OSCAudioGroup*) this)}),
-      mixer(*new OSCAudioMixer4{"mixer",*((OSCAudioGroup*) this)}),
-      env(*new OSCAudioEffectEnvelope{"env",*((OSCAudioGroup*) this)})
+      wav(*new OSCAudioSynthWaveform{"wav",*this}),
+      wav2(*new OSCAudioSynthWaveform{"wav2",*this}),
+      mixer(*new OSCAudioMixer4{"mixer",*this}),
+      env(*new OSCAudioEffectEnvelope{"env",*this})
+      /*
+     ,pc1(new OSCAudioConnection{"wav_mixer", *this, wav,   0, mixer, 0}),
+      pc2(new OSCAudioConnection{"wav2_mixer",*this, wav2,  0, mixer, 1}),
+      pc3(new OSCAudioConnection{"mixer_env", *this, mixer, 0, env,   0})                
+      */
     { 
+      
         int pci = 0; // used only for adding new patchcords
-        OSCAudioGroup& grp = *((OSCAudioGroup*) this);
+        OSCAudioGroup& grp = *this;
 
         patchCord[pci++] = new OSCAudioConnection("wav_mixer", grp, wav,   0, mixer, 0);
         patchCord[pci++] = new OSCAudioConnection("wav2_mixer",grp, wav2,  0, mixer, 1);
         patchCord[pci++] = new OSCAudioConnection("mixer_env", grp, mixer, 0, env,   0);                
+      
     } 
 
     // create at root
