@@ -52,12 +52,14 @@
 #define OSC_SPTF(...) DEBUG_SER.printf(__VA_ARGS__)
 #define OSC_SFSH(...) DEBUG_SER.flush(__VA_ARGS__)
 #define OSC_DBGP(...) dbgPrt(__VA_ARGS__)
+#define PRIVATE_UNLESS_DBGPRT public
 #else
 #define OSC_SPRT(...)
 #define OSC_SPLN(...)
 #define OSC_SPTF(...)
 #define OSC_SFSH(...)
 #define OSC_DBGP(...)
+#define PRIVATE_UNLESS_DBGPRT private
 #endif // defined(OSC_DEBUG_PRINT)
 #endif // !defined(DEBUG_SER)
 

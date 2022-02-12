@@ -485,7 +485,7 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 	
 	if (NULL != png) // has a parent group
 	{
-		png = parent->next_group;
+		png = parent->getNextGroup();
 		if (NULL != png) // group has no members, can't have hits!
 			hits = OSCAudioBase::hitCount(objName,png,false); // count matches
 	}
@@ -810,19 +810,19 @@ void OSCAudioGroup::linkOutGroup()
 
 
 #if defined(DYNAMIC_AUDIO_AVAILABLE) // Group creation / destruction
+struct crGrpContext_s {const char* name; OSCAudioBase::error retval;};
 void createGroupCB(OSCAudioBase* parent,OSCMessage& msg,int offset,void* context)
 {
-	char* buf = (char*) context;
-	OSCAudioBase::error retval = OSCAudioBase::OK;
+	crGrpContext_s* ctxt = (crGrpContext_s*) context;
+	const char* buf = ctxt->name;
 	OSCAudioBase* png = parent;
 	
 	if (NULL != png)
-			png = parent->next_group;
+		png = parent->getNextGroup();
 	
 	if (0 != OSCAudioBase::hitCount(buf,png,false))
 	{
-		retval = OSCAudioBase::DUPLICATE_NAME;
-		(void) retval;
+		ctxt->retval = OSCAudioBase::DUPLICATE_NAME;
 	}
 	else
 	{
@@ -850,10 +850,12 @@ void OSCAudioBase::createGroup(OSCMessage& msg, int addressOffset, OSCBundle& re
 	
 	if (NULL != buf && NULL != path)
 	{
+		crGrpContext_s context = {buf,OSCAudioBase::OK};
 		if (1 == strlen(path)) // just a / : create directly at root
-			createGroupCB(NULL,msg,0,buf);
+			createGroupCB(NULL,msg,0,&context);
 		else	// sub-group of existing group
-			callBack(path,createGroupCB,buf);
+			callBack(path,createGroupCB,&context);
+		retval = context.retval;
 	}
 	else
 		retval = BLANK_NAME;

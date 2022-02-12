@@ -57,12 +57,14 @@
 #define OSC_SPTF(...) DEBUG_SER.printf(__VA_ARGS__)
 #define OSC_SFSH(...) DEBUG_SER.flush(__VA_ARGS__)
 #define OSC_DBGP(...) dbgPrt(__VA_ARGS__)
+#define PRIVATE_UNLESS_DBGPRT public
 #else
 #define OSC_SPRT(...)
 #define OSC_SPLN(...)
 #define OSC_SPTF(...)
 #define OSC_SFSH(...)
 #define OSC_DBGP(...)
+#define PRIVATE_UNLESS_DBGPRT private
 #endif // defined(OSC_DEBUG_PRINT)
 #endif // !defined(DEBUG_SER)
 
@@ -391,14 +393,13 @@ class OSCAudioBase : public OSCUtils
     static void routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 	
 	
-//protected:
+protected:
 	// existing objects: message passing and linking in/out
 	static OSCAudioBase* first_route; //!< linked list to route OSC messages to all derived instances
-	//OSCAudioBase** pFirst; 		//!< pointer back to list head
 	OSCAudioBase* next_route;	//!< list of related objects
 	OSCAudioBase* next_group; //!< list of unrelated objects
 			
-//private:
+private:
 	static void renameObjectCB(OSCAudioBase* ooi,OSCMessage& msg,int offset,void* ctxt);
 	static void renameObject(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 	size_t nameAlloc;	//!< space allocated for name: may be shorter than current name
@@ -437,6 +438,7 @@ class OSCAudioBase : public OSCUtils
 	}
 	void linkOutGroup(OSCAudioGroup** ppPrnt);
 	
+PRIVATE_UNLESS_DBGPRT:  // make visible for debug
 	OSCAudioGroup* pParent; //!< pointer back to ultimate parent
 
   protected:		
