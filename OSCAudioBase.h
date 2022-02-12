@@ -156,11 +156,120 @@ class OSCAudioBase : public OSCUtils
 	}
 	
 	
+	/**
+	 * Route a message for the audio system to every known object.
+	 */
+    static void routeAll(OSCMessage& msg, 	//!< received message
+						 int addressOffset,	//!< offset past the already used part of the address
+						 OSCBundle& reply)	//!< bundle to hold reply
+    {
+      routeFrom(&first_route,msg,addressOffset,reply); 
+    }
+
+    static void routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& reply);
+	
+	// count matches to pattern
+	static int hitCount(const char* addr,			//!< address to match
+						OSCAudioBase* ooi = NULL,	//!< where in structure to start from (default is root)
+						bool enterGroups = true);	//!< whether to allow matches in sub-groups
+				
+	// count matches and return last matching object
+	static int findMatch(const char* addr,				//!< address to match
+						OSCAudioBase** found = NULL,	//!< last-found matching object
+						OSCAudioBase* ooi = NULL,		//!< where in structure to start from (default is root)
+						bool enterGroups = true);		//!< whether to allow matches in sub-groups
+	 
+
+	//=============================================================================================
+	// Set of functions mainly for debug purposes, to allow user to check
+	// object and group structure is as expected
+	/**
+	 * Return pointer to first OSC audio object
+	 */
+	static OSCAudioBase* getFirst(void)	
+	{
+		return first_route;
+	}
+	
+	/**
+	 * Return pointer to next OSC audio object after given one
+	 */
+	OSCAudioBase* getNext(void)
+	{
+		return next_route;
+	}
+	
+	/**
+	 * Return pointer to next OSC audio group after given one
+	 */
+	virtual	OSCAudioBase* getNextGroup(void)
+	{
+		return NULL;
+	}
+	
     char* name;
-    size_t nameLen;
 	AudioStream* sibling;
 	static const OSCAudioTypes_t audioTypes[];
 	static size_t countOfAudioTypes(void);
+	
+	virtual OSCAudioConnection* getFirstSrc(void) {return NULL;}
+	virtual OSCAudioConnection* getFirstDst(void) {return NULL;}
+
+	
+protected:
+	// Used by derived classes to route messages etc.
+	
+	// existing objects: message passing and linking in/out
+	static OSCAudioBase* first_route; //!< linked list to route OSC messages to all derived instances
+	OSCAudioBase* next_route;	//!< list of related objects
+	OSCAudioBase* next_group; //!< list of unrelated objects
+			
+	/**
+	 * Return offset > 0 if message is directed at audio instances whose name matches ours.
+	 * Subsequent calls to match() should add the returned offset to the existing
+	 * addressOffset, as appropriate.
+	 */
+	int isMine(OSCMessage& msg, int addressOffset) {return msg.match(name,addressOffset);}
+	
+	/**
+	 * Get total path name length to and including given object
+	 */
+	static int getPathNameLength(OSCAudioBase* ooi)
+	{
+		int result = 1;
+		
+		if (NULL != ooi)
+			result = ooi->nameLen+1 + getPathNameLength((OSCAudioBase*) (ooi->pParent));
+		
+		return result;
+	}
+	
+	/**
+	 * Get total path name to and including given object. 
+	 */
+	static int getPathNameTo(OSCAudioBase* ooi,char* buf)
+	{
+		int result = 1;
+		
+		if (NULL != ooi)
+		{
+			result = getPathNameTo((OSCAudioBase*) (ooi->pParent),buf);
+			strcpy(buf+result,ooi->name);
+			result += ooi->nameLen+1;
+		}
+		else
+			*buf = '/';
+		
+		return result;
+	}
+	static char* getMessageString(OSCMessage& msg, int position, void* buf, bool slashPad = false); //!< read message string into memory assigned by alloca() (probably)
+	
+PRIVATE_UNLESS_DBGPRT:  // make visible for debug
+	OSCAudioGroup* pParent; //!< pointer back to ultimate parent
+
+private:
+    size_t nameLen;
+	size_t nameAlloc;	//!< space allocated for name: may be shorter than current name
 
 	/**
 	 * (Re)set the name of the OSCAudio object so the system can find it.
@@ -215,13 +324,6 @@ class OSCAudioBase : public OSCUtils
 		return objIdx;
 	}
 
-	/**
-	 * Return offset > 0 if message is directed at audio instances whose name matches ours.
-	 * Subsequent calls to match() should add the returned offset to the existing
-	 * addressOffset, as appropriate.
-	 */
-	int isMine(OSCMessage& msg, int addressOffset) {return msg.match(name,addressOffset);}
-	
 	
     void debugPrint(OSCMessage& msg, int addressOffset)
     {
@@ -235,16 +337,6 @@ class OSCAudioBase : public OSCUtils
       Serial.println(isMine(msg,addressOffset));
       Serial.println(msg.size());
       Serial.println();      
-    }
-
-	/**
-	 * Route a message for the audio system to every known object.
-	 */
-    static void routeAll(OSCMessage& msg, 	//!< received message
-						 int addressOffset,	//!< offset past the already used part of the address
-						 OSCBundle& reply)	//!< bundle to hold reply
-    {
-      routeFrom(&first_route,msg,addressOffset,reply); 
     }
 
 
@@ -318,91 +410,12 @@ class OSCAudioBase : public OSCUtils
 		}
 	}
 	
-	/**
-	 * Get total path name length to and including given object
-	 */
-	static int getPathNameLength(OSCAudioBase* ooi)
-	{
-		int result = 1;
-		
-		if (NULL != ooi)
-			result = ooi->nameLen+1 + getPathNameLength((OSCAudioBase*) (ooi->pParent));
-		
-		return result;
-	}
-	
-	/**
-	 * Get total path name to and including given object. 
-	 */
-	static int getPathNameTo(OSCAudioBase* ooi,char* buf)
-	{
-		int result = 1;
-		
-		if (NULL != ooi)
-		{
-			result = getPathNameTo((OSCAudioBase*) (ooi->pParent),buf);
-			strcpy(buf+result,ooi->name);
-			result += ooi->nameLen+1;
-		}
-		else
-			*buf = '/';
-		
-		return result;
-	}
-	
-	// count matches to pattern
-	static int hitCount(const char* addr,
-						OSCAudioBase* ooi = NULL,
-						bool enterGroups = true);
-				
-	// count matches and return last matching object
-	static int findMatch(const char* addr,				//!< address to match
-						OSCAudioBase** found = NULL,	//!< last-found matching object
-						OSCAudioBase* ooi = NULL,		//!< where in structure to start from (default is root)
-						bool enterGroups = true);		//!< whether to allow matches in sub-groups
-	 
-	/**
-	 * Return pointer to first OSC audio object
-	 */
-	static OSCAudioBase* getFirst(void)	
-	{
-		return first_route;
-	}
-	
-	/**
-	 * Return pointer to next OSC audio object after given one
-	 */
-	OSCAudioBase* getNext(void)
-	{
-		return next_route;
-	}
-	
-	/**
-	 * Return pointer to next OSC audio group after given one
-	 */
-	virtual	OSCAudioBase* getNextGroup(void)
-	{
-		return NULL;
-	}
-	virtual OSCAudioConnection* getFirstSrc(void) {return NULL;}
-	virtual OSCAudioConnection* getFirstDst(void) {return NULL;}
-		
 		
 	static char* sanitise(const char* src, char* dst, int offset = 0);
-	static char* trimUnderscores(const char* src, char* dst);
-    static void routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& reply);
+	static char* trimUnderscores(const char* src, char* dst);	
 	
-	
-protected:
-	// existing objects: message passing and linking in/out
-	static OSCAudioBase* first_route; //!< linked list to route OSC messages to all derived instances
-	OSCAudioBase* next_route;	//!< list of related objects
-	OSCAudioBase* next_group; //!< list of unrelated objects
-			
-private:
 	static void renameObjectCB(OSCAudioBase* ooi,OSCMessage& msg,int offset,void* ctxt);
 	static void renameObject(OSCMessage& msg, int addressOffset, OSCBundle& reply);
-	size_t nameAlloc;	//!< space allocated for name: may be shorter than current name
 	
 	// Link in and out of the routing lists
 	// Link in: this occurs even if we're going to be a group member, before
@@ -438,13 +451,7 @@ private:
 	}
 	void linkOutGroup(OSCAudioGroup** ppPrnt);
 	
-PRIVATE_UNLESS_DBGPRT:  // make visible for debug
-	OSCAudioGroup* pParent; //!< pointer back to ultimate parent
 
-  protected:		
-	static char* getMessageString(OSCMessage& msg, int position, void* buf, bool slashPad = false); //!< read message string into memory assigned by alloca() (probably)
-		
-	
 #if defined(DYNAMIC_AUDIO_AVAILABLE)
 //============================== Dynamic Audio Objects ==================================================
   public:
@@ -525,6 +532,10 @@ class OSCAudioConnection : public OSCAudioBase, public AudioConnection
 
 	void route(OSCMessage& msg, int addressOffset, OSCBundle& reply);
 	
+	OSCAudioConnection* getNextSrc(void) {return next_src;}
+	OSCAudioConnection* getNextDst(void) {return next_dst;}
+				
+  private:
 	// Link in and out of the source connection lists
 	void linkInSrc(OSCAudioGroup* parent);		
 	void linkOutSrc();
@@ -533,10 +544,6 @@ class OSCAudioConnection : public OSCAudioBase, public AudioConnection
 	void linkInDst(OSCAudioGroup* parent);		
 	void linkOutDst();
 	
-	OSCAudioConnection* getNextSrc(void) {return next_src;}
-	OSCAudioConnection* getNextDst(void) {return next_dst;}
-				
-  private:
 	void mkLinks(OSCAudioBase& src, OSCAudioBase& dst);
 	OSCAudioGroup* pSrcParent; //!< parent group of source object
 	OSCAudioGroup* pDstParent; //!< parent group of destination object
@@ -555,12 +562,12 @@ class OSCAudioGroup : public OSCAudioBase
 	~OSCAudioGroup();
 	virtual	OSCAudioBase* getNextGroup(void);;
 	void route(OSCMessage& msg, int addressOffset, OSCBundle& reply);
-	void linkInGroup(OSCAudioGroup* parent);	
-	void linkOutGroup();
 	virtual OSCAudioConnection* getFirstSrc(void) {return first_src;}
 	virtual OSCAudioConnection* getFirstDst(void) {return first_dst;}
 		
   protected:
+	void linkInGroup(OSCAudioGroup* parent);	
+	void linkOutGroup();
 	friend class OSCAudioConnection;
 	OSCAudioConnection* first_src;	//!< list of connections whose source is in this group
 	OSCAudioConnection* first_dst;	//!< list of connections whose destination is in this group
