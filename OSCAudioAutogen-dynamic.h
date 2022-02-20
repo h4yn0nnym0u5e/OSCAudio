@@ -1820,6 +1820,7 @@ class OSCAudioMixer : public AudioMixer, public OSCAudioBase
             if (isTarget(msg,addrOff,"/ga*","f")) {gain(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void gain(float gain) {
             else if (isTarget(msg,addrOff,"/ga*","if")) {gain(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void gain(unsigned int channel, float gain) {
             else if (isTarget(msg,addrOff,"/ge*",NULL)) {addReplyResult(msg,addrOff,reply,getChannels(),nameOfTarget); } // uint8_t getChannels(void) {return num_inputs;}; // actual number, not requested
+            else if (isTarget(msg,addrOff,"/s*","f")) {setSoftKnee(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setSoftKnee(float startPoint) {AudioMixerBase::setSoftKnee(startPoint);}
             else addReplyResult(msg,addrOff,reply,false,nameOfTarget,INVALID_METHOD);
           }
 		}
@@ -1881,7 +1882,8 @@ class OSCAudioMixerStereo : public AudioMixerStereo, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/ga*","if")) {gain(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void gain(unsigned int channel, float gain)
             else if (isTarget(msg,addrOff,"/ge*",NULL)) {addReplyResult(msg,addrOff,reply,getChannels(),nameOfTarget); } // uint8_t getChannels(void) {return num_inputs;}; // actual number, not requested
             else if (isTarget(msg,addrOff,"/p*","if")) {pan(msg.getInt(0),msg.getFloat(1)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void pan(unsigned int channel, float pan)
-            else if (isTarget(msg,addrOff,"/s*","f")) {setPanLaw(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setPanLaw(float law)
+            else if (isTarget(msg,addrOff,"/setP*","f")) {setPanLaw(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setPanLaw(float law)
+            else if (isTarget(msg,addrOff,"/setS*","f")) {setSoftKnee(msg.getFloat(0)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setSoftKnee(float startPoint) {AudioMixerBase::setSoftKnee(startPoint);}
             else addReplyResult(msg,addrOff,reply,false,nameOfTarget,INVALID_METHOD);
           }
 		}

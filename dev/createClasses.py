@@ -106,6 +106,7 @@ rtcd = {
     'unsigned short': 'uint16_t'
 }
 notD = ['AudioAnalyzeEvent', 'AudioEffectExpEnvelope', 'AudioMixer', 'AudioMixerStereo']
+notEver = ['AudioMixerBase']
 returnTypes={}
 
 ##############################################################################################
@@ -343,7 +344,7 @@ def mkShort(d):
 
 d={}
 
-# scan the .h files looking for classes derived from AudioStream or AudioControl 
+# scan the .h files looking for classes derived from AudioStream, AudioControl or AudioMixerBase
 for root,dirs,files in os.walk(rp):
     if limit < 0:
         break
@@ -375,7 +376,7 @@ for root,dirs,files in os.walk(rp):
                         if '' != cp:
                             print(li)
                                             
-                m = re.search('class *([^ :]+) *:.*Audio(Stream|Control)',li)
+                m = re.search('class *([^ :]+) *:.*Audio(Stream|Control|MixerBase)',li)
                 if m:
                     cs = 'private'
                     base = m.group(1)
@@ -513,7 +514,12 @@ if not dynamic:
             del d[cl]
         except:
             pass
-
+for cl in notEver:
+    try:
+        del d[cl]
+    except:
+        pass
+    
 #############################################################################################################
 # Output file
 op = r'E:\Jonathan\Arduino\libraries\OSCAudio'
@@ -533,7 +539,7 @@ stw = F'''
 '''
 
 if dynamic:
-    stw += '''#if defined({rguard})
+    stw += F'''#if defined({rguard})
 #undef {fguard}
 
 #if !defined({rguard}_E)

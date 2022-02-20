@@ -81,7 +81,7 @@ SLIPser = sliplib.SlipStream(ser,chunk_size=1)
 poly = 6
 pt8211 = False
 i2s = True
-dac = True
+dac = False
 # Create a bundle that we could get actioned immediately
 msgl = []
 # start with a blank slate

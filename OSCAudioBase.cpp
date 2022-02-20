@@ -410,7 +410,7 @@ void OSCAudioBase::destroyObject(OSCMessage& msg, int addressOffset, OSCBundle& 
 		OSC_SPLN(vName);
 		OSC_DBGP(msg,addressOffset); 
 		
-		// Have to do repeated searches rther than one callBack() sweep,
+		// Have to do repeated searches rather than one callBack() sweep,
 		// because removing items from a branched list while you're
 		// traversing it is bound to result in Alarm and Despondency
 		do
