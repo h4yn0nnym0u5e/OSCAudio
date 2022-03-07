@@ -5,13 +5,17 @@ import json
 
 ##############################################################################################
 # User settings
-dynamic = False        
+dynamic = True        
 ftrl = ['play_wav' # files to reject
         ]
 
 limit = 1000
 rp = '../../Audio'
 idxf = '../../Audio/gui/index.html'
+# USB audio is in cores, not the Audio library. At time of writing
+# Teensy 3.x and 4.x have the same class structure.
+ar = 'c:/Program Files (x86)/Arduino/hardware/teensy/avr/cores/teensy4/'
+afl = ['usb_audio.h']
 
 ##############################################################################################
 def printFn(base,fnT):
@@ -344,10 +348,12 @@ def mkShort(d):
 
 d={}
 
-# scan the .h files looking for classes derived from AudioStream, AudioControl or AudioMixerBase
-for root,dirs,files in os.walk(rp):
+# scan the .h files looking for classes derived from AudioStream or AudioControl 
+#for root,dirs,files in os.walk(rp):
+def processFiles(root,dirs,files):
+    global limit,d
     if limit < 0:
-        break
+        return
     for fn in files:
         m = re.search('(.*)[.]h$',fn)
         if m and m.group(1) not in ftrl:
@@ -419,6 +425,11 @@ for root,dirs,files in os.walk(rp):
             if limit < 0:
                 break
             fi.close()
+
+for root,dirs,files in os.walk(rp):
+    processFiles(root,dirs,files)
+
+processFiles(ar,[],afl)
 
 ###############################################################################
 # Scan the GUI looking for "InputOutputCompatibilityMetadata"

@@ -1510,6 +1510,32 @@ class OSCAudioInputTDM2 : public AudioInputTDM2, public OSCAudioBase
 #define OSC_CLASS__input_tdm2_h_(a)
 #endif // defined(_input_tdm2_h_)
 
+// ============== AudioInputUSB ====================
+class OSCAudioInputUSB : public AudioInputUSB, public OSCAudioBase
+{
+    public:
+        OSCAudioInputUSB(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioInputUSB(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+
+        void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
+        {
+          int nameOff;
+          if ((nameOff = isMine(msg,addrOff)) > 0)
+          {
+            addrOff += nameOff;
+            char* nameOfTarget;
+            nameOfTarget = alloca(getPathNameLength(this)+1);
+            if (NULL != nameOfTarget)
+              getPathNameTo(this,nameOfTarget);
+            // if (isTarget(msg,addrOff,"/usb_audio_g*","bbb")) {addReplyResult(msg,addrOff,reply,(int32_t)usb_audio_get_feature(msg.getBlob(0),msg.getBlob(1),msg.getBlob(2)),nameOfTarget); } // friend int usb_audio_get_feature(void *stp, uint8_t *data, uint32_t *datalen);
+            if (isTarget(msg,addrOff,"/usb_audio_r*","i")) {usb_audio_receive_callback(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // friend void usb_audio_receive_callback(unsigned int len);
+            // else if (isTarget(msg,addrOff,"/usb_audio_s*","bb")) {addReplyResult(msg,addrOff,reply,(int32_t)usb_audio_set_feature(msg.getBlob(0),msg.getBlob(1)),nameOfTarget); } // friend int usb_audio_set_feature(void *stp, uint8_t *buf);
+            else if (isTarget(msg,addrOff,"/v*",NULL)) {addReplyResult(msg,addrOff,reply,volume(),nameOfTarget); } // float volume(void) {
+            else addReplyResult(msg,addrOff,reply,false,nameOfTarget,INVALID_METHOD);
+          }
+		}
+};
+
 #if defined(mixer_h_)
 // ============== AudioMixer4 ====================
 class OSCAudioMixer4 : public AudioMixer4, public OSCAudioBase
@@ -2003,6 +2029,29 @@ class OSCAudioOutputTDM2 : public AudioOutputTDM2, public OSCAudioBase
 #else
 #define OSC_CLASS_output_tdm2_h_(a)
 #endif // defined(output_tdm2_h_)
+
+// ============== AudioOutputUSB ====================
+class OSCAudioOutputUSB : public AudioOutputUSB, public OSCAudioBase
+{
+    public:
+        OSCAudioOutputUSB(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioOutputUSB(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+
+        void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
+        {
+          int nameOff;
+          if ((nameOff = isMine(msg,addrOff)) > 0)
+          {
+            addrOff += nameOff;
+            char* nameOfTarget;
+            nameOfTarget = alloca(getPathNameLength(this)+1);
+            if (NULL != nameOfTarget)
+              getPathNameTo(this,nameOfTarget);
+            if (isTarget(msg,addrOff,"/u*",NULL)) {addReplyResult(msg,addrOff,reply,(uint32_t)usb_audio_transmit_callback(),nameOfTarget); } // friend unsigned int usb_audio_transmit_callback(void);
+            else addReplyResult(msg,addrOff,reply,false,nameOfTarget,INVALID_METHOD);
+          }
+		}
+};
 
 #if defined(play_memory_h_)
 // ============== AudioPlayMemory ====================
@@ -2667,6 +2716,7 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
 	OSC_CLASS__input_spdif3_h_(AudioInputSPDIF3) \
 	OSC_CLASS__input_tdm_h_(AudioInputTDM) \
 	OSC_CLASS__input_tdm2_h_(AudioInputTDM2) \
+	OSC_CLASS(AudioInputUSB) \
 	OSC_CLASS_mixer_h_(AudioMixer4) \
 	OSC_CLASS_output_ADAT_h_(AudioOutputADAT) \
 	OSC_CLASS_output_dac_h_(AudioOutputAnalog) \
@@ -2685,6 +2735,7 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
 	OSC_CLASS_output_SPDIF3_h_(AudioOutputSPDIF3) \
 	OSC_CLASS_output_tdm_h_(AudioOutputTDM) \
 	OSC_CLASS_output_tdm2_h_(AudioOutputTDM2) \
+	OSC_CLASS(AudioOutputUSB) \
 	OSC_CLASS_play_memory_h_(AudioPlayMemory) \
 	OSC_CLASS_play_queue_h_(AudioPlayQueue) \
 	OSC_CLASS_play_sd_raw_h_(AudioPlaySdRaw) \

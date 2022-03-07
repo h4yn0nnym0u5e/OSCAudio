@@ -1799,6 +1799,43 @@ rsrcState_e OSCAudioInputTDM2::rsrcState;
 #define OSC_AUDIO_CHECK_RSRC__input_tdm2_h_(c)
 #endif // defined(_input_tdm2_h_)
 
+// ============== AudioInputUSB ====================
+class OSCAudioInputUSB : public AudioInputUSB, public OSCAudioBase
+{
+    public:
+        OSCAudioInputUSB(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioInputUSB(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioInputUSB() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[1];
+        static rsrcState_e rsrcState;
+
+        void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
+        {
+          int nameOff;
+          if ((nameOff = isMine(msg,addrOff)) > 0)
+          {
+            addrOff += nameOff;
+            char* nameOfTarget;
+            nameOfTarget = alloca(getPathNameLength(this)+1);
+            if (NULL != nameOfTarget)
+              getPathNameTo(this,nameOfTarget);
+            // if (isTarget(msg,addrOff,"/usb_audio_g*","bbb")) {addReplyResult(msg,addrOff,reply,(int32_t)usb_audio_get_feature(msg.getBlob(0),msg.getBlob(1),msg.getBlob(2)),nameOfTarget); } // friend int usb_audio_get_feature(void *stp, uint8_t *data, uint32_t *datalen);
+            if (isTarget(msg,addrOff,"/usb_audio_r*","i")) {usb_audio_receive_callback(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // friend void usb_audio_receive_callback(unsigned int len);
+            // else if (isTarget(msg,addrOff,"/usb_audio_s*","bb")) {addReplyResult(msg,addrOff,reply,(int32_t)usb_audio_set_feature(msg.getBlob(0),msg.getBlob(1)),nameOfTarget); } // friend int usb_audio_set_feature(void *stp, uint8_t *buf);
+            else if (isTarget(msg,addrOff,"/v*",NULL)) {addReplyResult(msg,addrOff,reply,volume(),nameOfTarget); } // float volume(void) {
+            else addReplyResult(msg,addrOff,reply,false,nameOfTarget,INVALID_METHOD);
+          }
+		}
+};
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioInputUSB::resources[] = {
+  {rsrc_USB_Rx_Endpoint,setgUnshareable},
+};
+rsrcState_e OSCAudioInputUSB::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+
 #if defined(DYNMIXER_H_)
 // ============== AudioMixer ====================
 class OSCAudioMixer : public AudioMixer, public OSCAudioBase
@@ -2617,6 +2654,40 @@ rsrcState_e OSCAudioOutputTDM2::rsrcState;
 #define OSC_AUDIO_CHECK_RSRC_output_tdm2_h_(c)
 #endif // defined(output_tdm2_h_)
 
+// ============== AudioOutputUSB ====================
+class OSCAudioOutputUSB : public AudioOutputUSB, public OSCAudioBase
+{
+    public:
+        OSCAudioOutputUSB(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        OSCAudioOutputUSB(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) { rsrcState = rsrcThisActive;}
+        ~OSCAudioOutputUSB() { rsrcState = rsrcThisDormant;} 
+
+        const static OSCAudioResourceCheck_t resources[1];
+        static rsrcState_e rsrcState;
+
+        void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
+        {
+          int nameOff;
+          if ((nameOff = isMine(msg,addrOff)) > 0)
+          {
+            addrOff += nameOff;
+            char* nameOfTarget;
+            nameOfTarget = alloca(getPathNameLength(this)+1);
+            if (NULL != nameOfTarget)
+              getPathNameTo(this,nameOfTarget);
+            if (isTarget(msg,addrOff,"/u*",NULL)) {addReplyResult(msg,addrOff,reply,(uint32_t)usb_audio_transmit_callback(),nameOfTarget); } // friend unsigned int usb_audio_transmit_callback(void);
+            else addReplyResult(msg,addrOff,reply,false,nameOfTarget,INVALID_METHOD);
+          }
+		}
+};
+#if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+const OSCAudioResourceCheck_t OSCAudioOutputUSB::resources[] = {
+  {rsrc_USB_Tx_Endpoint,setgUnshareable},
+};
+rsrcState_e OSCAudioOutputUSB::rsrcState;
+#endif // defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
+
+
 #if defined(play_memory_h_)
 // ============== AudioPlayMemory ====================
 class OSCAudioPlayMemory : public AudioPlayMemory, public OSCAudioBase
@@ -3289,6 +3360,7 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
 	OSC_CLASS__input_spdif3_h_(AudioInputSPDIF3,OSCAudioInputSPDIF3,OSCAudioInputSPDIF3) \
 	OSC_CLASS__input_tdm_h_(AudioInputTDM,OSCAudioInputTDM,OSCAudioInputTDM) \
 	OSC_CLASS__input_tdm2_h_(AudioInputTDM2,OSCAudioInputTDM2,OSCAudioInputTDM2) \
+	OSC_CLASS(AudioInputUSB,OSCAudioInputUSB,OSCAudioInputUSB) \
 	OSC_CLASS_mixer_h_(AudioMixer4,OSCAudioMixer4,noRequirementCheck) \
 	OSC_CLASS_output_ADAT_h_(AudioOutputADAT,OSCAudioOutputADAT,OSCAudioOutputADAT) \
 	OSC_CLASS_output_dac_h_(AudioOutputAnalog,OSCAudioOutputAnalog,OSCAudioOutputAnalog) \
@@ -3307,6 +3379,7 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
 	OSC_CLASS_output_SPDIF3_h_(AudioOutputSPDIF3,OSCAudioOutputSPDIF3,OSCAudioOutputSPDIF3) \
 	OSC_CLASS_output_tdm_h_(AudioOutputTDM,OSCAudioOutputTDM,OSCAudioOutputTDM) \
 	OSC_CLASS_output_tdm2_h_(AudioOutputTDM2,OSCAudioOutputTDM2,OSCAudioOutputTDM2) \
+	OSC_CLASS(AudioOutputUSB,OSCAudioOutputUSB,OSCAudioOutputUSB) \
 	OSC_CLASS_play_memory_h_(AudioPlayMemory,OSCAudioPlayMemory,noRequirementCheck) \
 	OSC_CLASS_play_queue_h_(AudioPlayQueue,OSCAudioPlayQueue,noRequirementCheck) \
 	OSC_CLASS_play_sd_raw_h_(AudioPlaySdRaw,OSCAudioPlaySdRaw,noRequirementCheck) \
@@ -3342,6 +3415,7 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
 	OSC_AUDIO_CHECK_RSRC__input_spdif3_h_(OSCAudioInputSPDIF3) \
 	OSC_AUDIO_CHECK_RSRC__input_tdm_h_(OSCAudioInputTDM) \
 	OSC_AUDIO_CHECK_RSRC__input_tdm2_h_(OSCAudioInputTDM2) \
+	OSC_AUDIO_CHECK_RSRC(OSCAudioInputUSB) \
 	OSC_AUDIO_CHECK_RSRC_output_ADAT_h_(OSCAudioOutputADAT) \
 	OSC_AUDIO_CHECK_RSRC_output_dac_h_(OSCAudioOutputAnalog) \
 	OSC_AUDIO_CHECK_RSRC_output_dacs_h_(OSCAudioOutputAnalogStereo) \
@@ -3359,6 +3433,7 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
 	OSC_AUDIO_CHECK_RSRC_output_SPDIF3_h_(OSCAudioOutputSPDIF3) \
 	OSC_AUDIO_CHECK_RSRC_output_tdm_h_(OSCAudioOutputTDM) \
 	OSC_AUDIO_CHECK_RSRC_output_tdm2_h_(OSCAudioOutputTDM2) \
+	OSC_AUDIO_CHECK_RSRC(OSCAudioOutputUSB) \
 
 
 #endif // !defined(OSC_RSRC_TYPEDEF_ONLY)
