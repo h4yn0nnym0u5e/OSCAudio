@@ -1820,10 +1820,7 @@ class OSCAudioInputUSB : public AudioInputUSB, public OSCAudioBase
             nameOfTarget = alloca(getPathNameLength(this)+1);
             if (NULL != nameOfTarget)
               getPathNameTo(this,nameOfTarget);
-            // if (isTarget(msg,addrOff,"/usb_audio_g*","bbb")) {addReplyResult(msg,addrOff,reply,(int32_t)usb_audio_get_feature(msg.getBlob(0),msg.getBlob(1),msg.getBlob(2)),nameOfTarget); } // friend int usb_audio_get_feature(void *stp, uint8_t *data, uint32_t *datalen);
-            if (isTarget(msg,addrOff,"/usb_audio_r*","i")) {usb_audio_receive_callback(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // friend void usb_audio_receive_callback(unsigned int len);
-            // else if (isTarget(msg,addrOff,"/usb_audio_s*","bb")) {addReplyResult(msg,addrOff,reply,(int32_t)usb_audio_set_feature(msg.getBlob(0),msg.getBlob(1)),nameOfTarget); } // friend int usb_audio_set_feature(void *stp, uint8_t *buf);
-            else if (isTarget(msg,addrOff,"/v*",NULL)) {addReplyResult(msg,addrOff,reply,volume(),nameOfTarget); } // float volume(void) {
+            if (isTarget(msg,addrOff,"/v*",NULL)) {addReplyResult(msg,addrOff,reply,volume(),nameOfTarget); } // float volume(void) {
             else addReplyResult(msg,addrOff,reply,false,nameOfTarget,INVALID_METHOD);
           }
 		}
@@ -2675,8 +2672,7 @@ class OSCAudioOutputUSB : public AudioOutputUSB, public OSCAudioBase
             nameOfTarget = alloca(getPathNameLength(this)+1);
             if (NULL != nameOfTarget)
               getPathNameTo(this,nameOfTarget);
-            if (isTarget(msg,addrOff,"/u*",NULL)) {addReplyResult(msg,addrOff,reply,(uint32_t)usb_audio_transmit_callback(),nameOfTarget); } // friend unsigned int usb_audio_transmit_callback(void);
-            else addReplyResult(msg,addrOff,reply,false,nameOfTarget,INVALID_METHOD);
+            addReplyResult(msg,addrOff,reply,false,nameOfTarget,INVALID_METHOD);
           }
 		}
 };

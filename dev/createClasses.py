@@ -403,6 +403,9 @@ def processFiles(root,dirs,files):
                         'begin' == m.group(2): # audio I/O begin function
                         output = False
 
+                    if re.search(r'^(usb_audio_)',m.group(2)): # USB internal function
+                        output = False
+
                     if re.search(r'^(update|if\s)$',m.group(2)): # update function, if statement
                         output = False
 
