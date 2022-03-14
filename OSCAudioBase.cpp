@@ -1003,6 +1003,68 @@ void OSCAudioConnection::OSCconnect(OSCMessage& msg,
 }
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 
+/**
+ * Compute the space required for a connection name.
+ */
+int OSCAudioConnection::getLength(const char* name, OSCAudioBase& src,OSCAudioBase& dst, AutoName an)
+{
+	int result = -1; // assume we're just going to use the name as given
+	
+	switch (an)
+	{
+		default:  // get rid of warning
+			break;
+
+		case AutoName::Underscores:
+			result  = 3; // 
+			// fallthrough
+		case AutoName::Short:
+			result += 6 // worst case for the port numbers
+				   + strlen(name)
+				   + strlen(src.name) // adds two extra for...
+				   + strlen(dst.name) // ...the initial / characters
+				   ;
+			break;
+	}
+	
+	return result;
+}
+
+/**
+ * Set a connection name based on its elements.
+ */
+void OSCAudioConnection::autoSetName(const char* name, 
+									 OSCAudioBase& src, uint8_t srcO,
+									 OSCAudioBase& dst, uint8_t dstI,
+									 AutoName an)
+{
+	char* buf;
+	int bufLen = getLength(name,src,dst,an);
+	
+	if (bufLen > 0) // we actually do want to change it!
+	{
+		buf = (char*) alloca(bufLen);
+		if (NULL != buf)
+		{
+			switch (an)
+			{
+				default:  // get rid of warning
+					break;
+					
+				case AutoName::Underscores:
+					sprintf(buf,"%s_%s_%d_%s_%d",name,src.name+1,srcO,dst.name+1,dstI);
+					break;
+					
+				case AutoName::Short:
+					sprintf(buf,"%s%s%d%s%d",name,src.name+1,srcO,dst.name+1,dstI);				
+					break;
+			}
+			setName(buf);
+		}
+	}
+}
+
+
 void OSCAudioConnection::mkLinks(OSCAudioBase& src, OSCAudioBase& dst)
 {
 	OSC_SPTF("Link %08X to source %08X (parent %08X)\n",

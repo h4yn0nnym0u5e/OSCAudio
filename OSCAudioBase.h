@@ -122,10 +122,10 @@ class OSCAudioBase : public OSCUtils
 	friend class OSCAudioConnection;
 	friend class OSCAudioGroup;
 	
-    OSCAudioBase(const char* _name,AudioStream* _sibling = NULL) : 
+    OSCAudioBase(const char* _name,AudioStream* _sibling = NULL, int nameLength = -1) : 
 				name(NULL), sibling(_sibling), next_group(NULL), pParent(NULL)
     {
-		setName(_name); 
+		setName(_name,nameLength); 
 		linkIn(); 
 		OSC_SPTF("%s base created:\n",name);
 		listObjects();
@@ -134,10 +134,11 @@ class OSCAudioBase : public OSCUtils
 	// Construct a group member
     OSCAudioBase(const char* _name,		//!< name of this object
 				 OSCAudioBase& first,	//!< group to become member of
-				 AudioStream* _sibling = NULL) : 
+				 AudioStream* _sibling = NULL, 
+				 int nameLength = -1) : 
 				name(NULL), sibling(_sibling), next_group(NULL), pParent(NULL)
     {
-		setName(_name); 
+		setName(_name,nameLength); 
 		linkInGroup(&first);
 		OSC_SPTF("%s base created; member of %s:\n",name,first.name);
 		listObjects();
@@ -277,13 +278,16 @@ private:
 	 * If there's already enough space for a new name then we don't 
 	 * re-allocate less, which may help heap fragmentation in some small way.
 	 */
-	void setName(const char* _name)
+	void setName(const char* _name, 
+				 const int setLength = -1)
 	{		
 #define NAME_PAD 3	
 		void* toFree = name;
 		if (NULL != _name)
 		{
 			nameLen = strlen(_name);
+			if (setLength > (int) nameLen)
+				nameLen = setLength;
 								
 			if (nameAlloc < nameLen+NAME_PAD || NULL == name)
 			{
@@ -479,6 +483,7 @@ private:
 class OSCAudioConnection : public OSCAudioBase, public AudioConnection
 {
   public:
+	enum class AutoName {None,Short,Underscores};
 #if defined(DYNAMIC_AUDIO_AVAILABLE) // AudioConnection::AudioConnection(void) not in static library - omit these
 	OSCAudioConnection(const char* _name) 
 		:  OSCAudioBase(_name),
@@ -492,40 +497,53 @@ class OSCAudioConnection : public OSCAudioBase, public AudioConnection
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 
 	// construct at root
-	OSCAudioConnection(const char* _name, OSCAudioBase& src, uint8_t srcO, OSCAudioBase& dst, uint8_t dstI) 
-		:  OSCAudioBase(_name),AudioConnection(*src.sibling,srcO,*dst.sibling,dstI),
-		pSrcParent(NULL),pDstParent(NULL) ,next_src(NULL),next_dst(NULL) 
-		{mkLinks(src,dst);}
+	OSCAudioConnection(const char* _name, 
+					   OSCAudioBase& src, uint8_t srcO, OSCAudioBase& dst, uint8_t dstI, 
+					   AutoName an = AutoName::None) 
+		: OSCAudioBase(_name,NULL,getLength(_name,src,dst,an)),
+		  AudioConnection(*src.sibling,srcO,*dst.sibling,dstI),
+		  pSrcParent(NULL),pDstParent(NULL) ,next_src(NULL),next_dst(NULL) 
+		{
+			mkLinks(src,dst);
+			autoSetName(_name,src,srcO,dst,dstI,an);
+		}
 				
 	// construct in group
 	OSCAudioConnection(const char* _name, OSCAudioBase& first,
-					   OSCAudioBase& src, uint8_t srcO, OSCAudioBase& dst, uint8_t dstI) 
-		:  OSCAudioBase(_name, first),AudioConnection(*src.sibling,srcO,*dst.sibling,dstI),
+					   OSCAudioBase& src, uint8_t srcO, OSCAudioBase& dst, uint8_t dstI,
+					   AutoName an = AutoName::None) 
+		:  OSCAudioBase(_name, first,NULL, getLength(_name,src,dst,an)),AudioConnection(*src.sibling,srcO,*dst.sibling,dstI),
 		pSrcParent(NULL),pDstParent(NULL) ,next_src(NULL),next_dst(NULL) 
-		{mkLinks(src,dst);}
+		{
+			mkLinks(src,dst);
+			autoSetName(_name,src,srcO,dst,dstI,an);
+		}
 	
 	// root
-	OSCAudioConnection(const char* _name, OSCAudioBase* src, uint8_t srcO, OSCAudioBase* dst, uint8_t dstI) 
-		:  OSCAudioConnection(_name,*src,srcO,*dst,dstI) {}
+	OSCAudioConnection(const char* _name, OSCAudioBase* src, uint8_t srcO, OSCAudioBase* dst, uint8_t dstI, AutoName an = AutoName::None) 
+		:  OSCAudioConnection(_name,*src,srcO,*dst,dstI,an) {}
 		
-	OSCAudioConnection(const char* _name, OSCAudioBase& src, OSCAudioBase& dst) 
-		:  OSCAudioConnection(_name,src,0,dst,0) {}
+	OSCAudioConnection(const char* _name, OSCAudioBase& src, OSCAudioBase& dst, AutoName an = AutoName::None) 
+		:  OSCAudioConnection(_name,src,0,dst,0,an) {}
 		
-	OSCAudioConnection(const char* _name, OSCAudioBase* src, OSCAudioBase* dst) 
-		:  OSCAudioConnection(_name,*src,*dst) {}
+	OSCAudioConnection(const char* _name, OSCAudioBase* src, OSCAudioBase* dst, AutoName an = AutoName::None) 
+		:  OSCAudioConnection(_name,*src,*dst,an) {}
 		
 	// group			
 	OSCAudioConnection(const char* _name, OSCAudioBase& first,
-						OSCAudioBase* src, uint8_t srcO, OSCAudioBase* dst, uint8_t dstI) 
-		:  OSCAudioConnection(_name, first, *src,srcO,*dst,dstI) {}
+						OSCAudioBase* src, uint8_t srcO, OSCAudioBase* dst, uint8_t dstI,
+						AutoName an = AutoName::None) 
+		:  OSCAudioConnection(_name,first,*src,srcO,*dst,dstI,an) {}
 		
 	OSCAudioConnection(const char* _name, OSCAudioBase& first,
-					   OSCAudioBase& src, OSCAudioBase& dst) 
-		:  OSCAudioConnection(_name,first,src,0,dst,0) {}
+					   OSCAudioBase& src, OSCAudioBase& dst,
+						AutoName an = AutoName::None) 
+		:  OSCAudioConnection(_name,first,src,0,dst,0,an) {}
 		
 	OSCAudioConnection(const char* _name, OSCAudioBase& first,
-					   OSCAudioBase* src, OSCAudioBase* dst) 
-		:  OSCAudioConnection(_name,first,*src,*dst) {}
+					   OSCAudioBase* src, OSCAudioBase* dst,
+						AutoName an = AutoName::None) 
+		:  OSCAudioConnection(_name,first,*src,*dst,an) {}
 		
 		
 	~OSCAudioConnection();
@@ -536,6 +554,10 @@ class OSCAudioConnection : public OSCAudioBase, public AudioConnection
 	OSCAudioConnection* getNextDst(void) {return next_dst;}
 				
   private:
+	// automatic name generation
+	int getLength(const char* name, OSCAudioBase& src,OSCAudioBase& dst, AutoName an);
+	void autoSetName(const char* name, OSCAudioBase& src, uint8_t srcO, OSCAudioBase& dst, uint8_t dstI, AutoName an);
+	
 	// Link in and out of the source connection lists
 	void linkInSrc(OSCAudioGroup* parent);		
 	void linkOutSrc();
