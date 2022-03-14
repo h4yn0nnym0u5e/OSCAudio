@@ -1018,6 +1018,12 @@ void OSCAudioConnection::mkLinks(OSCAudioBase& src, OSCAudioBase& dst)
 					);
 					
 	linkInDst(dst.pParent);
+	
+	/*
+	// should only do this for debug purposes
+	AudioConnection* cptr = this;	// find pointer to base AudioConnection
+	sibling = (AudioStream*) cptr;	// store it for structure crawler to use
+	*/
 }
 
 
