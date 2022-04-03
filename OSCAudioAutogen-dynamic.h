@@ -740,8 +740,8 @@ class OSCAudioEffectDelay : public AudioEffectDelay, public OSCAudioBase
 class OSCAudioEffectDelayExternal : public AudioEffectDelayExternal, public OSCAudioBase
 {
     public:
-        OSCAudioEffectDelayExternal(const char* _name) :  OSCAudioBase(_name, (AudioStream*) this) {}
-        OSCAudioEffectDelayExternal(const char* _name, OSCAudioGroup& grp) :  OSCAudioBase(_name, grp, (AudioStream*) this) {}
+        OSCAudioEffectDelayExternal(const char* _name, int type, float milliseconds=1e6) : AudioEffectDelayExternal((AudioEffectDelayMemoryType_t) type, milliseconds), /* if */  OSCAudioBase(_name, (AudioStream*) this) {}
+        OSCAudioEffectDelayExternal(const char* _name, OSCAudioGroup& grp, int type, float milliseconds=1e6) : AudioEffectDelayExternal((AudioEffectDelayMemoryType_t) type, milliseconds), /* if */  OSCAudioBase(_name, grp, (AudioStream*) this) {}
 
         void route(OSCMessage& msg, int addrOff, OSCBundle& reply)
         {
@@ -759,7 +759,7 @@ class OSCAudioEffectDelayExternal : public AudioEffectDelayExternal, public OSCA
           }
 		}
 };
-#define OSC_CLASS_effect_delay_ext_h_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_CLASS_effect_delay_ext_h_(a,o,c) OSC_CLASSif(a,o,c)
 #else
 #define OSC_CLASS_effect_delay_ext_h_(a,o,c)
 #endif // defined(effect_delay_ext_h_)
@@ -1859,7 +1859,7 @@ class OSCAudioMixer : public AudioMixer, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_DYNMIXER_H_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_CLASS_DYNMIXER_H_(a,o,c) OSC_CLASSi(a,o,c)
 #else
 #define OSC_CLASS_DYNMIXER_H_(a,o,c)
 #endif // defined(DYNMIXER_H_)
@@ -1922,7 +1922,7 @@ class OSCAudioMixerStereo : public AudioMixerStereo, public OSCAudioBase
           }
 		}
 };
-#define OSC_CLASS_DYNMIXER_H_(a,o,c) OSC_CLASS(a,o,c)
+#define OSC_CLASS_DYNMIXER_H_(a,o,c) OSC_CLASSi(a,o,c)
 #else
 #define OSC_CLASS_DYNMIXER_H_(a,o,c)
 #endif // defined(DYNMIXER_H_)
@@ -3306,6 +3306,13 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
 #define OSC_CLASS__synth_wavetable_h_(a,o,c)
 #endif // defined(_synth_wavetable_h_)
 
+// Need to define the following for complete coverage of OSC classes:
+/*
+#define OSC_CLASS(...)
+#define OSC_CLASSi(...)
+#define OSC_CLASSif(...)
+*/
+
 #define OSC_AUDIO_CLASSES \
 	OSC_CLASS_async_input_spdif3_h_(AsyncAudioInputSPDIF3,AsyncOSCAudioInputSPDIF3,AsyncOSCAudioInputSPDIF3) \
 	OSC_CLASS_mixer_h_(AudioAmplifier,OSCAudioAmplifier,noRequirementCheck) \
@@ -3326,7 +3333,6 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
 	OSC_CLASS_control_wm8731_h_(AudioControlWM8731master,OSCAudioControlWM8731master,noRequirementCheck) \
 	OSC_CLASS_effect_bitcrusher_h_(AudioEffectBitcrusher,OSCAudioEffectBitcrusher,noRequirementCheck) \
 	OSC_CLASS_effect_delay_h_(AudioEffectDelay,OSCAudioEffectDelay,noRequirementCheck) \
-	OSC_CLASS_effect_delay_ext_h_(AudioEffectDelayExternal,OSCAudioEffectDelayExternal,noRequirementCheck) \
 	OSC_CLASS_effect_digital_combine_h_(AudioEffectDigitalCombine,OSCAudioEffectDigitalCombine,noRequirementCheck) \
 	OSC_CLASS_effect_envelope_h_(AudioEffectEnvelope,OSCAudioEffectEnvelope,noRequirementCheck) \
 	OSC_CLASS_effect_expenvelope_h_(AudioEffectExpEnvelope,OSCAudioEffectExpEnvelope,noRequirementCheck) \
@@ -3395,6 +3401,16 @@ class OSCAudioSynthWavetable : public AudioSynthWavetable, public OSCAudioBase
 	OSC_CLASS_synth_sine_h_(AudioSynthWaveformSineHires,OSCAudioSynthWaveformSineHires,noRequirementCheck) \
 	OSC_CLASS_synth_sine_h_(AudioSynthWaveformSineModulated,OSCAudioSynthWaveformSineModulated,noRequirementCheck) \
 	OSC_CLASS__synth_wavetable_h_(AudioSynthWavetable,OSCAudioSynthWavetable,noRequirementCheck) \
+
+
+#define OSC_AUDIO_CLASSESi \
+	OSC_CLASS_DYNMIXER_H_(AudioMixer,OSCAudioMixer,noRequirementCheck) \
+	OSC_CLASS_DYNMIXER_H_(AudioMixerStereo,OSCAudioMixerStereo,noRequirementCheck) \
+
+
+#define OSC_AUDIO_CLASSESif \
+	OSC_CLASS_effect_delay_ext_h_(AudioEffectDelayExternal,OSCAudioEffectDelayExternal,noRequirementCheck) \
+
 
 #define OSC_AUDIO_CHECK_RSRC_LIST \
 	OSC_AUDIO_CHECK_RSRC_noRequirementCheck(noRequirementCheck) \

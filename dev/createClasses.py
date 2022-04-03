@@ -34,7 +34,7 @@ def paramToType(p):
     if re.search('(short|int|signed)',p):
         result = 'i'
 
-    m = re.search('(AudioFilterLadderInterpolation|behaviour_e)',p)
+    m = re.search('(AudioFilterLadderInterpolation|behaviour_e|AudioEffectDelayMemoryType_t)',p)
     if m:
         result = ('i',m.group(1)) # integer, but cast to enum
 
@@ -98,9 +98,12 @@ getd = {
     'b': 'getBlob(%d)',
     ';': 'getBoolean(%d)',
     }
+    
+# return value cast dict
 rtcd = {
     'boolean': 'bool',
     'envelopeStateEnum': 'uint8_t',
+    'AudioEffectDelayMemoryType_t': 'int',
     'double': 'float',
     'int': 'int32_t',
     'int16_t *': 'uint32_t',
@@ -109,8 +112,8 @@ rtcd = {
     'unsigned int': 'uint32_t',
     'unsigned short': 'uint16_t'
 }
-notD = ['AudioAnalyzeEvent', 'AudioEffectExpEnvelope', 'AudioMixer', 'AudioMixerStereo']
-notEver = ['AudioMixerBase']
+notD = ['AudioAnalyzeEvent', 'AudioEffectExpEnvelope', 'AudioMixer', 'AudioMixerStereo'] # not in static library
+notEver = ['AudioMixerBase'] # not in either library
 returnTypes={}
 
 ##############################################################################################
@@ -229,10 +232,18 @@ def mkClass(cn,fd):
         fd['cp'] = ''
     cp = ''
     cinit = ''
+    oscpt = ''
     if 'cp' in fd and '' != fd['cp']:
-        sp = fd['cp'].split(' ')
-        cinit = F'{cn}({sp[-1]}), '
-        cp = ','+fd['cp']
+        spl=fd['cp'].split(',')
+        cinit = F'{cn}('
+        for sp in spl:
+            sp = re.sub('=[^,]*','',sp) # remove parameter defaults
+            oscpt += paramToType(sp)[0]
+            sp = sp.split(' ')
+            cinit = cinit + F'{sp[-1]}, '
+        cinit = cinit[:-2] + '), ' + F'/* {oscpt} */ '
+        fd['oscpt'] = oscpt
+        cp = ', '+fd['cp'] # append constructor parameters to derived class 
         
     # resource checking
     if dynamic and 'excl' in fd:
@@ -262,7 +273,7 @@ def mkClass(cn,fd):
     if '' != dtorBody:
         dtorLine = F'''        ~{cno}() {{{dtorBody}}} \n'''
 
-    if dynamic: # need destructor and resource check for synamic library
+    if dynamic: # need destructor and resource check for dynamic library
         s = F'''class {cno} : public {cn}, public OSCAudioBase
 {{
     public:
@@ -433,6 +444,7 @@ for root,dirs,files in os.walk(rp):
     processFiles(root,dirs,files)
 
 processFiles(ar,[],afl)
+print()
 
 ###############################################################################
 # Scan the GUI looking for "InputOutputCompatibilityMetadata"
@@ -538,6 +550,7 @@ for cl in notEver:
 # Output file
 op = r'E:\Jonathan\Arduino\libraries\OSCAudio'
 of = 'OSCAudioAutogen.h'
+ofjson = of.replace('.h','.json')
 ofs = open(os.path.join(op,of),mode='w')
 
 fguard = 'OSC_AUTOGEN_H'
@@ -582,6 +595,7 @@ ofs.write(stw)
 
 # Classes
 MACparams = 'a,o,c'
+consTypes = set()
 if not dynamic:
     MACparams = 'a'
     
@@ -592,11 +606,17 @@ for cl in sorted(d):
         ndefr = d[cl]['ndef']
     stw = F'{ndef}// ============== {cl} ===================='
     print(cl)
+    
     mkShort(d[cl])
     stw += '\n' + mkClass(cl,d[cl])
+    
+    oscpt =''
+    if 'oscpt' in d[cl]: # constructor parameters are discovered in mkClass()
+        oscpt = d[cl]['oscpt']
+        consTypes.add(oscpt)
     #print(stw)
     if ndef:
-        stw += F'#define OSC_CLASS_{ndefr}({MACparams}) OSC_CLASS({MACparams})\n'
+        stw += F'#define OSC_CLASS_{ndefr}({MACparams}) OSC_CLASS{oscpt}({MACparams})\n'
         if dynamic and 'excl' in d[cl]:
             stw += F'#define OSC_AUDIO_CHECK_RSRC_{ndefr}(c) OSC_AUDIO_CHECK_RSRC(c)\n'
         stw +=  '#else\n'
@@ -609,26 +629,56 @@ for cl in sorted(d):
     ofs.write(stw)
 
 
+# dump database in JSON format
+# here because mkClass() adds information about 
+# constructor parameter types
+ofj = open(os.path.join(op,ofjson),mode='w')
+json.dump(d,ofj,indent=2)
+ofj.close()
 
 
-# List of classes
+# List of classes: 
+def writeEntry(ofs,cl):
+    if 'ndef' in d[cl]:
+        ndef = '_' + d[cl]['ndef']
+    else:
+        ndef = ''
+        
+    clo = cl.replace('Audio','OSCAudio')
+    
+    if 'excl' in d[cl]: # hardware requirement check?
+        chk = clo
+    else:
+        chk = 'noRequirementCheck'
+        
+    if dynamic:
+        ofs.write(f"\tOSC_CLASS{ndef}({cl},{clo},{chk}) \\\n")
+    else:
+        ofs.write(f"\tOSC_CLASS{ndef}({cl}) \\\n")
+
+ofs.write('''// Need to define the following for complete coverage of OSC classes:
+/*
+#define OSC_CLASS(...)
+''')
+for sfx in consTypes:
+    ofs.write(F'#define OSC_CLASS{sfx}(...)\n')
+ofs.write('*/\n\n')
+
+# void constructors only
 ofs.write('#define OSC_AUDIO_CLASSES \\\n')
 for cl in sorted(d):
-    if 'cp' not in d[cl] or d[cl]['cp'] == '':
-        if 'ndef' in d[cl]:
-            ndef = '_' + d[cl]['ndef']
-        else:
-            ndef = ''
-        clo = cl.replace('Audio','OSCAudio')
-        if 'excl' in d[cl]:
-            chk = clo
-        else:
-            chk = 'noRequirementCheck'
-        if dynamic:
-            ofs.write(f"\tOSC_CLASS{ndef}({cl},{clo},{chk}) \\\n")
-        else:
-            ofs.write(f"\tOSC_CLASS{ndef}({cl}) \\\n")
-ofs.write("\n")
+    if 'cp' not in d[cl] or d[cl]['cp'] == '': 
+        writeEntry(ofs,cl)
+ofs.write("\n\n")
+
+# non-void constructors
+for sfx in consTypes:
+    ofs.write(f'#define OSC_AUDIO_CLASSES{sfx} \\\n')
+    for cl in sorted(d):
+        if 'oscpt'in d[cl] and d[cl]['oscpt'] == sfx: 
+            writeEntry(ofs,cl)
+    ofs.write("\n\n")
+
 
 # List of objects that need resource checks
 if dynamic:
@@ -722,17 +772,17 @@ ofs.write("\n\n")
 ofs.close()
 
 # debug stuff
-if True:
+if False:
     for k in opd:
         print(k,len(opd[k]))
         print(opd[k])
     for obj in sorted(objd):
         print(obj)
-        for d in objd[obj]:
-            print(d)
-            if d['shareable'] and 'setting' not in d:
+        for od in objd[obj]:
+            print(od)
+            if od['shareable'] and 'setting' not in od:
                 print('*******************')
-            if not d['shareable'] and 'setting' in d:
+            if not od['shareable'] and 'setting' in od:
                 print('???????????????????')
     for rsrc in sorted(rsrcd):
         print(rsrc,end=' ')
@@ -742,3 +792,5 @@ if True:
             print()
     print(['setgAvailable','setgUnshareable']+list(map(lambda s:'setg_'+s.replace(' ','_'),sorted(sets))))
     print(list(map(lambda s:'rsrc_'+s.replace(' ','_'),sorted(rsrcd))))
+
+

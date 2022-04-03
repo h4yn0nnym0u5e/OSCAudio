@@ -105,13 +105,27 @@ typedef struct OSCAudioResourceSetting_s
 } OSCAudioResourceSetting_t;
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 
+typedef enum {
+	objcVoid,
+	objcInt,
+	objcIntFloat,
+} objcType_e;
 
 typedef struct OSCAudioTypes_s {
   const char* name;	//!< the name of the [OSC]AudioStream type
 #if defined(DYNAMIC_AUDIO_AVAILABLE)
-  OSCAudioBase* (*mkRoot)(const char*); //!< make object at root
-  OSCAudioBase* (*mkGroup)(const char*,OSCAudioGroup&); //!< make object within group
+  union root {
+	OSCAudioBase* (*mk)(const char*); //!< make object at root
+	OSCAudioBase* (*mk_i)(const char*,int); //!< make object at root
+	OSCAudioBase* (*mk_if)(const char*,int,float); //!< make object at root
+  } root;
+  union group {
+	OSCAudioBase* (*mk)  (const char*,OSCAudioGroup&); //!< make object within group
+	OSCAudioBase* (*mk_i)(const char*,OSCAudioGroup&,int); //!< make object within group
+	OSCAudioBase* (*mk_if)(const char*,OSCAudioGroup&,int,float); //!< make object within group
+  } group;
   rsrcState_e (*chkResource)(void);
+  objcType_e constructorType;
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 } OSCAudioTypes_t;
 

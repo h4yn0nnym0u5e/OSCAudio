@@ -41,11 +41,27 @@ OSCAudioResourceSetting_t OSCAudioBase::settings[rsrc_COUNT] = {0};
  * together with pointers to the functions to call to create instances of each.
  */
 #if defined(DYNAMIC_AUDIO_AVAILABLE) // build create functions
+
+// objects with (void) constructors:
 #define OSC_CLASS(a,o,c) \
 OSCAudioBase* mk1_##o(const char* nm) {return (OSCAudioBase*) new o(nm);} \
 OSCAudioBase* mk2_##o(const char* nm,OSCAudioGroup& grp) {return (OSCAudioBase*) new o(nm,grp);} 
 OSC_AUDIO_CLASSES
 #undef OSC_CLASS
+
+// objects with (int) constructors:
+#define OSC_CLASSi(a,o,c) \
+OSCAudioBase* mk1_##o(const char* nm, int n) {return (OSCAudioBase*) new o(nm,n);} \
+OSCAudioBase* mk2_##o(const char* nm,OSCAudioGroup& grp,int n) {return (OSCAudioBase*) new o(nm,grp,n);} 
+OSC_AUDIO_CLASSESi
+#undef OSC_CLASSi
+
+// objects with (int,float) constructors:
+#define OSC_CLASSif(a,o,c) \
+OSCAudioBase* mk1_##o(const char* nm, int n, float f) {return (OSCAudioBase*) new o(nm,n,f);} \
+OSCAudioBase* mk2_##o(const char* nm,OSCAudioGroup& grp,int n, float f) {return (OSCAudioBase*) new o(nm,grp,n,f);} 
+OSC_AUDIO_CLASSESif
+#undef OSC_CLASSif
 
 // special cases
 const char* AudioMixerName = "AudioMixer";
@@ -65,27 +81,39 @@ OSC_AUDIO_CHECK_RSRC_LIST
 #undef OSC_AUDIO_CHECK_RSRC
 
 // build table of pointers to creation functions
-#define OSC_CLASS(a,o,c) {#a,mk1_##o,mk2_##o,checkResource_##c},
+#define OSC_CLASS(a,o,c)  {#a,.root = {.mk    = mk1_##o},.group = {.mk    = mk2_##o},checkResource_##c,objcVoid},
+#define OSC_CLASSi(a,o,c) {#a,.root = {.mk_i  = mk1_##o},.group = {.mk_i  = mk2_##o},checkResource_##c,objcInt},
+#define OSC_CLASSif(a,o,c){#a,.root = {.mk_if = mk1_##o},.group = {.mk_if = mk2_##o},checkResource_##c,objcIntFloat},
 const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
   OSC_AUDIO_CLASSES
+  OSC_AUDIO_CLASSESi
+  OSC_AUDIO_CLASSESif
+  //{"jim",mk1_OSCAudioAmplifier,mk2_OSCAudioAmplifier,checkResource_noRequirementCheck,objcVoid},
+  //{"bob",.root = {.mk_i = mk1_OSCAudioMixer},.group = {.mk_i = mk2_OSCAudioMixer},checkResource_noRequirementCheck,objcInt}
 };
 #undef OSC_CLASS
+#undef OSC_CLASSi
+#undef OSC_CLASSif
 
 #else // no dynamic audio, just a list of class names
 	
 #define OSC_CLASS(a) {#a},
+#define OSC_CLASSi(a) {#a},
+#define OSC_CLASSif(a) {#a},
 const OSCAudioTypes_t OSCAudioBase::audioTypes[] = {
   OSC_AUDIO_CLASSES
 };
 #undef OSC_CLASS
+#undef OSC_CLASSi
+#undef OSC_CLASSif
 
 #endif // defined(DYNAMIC_AUDIO_AVAILABLE)
 
 // Return number of available audio objects
 size_t OSCAudioBase::countOfAudioTypes(void) {return COUNT_OF(audioTypes);}
 #define CONNECTION_INDEX -1 //!< special "object number" denoting AudioConnection rather than AudioStream object type
-#define AUDIOMIXER_INDEX -2 //!< special variable-width mixer
-#define AUDIOMIXERSTEREO_INDEX -3 //!< special variable-width mixer - stereo
+//#define AUDIOMIXER_INDEX -2 //!< special variable-width mixer
+//#define AUDIOMIXERSTEREO_INDEX -3 //!< special variable-width mixer - stereo
 // ********* end of magic array generator stuff ********************
 
 
@@ -364,20 +392,24 @@ void OSCAudioBase::routeDynamic(OSCMessage& msg, int addressOffset, OSCBundle& r
 #if defined(DYNAMIC_AUDIO_AVAILABLE) // route OSC commands to create / destroy objects
     else if (isStaticTarget(msg,addressOffset,"/crCo","s"))  {createConnection(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/crCo","ss")) {createConnection(msg,addressOffset,reply);} 
-    else if (isStaticTarget(msg,addressOffset,"/crOb","ss"))	 {createObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/crOb","ss*"))	 {createObject(msg,addressOffset,reply);} 
+/*	
     else if (isStaticTarget(msg,addressOffset,"/crOb","sss"))	 {createObject(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/crOb","ssi"))	 {createObject(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/crOb","sssi"))	 {createObject(msg,addressOffset,reply);} 
+	*/
     else if (isStaticTarget(msg,addressOffset,"/crGr","ss"))	 {createGroup(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/crGrp","ss"))	 {createGroup(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/deOb","s"))	 {destroyObject(msg,addressOffset,reply);} 
     //else if (isStaticTarget(msg,addressOffset,"/clearAll",NULL)) 		 {clearAllObjects(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/createConnection","s"))  {createConnection(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/createConnection","ss")) {createConnection(msg,addressOffset,reply);} 
-    else if (isStaticTarget(msg,addressOffset,"/createObject","ss"))	 {createObject(msg,addressOffset,reply);} 
+    else if (isStaticTarget(msg,addressOffset,"/createObject","ss*"))	 {createObject(msg,addressOffset,reply);}
+/*	
     else if (isStaticTarget(msg,addressOffset,"/createObject","sss"))	 {createObject(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/createObject","ssi"))	 {createObject(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/createObject","sssi"))	 {createObject(msg,addressOffset,reply);} 
+*/
     else if (isStaticTarget(msg,addressOffset,"/createGroup","ss"))	 {createGroup(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/destroyObject","s"))	 {destroyObject(msg,addressOffset,reply);} 
     else if (isStaticTarget(msg,addressOffset,"/clearAll",NULL)) 		 {clearAllObjects(msg,addressOffset,reply);} 
@@ -454,6 +486,7 @@ void OSCAudioBase::clearAllObjects(OSCMessage& msg, int addressOffset, OSCBundle
 }
 
 //============================== OSCAudioStream =========================================================
+struct crObContext_s {int objIdx; const char* name; OSCAudioBase::error retval; objcType_e cType; int i1; float f1;};
 //-------------------------------------------------------------------------------------------------------
 // Test code for switching between full dynamic audio support and simple control
 // messaging. If full support is enabled then the object code is MUCH larger, but
@@ -461,9 +494,9 @@ void OSCAudioBase::clearAllObjects(OSCMessage& msg, int addressOffset, OSCBundle
 #define noDISABLE_FULL_DYNAMIC
 #if defined(DISABLE_FULL_DYNAMIC)
 // weak definition
-OSCAudioBase::error DynamicAudioCreateObject(char* typ,char* objName,OSCAudioBase* p,int x) __attribute__((weak));	
+OSCAudioBase::error DynamicAudioCreateObject(char* typ,char* objName,OSCAudioBase* p,void* x) __attribute__((weak));	
 											 
-OSCAudioBase::error DynamicAudioCreateObject(char* typ,char* objName,OSCAudioBase* p,int x)
+OSCAudioBase::error DynamicAudioCreateObject(char* typ,char* objName,OSCAudioBase* p,void* x)
 {
 	return OSCAudioBase::NO_DYNAMIC;
 }
@@ -476,12 +509,13 @@ OSCAudioBase::error DynamicAudioCreateObject(char* typ,char* objName,OSCAudioBas
 OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]AudioStream object to create
 											 const char* objName,	//!< name of object
 											 OSCAudioBase* parent, 	//!< parent object
-											 int mixerSize = -1 )	//!< mixer size, maybe
+											 void* ctxt = NULL)		//!< additional parameters, maybe
 {
 	OSCAudioBase::error retval = OSCAudioBase::OK;
 	void* pNewObj = NULL;
 	OSCAudioBase* png = parent;
 	int hits = -1;
+	crObContext_s* context = (crObContext_s*) ctxt;
 	
 	if (NULL != png) // has a parent group
 	{
@@ -512,17 +546,22 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 				switch (objIdx)
 				{
 				  default:
-					pNewObj = OSCAudioBase::audioTypes[objIdx].mkRoot(objName+1);
-					break;
-						
-				  case AUDIOMIXER_INDEX:
-					if (mixerSize > 0)
-						pNewObj = mk1_AudioMixer(objName+1,mixerSize);
-					break;
-						
-				  case AUDIOMIXERSTEREO_INDEX:
-					if (mixerSize > 0)
-						pNewObj = mk1_AudioMixerStereo(objName+1,mixerSize);
+					switch (OSCAudioBase::audioTypes[objIdx].constructorType)
+					{
+						case objcVoid:
+							pNewObj = OSCAudioBase::audioTypes[objIdx].root.mk(objName+1);
+							break;
+							
+						case objcInt:
+							if (NULL != context && objcInt == context->cType)
+								pNewObj = OSCAudioBase::audioTypes[objIdx].root.mk_i(objName+1,context->i1);
+							break;
+							
+						case objcIntFloat:
+							if (NULL != context && objcIntFloat == context->cType)
+								pNewObj = OSCAudioBase::audioTypes[objIdx].root.mk_if(objName+1,context->i1,context->f1);
+							break;
+					}
 					break;
 						
 				  case CONNECTION_INDEX:
@@ -535,19 +574,24 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 				switch (objIdx)
 				{
 				  default:
-					pNewObj = OSCAudioBase::audioTypes[objIdx].mkGroup(objName+1,*((OSCAudioGroup*) parent));
+					switch (OSCAudioBase::audioTypes[objIdx].constructorType)
+					{
+						case objcVoid:
+							pNewObj = OSCAudioBase::audioTypes[objIdx].group.mk(objName+1,*((OSCAudioGroup*) parent));
+							break;
+							
+						case objcInt:
+							if (NULL != context && objcInt == context->cType)
+								pNewObj = OSCAudioBase::audioTypes[objIdx].group.mk_i(objName+1,*((OSCAudioGroup*) parent),context->i1);
+							break;
+							
+						case objcIntFloat:
+							if (NULL != context && objcIntFloat == context->cType)
+								pNewObj = OSCAudioBase::audioTypes[objIdx].group.mk_if(objName+1,*((OSCAudioGroup*) parent),context->i1,context->f1);
+							break;
+					}
 					break;
-					
-				  case AUDIOMIXER_INDEX:
-					if (mixerSize > 0)
-						pNewObj = mk2_AudioMixer(objName+1,*((OSCAudioGroup*) parent),mixerSize);
-					break;
-					
-				  case AUDIOMIXERSTEREO_INDEX:
-					if (mixerSize > 0)
-						pNewObj = mk2_AudioMixerStereo(objName+1,*((OSCAudioGroup*) parent),mixerSize);
-					break;
-					
+										
 				  case CONNECTION_INDEX:
 					pNewObj = new OSCAudioConnection(objName+1,*((OSCAudioGroup*) parent));
 					break;
@@ -564,14 +608,6 @@ OSCAudioBase::error DynamicAudioCreateObject(int objIdx,			//!< index of [OSC]Au
 				name = OSCAudioBase::audioTypes[objIdx].name;
 				break;
 				
-			  case AUDIOMIXER_INDEX:
-				name = AudioMixerName;
-				break;
-			  
-			  case AUDIOMIXERSTEREO_INDEX:
-				name = AudioMixerStereoName;
-				break;
-			  
 			  case CONNECTION_INDEX:
 				name = "connection";
 				break;
@@ -648,12 +684,11 @@ rsrcState_e OSCAudioBase::claimResource(const OSCAudioResourceCheck_t* reqRsrc, 
 
 
 
-struct crObContext_s {int objIdx; const char* name; OSCAudioBase::error retval; int mixerSize;};
 void createObjectCB(OSCAudioBase* parent,OSCMessage& msg,int offset,void* ctxt)
 {
 	crObContext_s* context = (crObContext_s*) ctxt;
 
-	OSCAudioBase::error rv = DynamicAudioCreateObject(context->objIdx,context->name,parent,context->mixerSize);
+	OSCAudioBase::error rv = DynamicAudioCreateObject(context->objIdx,context->name,parent,ctxt);
 	
 	if (rv != OSCAudioBase::OK)
 		context->retval = rv;
@@ -662,58 +697,57 @@ void createObjectCB(OSCAudioBase* parent,OSCMessage& msg,int offset,void* ctxt)
 
 /**
  *	Create a new [OSC]AudioStream object.
+ * 	OSC parameters are at least 'ss', for type and name. If the next is 's' then it's the group name.
+ *	Subsequent parameters are currently allowed to be 'i' or 'if'.
  */
 void OSCAudioBase::createObject(OSCMessage& msg, int addressOffset, OSCBundle& reply)
 {
 	error retval = OK;
 	char* objName,*typ;
 	int objIdx;
-	int mixerSize = -1;
-	int ml = msg.size() - 1;
+	int ml = msg.size() - 1; // max message parameter index: at least 1, as we must have type and name
 	bool isRoot = !(ml>1 && msg.isString(2)); // sss or sssi, but not ssi, are group creates
+	int extra = isRoot?2:3; // this is where extra data may be found
 	
 	typ = getMessageString(msg,0,alloca(msg.getDataLength(0)));
 	objName = getMessageString(msg,1,alloca(msg.getDataLength(1)+1),true);
 	
+	crObContext_s context = {-999,objName,retval,objcVoid};
+	
+	// get any optional parameters
+	if (extra <= ml && msg.isInt(extra))
+	{
+		context.i1 = msg.getInt(extra);
+		context.cType = objcInt;
+		extra++;
+		if (extra <= ml && msg.isFloat(extra))
+		{
+			context.f1 = msg.getFloat(extra);
+			context.cType = objcIntFloat;
+		}
+	}
+						
 	if (NULL != typ && NULL != objName)
 	{
 		objIdx = OSCAudioBase::getTypeIndex(typ); // see if we've got a valid object type
-		if (objIdx < 0) // could be a special case: so far we only have one
-		{
-			if (msg.isInt(ml) && 0 == strcmp(AudioMixerName,typ)) // last parameter is an integer? variable width mixer?
-			{
-				mixerSize = msg.getInt(ml); // get mixer width
-				objIdx = AUDIOMIXER_INDEX;
-			}
-			else if (msg.isInt(ml) && 0 == strcmp(AudioMixerStereoName,typ)) // last parameter is an integer? variable width mixer?
-			{
-				mixerSize = msg.getInt(ml); // get mixer width
-				objIdx = AUDIOMIXERSTEREO_INDEX;
-			}
-		}
-		
-		if (objIdx >= 0 
-			|| AUDIOMIXER_INDEX == objIdx
-			|| AUDIOMIXERSTEREO_INDEX == objIdx) // valid type
+		if (objIdx >= 0 && context.cType == audioTypes[objIdx].constructorType) // valid type and parameters
 		{	
-			
 			if (strlen(objName+1) > 0) // initial / doesn't count as part of the name!
 			{
 				trimUnderscores(sanitise(objName,objName,1),objName); // make the name valid
+				context.objIdx = objIdx;
 				
 				OSC_SPTF("createObject(%s,%s)\n",typ,objName);
 				OSC_DBGP(msg,addressOffset);
 				
 				if (isRoot) // create in root, not group
-					retval = DynamicAudioCreateObject(objIdx,objName,NULL,mixerSize);
+					retval = DynamicAudioCreateObject(objIdx,objName,NULL,&context);
 				else
 				{
-					crObContext_s context;
 					char* path = getMessageString(msg,2,alloca(msg.getDataLength(2)+1),true);
 					
 					if (NULL != path)
 					{
-						context = {objIdx,objName,OK,mixerSize};
 						callBack(path,createObjectCB,&context);
 						retval = context.retval;
 					}
@@ -900,12 +934,12 @@ void OSCAudioBase::createConnection(OSCMessage& msg, int addressOffset, OSCBundl
 				crObContext_s context;
 				char* path = getMessageString(msg,1,alloca(msg.getDataLength(1)+1),true);
 				
-				context = {CONNECTION_INDEX,objName,OK,-1}; // use special "index" to create connections
-				callBack(path,createObjectCB,&context); // NULL path is safe, no check needed
+				context = {CONNECTION_INDEX,objName,OK};	// use special "index" to create connections
+				callBack(path,createObjectCB,&context); 	// NULL path is safe, no check needed
 				retval = context.retval;			
 			}
 			else 
-				retval = DynamicAudioCreateObject(CONNECTION_INDEX,objName,NULL,-1);	
+				retval = DynamicAudioCreateObject(CONNECTION_INDEX,objName,NULL);	
 		}
 		else
 			retval = BLANK_NAME;
