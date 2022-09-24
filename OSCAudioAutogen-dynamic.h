@@ -63,8 +63,7 @@ class AsyncOSCAudioInputSPDIF3 : public AsyncAudioInputSPDIF3, public OSCAudioBa
             nameOfTarget = alloca(getPathNameLength(this)+1);
             if (NULL != nameOfTarget)
               getPathNameTo(this,nameOfTarget);
-            if (isTarget(msg,addrOff,"/b*",NULL)) {begin(); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void begin();
-            else if (isTarget(msg,addrOff,"/getA*",NULL)) {addReplyResult(msg,addrOff,reply,(float)getAttenuation(),nameOfTarget); } // double getAttenuation() const;
+			if (isTarget(msg,addrOff,"/getA*",NULL)) {addReplyResult(msg,addrOff,reply,(float)getAttenuation(),nameOfTarget); } // double getAttenuation() const;
             else if (isTarget(msg,addrOff,"/getB*",NULL)) {addReplyResult(msg,addrOff,reply,(float)getBufferedTime(),nameOfTarget); } // double getBufferedTime() const;
             else if (isTarget(msg,addrOff,"/getH*",NULL)) {addReplyResult(msg,addrOff,reply,getHalfFilterLength(),nameOfTarget); } // int32_t getHalfFilterLength() const;
             else if (isTarget(msg,addrOff,"/getI*",NULL)) {addReplyResult(msg,addrOff,reply,(float)getInputFrequency(),nameOfTarget); } // double getInputFrequency() const;
@@ -433,7 +432,7 @@ class OSCAudioControlCS42448 : public AudioControlCS42448, public OSCAudioBase
             if (NULL != nameOfTarget)
               getPathNameTo(this,nameOfTarget);
             if (isTarget(msg,addrOff,"/d*",NULL)) {addReplyResult(msg,addrOff,reply,disable(),nameOfTarget); } // bool disable(void) {
-            else if (isTarget(msg,addrOff,"/e*",NULL)) {addReplyResult(msg,addrOff,reply,enable(),nameOfTarget); } // bool enable(void);
+            else if (isTarget(msg,addrOff,"/e*",";")) {addReplyResult(msg,addrOff,reply,enable(msg.getBoolean(0)),nameOfTarget); } // bool enable(void);
             else if (isTarget(msg,addrOff,"/f*",NULL)) {addReplyResult(msg,addrOff,reply,filterFreeze(),nameOfTarget); } // bool filterFreeze(void);
             else if (isTarget(msg,addrOff,"/inputL*","f")) {addReplyResult(msg,addrOff,reply,inputLevel(msg.getFloat(0)),nameOfTarget); } // bool inputLevel(float level) {
             else if (isTarget(msg,addrOff,"/inputL*","if")) {addReplyResult(msg,addrOff,reply,inputLevel(msg.getInt(0),msg.getFloat(1)),nameOfTarget); } // bool inputLevel(int channel, float level) {
