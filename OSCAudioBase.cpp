@@ -634,9 +634,9 @@ rsrcState_e OSCAudioBase::checkResource(const OSCAudioResourceCheck_t* reqRsrc, 
 	
 	for (int i=0;i<nRsrc && result < rsrcThisActive;i++)
 	{
-		resourceSetting_e setting = settings[reqRsrc[i].resource].setting; // get current setting
+		resourceSetting_e currentSetting = settings[reqRsrc[i].resource].setting; // get current setting
 		
-		switch (setting)
+		switch (currentSetting)
 		{
 			case setgAvailable: // not in use, OK
 				break;
@@ -650,7 +650,22 @@ rsrcState_e OSCAudioBase::checkResource(const OSCAudioResourceCheck_t* reqRsrc, 
 			default: // some other setting
 				if (settings[reqRsrc[i].resource].resArray != reqRsrc) // not us using it
 				{
-					if (settings[reqRsrc[i].resource].setting != reqRsrc[i].setting) // are settings different?
+					// can't share the resource if the existing owner needs different settings, 
+					// UNLESS either the existing owner has flexible settings and the new sharer can use one of those,
+					// OR the existing owner has a fixed setting but the new sharer is flexible and can use the current setting
+					if (setg_Teensy_ControlOrSPDIF_Control == currentSetting  // current owner is flexible...
+					 && (setg_Teensy_Control == reqRsrc[i].setting			  // ...new sharer can use one...
+					  || setg_SPDIF_Control  == reqRsrc[i].setting)			  // ...of the settings
+					  )
+						break;  // OK, we have a result
+					 
+					if (setg_Teensy_ControlOrSPDIF_Control == reqRsrc[i].setting   // new sharer is flexible...
+					 && (setg_Teensy_Control == currentSetting			  // ...current owner can use one...
+					  || setg_SPDIF_Control  == currentSetting)			  // ...of the settings
+					  )
+						break;  // OK, we have a result
+					 
+					if (currentSetting != reqRsrc[i].setting) // are current and required settings different?
 						result = rsrcOther; // yup, can't use it
 				}
 				break;
@@ -673,10 +688,16 @@ rsrcState_e OSCAudioBase::claimResource(const OSCAudioResourceCheck_t* reqRsrc, 
 	rsrcState_e result = checkResource(reqRsrc,nRsrc,curState);
 	if (result < rsrcThisActive) // if we can claim it
 	{
-		for (int i=0;i<nRsrc && result < rsrcThisActive;i++)
+		for (int i=0;i<nRsrc;i++)
 		{
-			settings[reqRsrc[i].resource].setting = reqRsrc[i].setting; // set current setting
-			settings[reqRsrc[i].resource].resArray = reqRsrc; //and which object is using it
+			// if the resource is in use and the new sharer has more flexibility, leave
+			// the resource setting in the more stringent state
+			if (setgAvailable == settings[reqRsrc[i].resource].setting 
+			 || setg_Teensy_ControlOrSPDIF_Control != reqRsrc[i].setting)
+			{
+				settings[reqRsrc[i].resource].setting = reqRsrc[i].setting; // set current setting
+				settings[reqRsrc[i].resource].resArray = reqRsrc; //and which object is using it
+			}
 		}
 	}
 	return result;

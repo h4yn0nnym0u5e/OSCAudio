@@ -5,7 +5,7 @@ import json
 
 ##############################################################################################
 # User settings
-dynamic = True        
+dynamic = False        
 ftrl = ['play_wav' # files to reject
         ]
 
@@ -73,6 +73,7 @@ def alterPtypeFBQ(li,sf):
     
 helperFns = { # member functions which need special "helpers"
     'AsyncAudioInputSPDIF3': [{'zapCon': 'y'}],
+    'AudioControlTLV320AIC3206': [{'zapCon': 'y'}],
     'AudioAnalyzeFFT1024~windowFunction': ['s',';','bool',{'doc': 'string selecting one of the built-in window types, e.g. "Hanning"'}],
     'AudioAnalyzeFFT256~windowFunction': ['s',';','bool',{'doc': 'string selecting one of the built-in window types, e.g. "BlackmanHarris"'}],
     'AudioAnalyzePrint~name': ['s',';','bool',{'dtor': 'free(namePtr);','vars': ['char* namePtr']}],
@@ -113,15 +114,23 @@ rtcd = {
     'unsigned short': 'uint16_t'
 }
 notD = ['AudioAnalyzeEvent', 'AudioEffectExpEnvelope', 'AudioMixer', 'AudioMixerStereo'] # not in static library
-notEver = ['AudioMixerBase'] # not in either library
+notEver = ['AudioMixerBase', 'AudioControlI2C'] # not in either library
 returnTypes={}
+
+##############################################################################################
+# Convert resource share setting to enum
+# Could be a list
+def settingToEnum(s):
+    if isinstance(s,list):
+        s = 'Or'.join(s)
+    return s
 
 ##############################################################################################
 # Convert dict entry to resource settings enums
 def rsrcEnum(d):
     dr = {}
     if 'setting' in d: # shareable
-        dr['setting'] = 'setg_' + d['setting'].replace(' ','_')
+        dr['setting'] = 'setg_' + settingToEnum(d['setting']).replace(' ','_')
     else:
         dr['setting'] = 'setgUnshareable'
     dr['resource'] = 'rsrc_' + d['resource'].replace(' ','_')
@@ -235,15 +244,23 @@ def mkClass(cn,fd):
     oscpt = ''
     if 'cp' in fd and '' != fd['cp']:
         spl=fd['cp'].split(',')
+        ospl = []
         cinit = F'{cn}('
-        for sp in spl:
-            sp = re.sub('=[^,]*','',sp) # remove parameter defaults
-            oscpt += paramToType(sp)[0]
+        for spo in spl:
+            cast = ''
+            sp = re.sub('=[^,]*','',spo) # remove parameter defaults
+            t = paramToType(sp)
+            oscpt += t[0]  # works for string or tuple
             sp = sp.split(' ')
-            cinit = cinit + F'{sp[-1]}, '
+            if isinstance(t,tuple):
+                print(t[1],spo)
+                cast = f"({t[1]}) "
+                spo = spo.replace(t[1],"int")  # sleazy hack for now
+            cinit = cinit + F'{cast}{sp[-1]}, '
+            ospl.append(spo)
         cinit = cinit[:-2] + '), ' + F'/* {oscpt} */ '
         fd['oscpt'] = oscpt
-        cp = ', '+fd['cp'] # append constructor parameters to derived class 
+        cp = ', '+(", ".join(ospl))  #+fd['cp'] # append constructor parameters to derived class 
         
     # resource checking
     if dynamic and 'excl' in fd:
@@ -393,11 +410,14 @@ def processFiles(root,dirs,files):
                         if '' != cp:
                             print(li)
                                             
-                m = re.search('class *([^ :]+) *:.*Audio(Stream|Control|MixerBase)',li)
+                m = re.search('class *([^ :]+) *:.*(Audio(?:Stream|Control|MixerBase)[^/{]*)',li)
                 if m:
                     cs = 'private'
                     base = m.group(1)
                     d[base]={}
+                    s = m.group(2).replace("public","").replace(" ","").split(",")
+                    d[base]["baseClass"] = s
+                    d[base]["li"] = li
                     if ndef: # expect guard before class definition starts!
                         d[base]['ndef'] = ndef
                     #print(base)
@@ -511,7 +531,7 @@ for tdd in js: # one compatibility requirement...
     if rsrc not in rsrcd:
         rsrcd[rsrc] = set()
     if 'setting' in rss:
-        setg = rss['setting']
+        setg = settingToEnum(rss['setting'])
         rsrcd[rsrc].add(setg)
         sets.add(str(setg))
         
@@ -532,6 +552,18 @@ for li in fi:
         FFTwd[m.group(2)] += [m.group(1)]
 fi.close()
 
+# Classes derived from AudioControlI2C should expose some of
+# the base class functionality:
+ACi2c = d["AudioControlI2C"]
+ACi2cFns = {}
+for k in ACi2c:
+    if "~" in k:
+        if "include-in-OSC" in ACi2c[k]["l"]:
+            ACi2cFns[k] = ACi2c[k]
+for cl in d:
+    if "AudioControlI2C" in d[cl]["baseClass"]:
+        for k in ACi2cFns:
+            d[cl][k] = ACi2cFns[k]
 
 # more special cases
 if not dynamic:
@@ -548,7 +580,7 @@ for cl in notEver:
     
 #############################################################################################################
 # Output file
-op = r'E:\Jonathan\Arduino\libraries\OSCAudio'
+op = r'..'  # r'E:\Jonathan\Arduino\libraries\OSCAudio'
 of = 'OSCAudioAutogen.h'
 ofjson = of.replace('.h','.json')
 ofs = open(os.path.join(op,of),mode='w')

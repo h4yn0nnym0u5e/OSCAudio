@@ -35,7 +35,7 @@
 
 #if !defined(OSC_RSRC_TYPEDEF_ONLY_E)
 #define OSC_RSRC_TYPEDEF_ONLY_E
-typedef enum {setgAvailable, setgUnshareable, setg_ADAT_Protocol, setg_I2S_Master, setg_I2S_Slave, setg_LRCLK1_Control, setg_PT8211_Protocol, setg_SPDIF_Control, setg_SPDIF_Protocol, setg_TDM_Protocol, setg_Teensy_Control, setg_COUNT} resourceSetting_e;
+typedef enum {setgAvailable, setgUnshareable, setg_ADAT_Protocol, setg_I2S_Master, setg_I2S_Slave, setg_LRCLK1_Control, setg_PT8211_Protocol, setg_SPDIF_Control, setg_SPDIF_Protocol, setg_TDM_Protocol, setg_Teensy_Control, setg_Teensy_ControlOrSPDIF_Control, setg_COUNT} resourceSetting_e;
 typedef enum {rsrc_ADC1, rsrc_ADC2, rsrc_DAC1, rsrc_DAC2, rsrc_I2S_Device, rsrc_I2S2_Device, rsrc_IN1_Pin, rsrc_IN2_Pin, rsrc_MSQ_Device, rsrc_OUT1A_Pin, rsrc_OUT1B_Pin, rsrc_OUT1C_Pin, rsrc_OUT1D_Pin, rsrc_OUT2_Pin, rsrc_PWM, rsrc_SPDIF_Device, rsrc_SPDIFIN_Pin, rsrc_SPDIFOUT_Pin, rsrc_Sample_Rate, rsrc_USB_Rx_Endpoint, rsrc_USB_Tx_Endpoint, rsrc_COUNT} resourceType_e;
 #endif // !defined(OSC_RSRC_TYPEDEF_ONLY_E)
 
@@ -401,6 +401,8 @@ class OSCAudioControlAK4558 : public AudioControlAK4558, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/enable",NULL)) {addReplyResult(msg,addrOff,reply,enable(),nameOfTarget); } // bool enable(void);		//enables the CODEC, does not power up ADC nor DAC (use enableIn() and enableOut() for selective power up)
             else if (isTarget(msg,addrOff,"/inputL*","f")) {addReplyResult(msg,addrOff,reply,inputLevel(msg.getFloat(0)),nameOfTarget); } // bool inputLevel(float n) { return false; }	//not supported by AK4558
             else if (isTarget(msg,addrOff,"/inputS*","i")) {addReplyResult(msg,addrOff,reply,inputSelect(msg.getInt(0)),nameOfTarget); } // bool inputSelect(int n) { return false; }	//sets inputs to mono left, mono right, stereo (default stereo), not yet implemented
+            else if (isTarget(msg,addrOff,"/setA*","i")) {setAddress(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setAddress(uint8_t addr); // include-in-OSC
+            else if (isTarget(msg,addrOff,"/setW*","ii")) {setWire(msg.getInt(0),msg.getInt(1)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setWire(uint8_t wnum, uint8_t addr); // include-in-OSC
             else if (isTarget(msg,addrOff,"/volumeL*","f")) {addReplyResult(msg,addrOff,reply,volumeLeft(msg.getFloat(0)),nameOfTarget); } // bool volumeLeft(float n);	//sets LOUT volume to n (range 0.0 - 1.0)
             else if (isTarget(msg,addrOff,"/volumeR*","f")) {addReplyResult(msg,addrOff,reply,volumeRight(msg.getFloat(0)),nameOfTarget); } // bool volumeRight(float n);	//sets ROUT volume to n (range 0.0 - 1.0)
             else if (isTarget(msg,addrOff,"/volume","f")) {addReplyResult(msg,addrOff,reply,volume(msg.getFloat(0)),nameOfTarget); } // bool volume(float n);	//sets LOUT/ROUT volume to n (range 0.0 - 1.0)
@@ -432,14 +434,16 @@ class OSCAudioControlCS42448 : public AudioControlCS42448, public OSCAudioBase
             if (NULL != nameOfTarget)
               getPathNameTo(this,nameOfTarget);
             if (isTarget(msg,addrOff,"/d*",NULL)) {addReplyResult(msg,addrOff,reply,disable(),nameOfTarget); } // bool disable(void) {
-            else if (isTarget(msg,addrOff,"/e*",";")) {addReplyResult(msg,addrOff,reply,enable(msg.getBoolean(0)),nameOfTarget); } // bool enable(void);
+            else if (isTarget(msg,addrOff,"/enableM*",";")) {addReplyResult(msg,addrOff,reply,enableMagicBitOption(msg.getBoolean(0)),nameOfTarget); } // bool enableMagicBitOption(bool useMagicBit = false);
+            else if (isTarget(msg,addrOff,"/enable",NULL)) {addReplyResult(msg,addrOff,reply,enable(),nameOfTarget); } // bool enable(void) {return enableMagicBitOption();}
             else if (isTarget(msg,addrOff,"/f*",NULL)) {addReplyResult(msg,addrOff,reply,filterFreeze(),nameOfTarget); } // bool filterFreeze(void);
             else if (isTarget(msg,addrOff,"/inputL*","f")) {addReplyResult(msg,addrOff,reply,inputLevel(msg.getFloat(0)),nameOfTarget); } // bool inputLevel(float level) {
             else if (isTarget(msg,addrOff,"/inputL*","if")) {addReplyResult(msg,addrOff,reply,inputLevel(msg.getInt(0),msg.getFloat(1)),nameOfTarget); } // bool inputLevel(int channel, float level) {
             else if (isTarget(msg,addrOff,"/inputS*","i")) {addReplyResult(msg,addrOff,reply,inputSelect(msg.getInt(0)),nameOfTarget); } // bool inputSelect(int n) {
             else if (isTarget(msg,addrOff,"/invertA*","i")) {addReplyResult(msg,addrOff,reply,invertADC(msg.getInt(0)),nameOfTarget); } // bool invertADC(uint32_t data);
             else if (isTarget(msg,addrOff,"/invertD*","i")) {addReplyResult(msg,addrOff,reply,invertDAC(msg.getInt(0)),nameOfTarget); } // bool invertDAC(uint32_t data);
-            else if (isTarget(msg,addrOff,"/s*","i")) {setAddress(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setAddress(uint8_t addr) {
+            else if (isTarget(msg,addrOff,"/setA*","i")) {setAddress(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setAddress(uint8_t addr); // include-in-OSC
+            else if (isTarget(msg,addrOff,"/setW*","ii")) {setWire(msg.getInt(0),msg.getInt(1)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setWire(uint8_t wnum, uint8_t addr); // include-in-OSC
             else if (isTarget(msg,addrOff,"/v*","f")) {addReplyResult(msg,addrOff,reply,volume(msg.getFloat(0)),nameOfTarget); } // bool volume(float level) {
             else if (isTarget(msg,addrOff,"/v*","if")) {addReplyResult(msg,addrOff,reply,volume(msg.getInt(0),msg.getFloat(1)),nameOfTarget); } // bool volume(int channel, float level) {
             else addReplyResult(msg,addrOff,reply,false,nameOfTarget,INVALID_METHOD);
@@ -479,6 +483,8 @@ class OSCAudioControlCS4272 : public AudioControlCS4272, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/inputS*","i")) {addReplyResult(msg,addrOff,reply,inputSelect(msg.getInt(0)),nameOfTarget); } // bool inputSelect(int n) { return false; }
             else if (isTarget(msg,addrOff,"/muteI*",NULL)) {addReplyResult(msg,addrOff,reply,muteInput(),nameOfTarget); } // bool muteInput(void);
             else if (isTarget(msg,addrOff,"/muteO*",NULL)) {addReplyResult(msg,addrOff,reply,muteOutput(),nameOfTarget); } // bool muteOutput(void);
+            else if (isTarget(msg,addrOff,"/setA*","i")) {setAddress(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setAddress(uint8_t addr); // include-in-OSC
+            else if (isTarget(msg,addrOff,"/setW*","ii")) {setWire(msg.getInt(0),msg.getInt(1)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setWire(uint8_t wnum, uint8_t addr); // include-in-OSC
             else if (isTarget(msg,addrOff,"/unmuteI*",NULL)) {addReplyResult(msg,addrOff,reply,unmuteInput(),nameOfTarget); } // bool unmuteInput(void);
             else if (isTarget(msg,addrOff,"/unmuteO*",NULL)) {addReplyResult(msg,addrOff,reply,unmuteOutput(),nameOfTarget); } // bool unmuteOutput(void);
             else if (isTarget(msg,addrOff,"/v*","ff")) {addReplyResult(msg,addrOff,reply,volume(msg.getFloat(0),msg.getFloat(1)),nameOfTarget); } // bool volume(float left, float right);
@@ -548,7 +554,8 @@ class OSCAudioControlSGTL5000 : public AudioControlSGTL5000, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/mi*","i")) {addReplyResult(msg,addrOff,reply,micGain(msg.getInt(0)),nameOfTarget); } // bool micGain(unsigned int dB);
             else if (isTarget(msg,addrOff,"/muteH*",NULL)) {addReplyResult(msg,addrOff,reply,muteHeadphone(),nameOfTarget); } // bool muteHeadphone(void) { return write(0x0024, ana_ctrl | (1<<4)); }
             else if (isTarget(msg,addrOff,"/muteL*",NULL)) {addReplyResult(msg,addrOff,reply,muteLineout(),nameOfTarget); } // bool muteLineout(void) { return write(0x0024, ana_ctrl | (1<<8)); }
-            else if (isTarget(msg,addrOff,"/se*","i")) {setAddress(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setAddress(uint8_t level);
+            else if (isTarget(msg,addrOff,"/setA*","i")) {setAddress(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setAddress(uint8_t addr); // include-in-OSC
+            else if (isTarget(msg,addrOff,"/setW*","ii")) {setWire(msg.getInt(0),msg.getInt(1)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setWire(uint8_t wnum, uint8_t addr); // include-in-OSC
             else if (isTarget(msg,addrOff,"/surroundSoundD*",NULL)) {addReplyResult(msg,addrOff,reply,(uint16_t)surroundSoundDisable(),nameOfTarget); } // unsigned short surroundSoundDisable(void);
             else if (isTarget(msg,addrOff,"/surroundSoundE*",NULL)) {addReplyResult(msg,addrOff,reply,(uint16_t)surroundSoundEnable(),nameOfTarget); } // unsigned short surroundSoundEnable(void);
             else if (isTarget(msg,addrOff,"/surroundSound","i")) {addReplyResult(msg,addrOff,reply,(uint16_t)surroundSound(msg.getInt(0)),nameOfTarget); } // unsigned short surroundSound(uint8_t width);
@@ -598,10 +605,12 @@ class OSCAudioControlTLV320AIC3206 : public AudioControlTLV320AIC3206, public OS
             else if (isTarget(msg,addrOff,"/inputS*","i")) {addReplyResult(msg,addrOff,reply,inputSelect(msg.getInt(0)),nameOfTarget); } // bool inputSelect(int n);   //use AIC3206_INPUT_IN1 or one of other choices defined earlier
             else if (isTarget(msg,addrOff,"/o*","i")) {addReplyResult(msg,addrOff,reply,outputSelect(msg.getInt(0)),nameOfTarget); } // bool outputSelect(int n);  //use AIC3206_OUTPUT_HEADPHONE_JACK_OUT or one of other choices defined earlier
             else if (isTarget(msg,addrOff,"/r*",NULL)) {addReplyResult(msg,addrOff,reply,(int32_t)readMicDetect(),nameOfTarget); } // int  readMicDetect(void);
+            else if (isTarget(msg,addrOff,"/setA*","i")) {setAddress(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setAddress(uint8_t addr); // include-in-OSC
             else if (isTarget(msg,addrOff,"/setH*",";ff")) {setHPFonADC(msg.getBoolean(0),msg.getFloat(1),msg.getFloat(2)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setHPFonADC(bool enable, float cutoff_Hz, float fs_Hz);
             else if (isTarget(msg,addrOff,"/setII*","ib")) {setIIRCoeffOnADC(msg); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setIIRCoeffOnADC(int chan, uint32_t *coeff);  //for chan, use AIC3206_BOTH_CHAN or AIC3206_LEFT_CHAN or AIC3206_RIGHT_CHAN
             else if (isTarget(msg,addrOff,"/setIn*","f")) {addReplyResult(msg,addrOff,reply,setInputGain_dB(msg.getFloat(0)),nameOfTarget); } // bool setInputGain_dB(float n);
             else if (isTarget(msg,addrOff,"/setM*","i")) {addReplyResult(msg,addrOff,reply,setMicBias(msg.getInt(0)),nameOfTarget); } // bool setMicBias(int n);  //use AIC3206_MIC_BIAS_OFF or AIC3206_MIC_BIAS_2_5 or one of other choices defined earlier
+            else if (isTarget(msg,addrOff,"/setW*","ii")) {setWire(msg.getInt(0),msg.getInt(1)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setWire(uint8_t wnum, uint8_t addr); // include-in-OSC
             else if (isTarget(msg,addrOff,"/u*","i")) {addReplyResult(msg,addrOff,reply,updateInputBasedOnMicDetect(msg.getInt(0)),nameOfTarget); } // bool updateInputBasedOnMicDetect(int setting = AIC3206_INPUT_IN1); //which input to monitor
             else if (isTarget(msg,addrOff,"/volume_*","f")) {addReplyResult(msg,addrOff,reply,volume_dB(msg.getFloat(0)),nameOfTarget); } // bool volume_dB(float n);
             else if (isTarget(msg,addrOff,"/volume","f")) {addReplyResult(msg,addrOff,reply,volume(msg.getFloat(0)),nameOfTarget); } // bool volume(float n);
@@ -638,6 +647,8 @@ class OSCAudioControlWM8731 : public AudioControlWM8731, public OSCAudioBase
             else if (isTarget(msg,addrOff,"/e*",NULL)) {addReplyResult(msg,addrOff,reply,enable(),nameOfTarget); } // bool enable(void);
             else if (isTarget(msg,addrOff,"/inputL*","f")) {addReplyResult(msg,addrOff,reply,inputLevel(msg.getFloat(0)),nameOfTarget); } // bool inputLevel(float n); // range: 0.0f to 1.0f
             else if (isTarget(msg,addrOff,"/inputS*","i")) {addReplyResult(msg,addrOff,reply,inputSelect(msg.getInt(0)),nameOfTarget); } // bool inputSelect(int n);
+            else if (isTarget(msg,addrOff,"/setA*","i")) {setAddress(msg.getInt(0)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setAddress(uint8_t addr); // include-in-OSC
+            else if (isTarget(msg,addrOff,"/setW*","ii")) {setWire(msg.getInt(0),msg.getInt(1)); addReplyExecuted(msg,addrOff,reply,nameOfTarget);} // void setWire(uint8_t wnum, uint8_t addr); // include-in-OSC
             else if (isTarget(msg,addrOff,"/v*","f")) {addReplyResult(msg,addrOff,reply,volume(msg.getFloat(0)),nameOfTarget); } // bool volume(float n) { return volumeInteger(n * 80.0f + 47.499f); }
             else addReplyResult(msg,addrOff,reply,false,nameOfTarget,INVALID_METHOD);
           }
@@ -2553,7 +2564,7 @@ class OSCAudioOutputSPDIF3 : public AudioOutputSPDIF3, public OSCAudioBase
 #if defined(OSC_RSRC_ENABLE_DEFINE_ARRAYS)
 const OSCAudioResourceCheck_t OSCAudioOutputSPDIF3::resources[] = {
   {rsrc_SPDIF_Device,setg_SPDIF_Protocol},
-  {rsrc_Sample_Rate,setg_Teensy_Control},
+  {rsrc_Sample_Rate,setg_Teensy_ControlOrSPDIF_Control},
   {rsrc_SPDIFOUT_Pin,setgUnshareable},
 };
 rsrcState_e OSCAudioOutputSPDIF3::rsrcState;
