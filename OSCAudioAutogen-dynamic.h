@@ -434,8 +434,8 @@ class OSCAudioControlCS42448 : public AudioControlCS42448, public OSCAudioBase
             if (NULL != nameOfTarget)
               getPathNameTo(this,nameOfTarget);
             if (isTarget(msg,addrOff,"/d*",NULL)) {addReplyResult(msg,addrOff,reply,disable(),nameOfTarget); } // bool disable(void) {
-            else if (isTarget(msg,addrOff,"/enableM*",";")) {addReplyResult(msg,addrOff,reply,enableMagicBitOption(msg.getBoolean(0)),nameOfTarget); } // bool enableMagicBitOption(bool useMagicBit = false);
-            else if (isTarget(msg,addrOff,"/enable",NULL)) {addReplyResult(msg,addrOff,reply,enable(),nameOfTarget); } // bool enable(void) {return enableMagicBitOption();}
+            else if (isTarget(msg,addrOff,"/e*",";")) {addReplyResult(msg,addrOff,reply,enable(msg.getBoolean(0)),nameOfTarget); } // bool enable(bool useMagicBit);
+            else if (isTarget(msg,addrOff,"/e*",NULL)) {addReplyResult(msg,addrOff,reply,enable(),nameOfTarget); } // bool enable(void) {return enable(false);}
             else if (isTarget(msg,addrOff,"/f*",NULL)) {addReplyResult(msg,addrOff,reply,filterFreeze(),nameOfTarget); } // bool filterFreeze(void);
             else if (isTarget(msg,addrOff,"/inputL*","f")) {addReplyResult(msg,addrOff,reply,inputLevel(msg.getFloat(0)),nameOfTarget); } // bool inputLevel(float level) {
             else if (isTarget(msg,addrOff,"/inputL*","if")) {addReplyResult(msg,addrOff,reply,inputLevel(msg.getInt(0),msg.getFloat(1)),nameOfTarget); } // bool inputLevel(int channel, float level) {

@@ -5,7 +5,7 @@ import json
 
 ##############################################################################################
 # User settings
-dynamic = False        
+dynamic = True        
 ftrl = ['play_wav' # files to reject
         ]
 
